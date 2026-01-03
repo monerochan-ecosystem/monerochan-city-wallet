@@ -1,7 +1,10 @@
 {
   "name": "monerochan-city-wallet",
-  "module": "index.ts",
-  "type": "module",
+  "scripts": {
+    "copymanifest":"cp wallet/manifest.json dist/manifest.json",
+    "buildbackground":"bun build wallet/background.ts --outdir dist --target browser",
+    "build":"bun run buildbackground && bun run copymanifest"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
