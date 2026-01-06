@@ -1,9 +1,12 @@
 {
   "name": "monerochan-city-wallet",
   "scripts": {
-    "copymanifest": "cp wallet/manifest.json dist/manifest.json",
-    "buildbackground": "bun build wallet/background.ts --outdir dist --target browser",
-    "build": "bun run buildbackground && bun run copymanifest"
+    "copyfirefoxmanifest": "cp manifest/firefox.json dist/firefox/manifest.json",
+    "copychromemanifest": "cp wallet/chrome.json dist/chrome/manifest.json",
+    "buildfirefox": "bun build wallet/sidebar.html background/background.ts --outdir dist/firefox --target browser",
+    "buildchrome": "bun build wallet/sidebar.html background/offscreen/bridge.html background/offscreen/bridge.ts --outdir dist/chrome --target browser",
+    "build": "bun run buildchrome && bun run copychromemanifest && bun run buildfirefox && bun run copyfirefoxmanifest",
+    "clean": "rm -rf ./dist"
   },
   "devDependencies": {
     "@spirobel/monero-wallet-api": "../monero-wallet-api/typescript/",
