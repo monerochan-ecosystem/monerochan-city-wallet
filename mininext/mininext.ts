@@ -110,10 +110,10 @@ export type MiniHtmlString = {
   resolve(mini?: Mini): ResolvedMiniHtmlString;
 };
 export type ResolvedMiniHtmlString = {
-  stringLiterals: TemplateStringsArray;
+  stringLiterals: StringArray;
   values: ResolvedMiniValue[];
   slots: string[];
-  handlers?: ClickHandler[];
+  handlers: ClickHandler[];
   render: (target: Element, cacheAndCursor?: CacheAndCursor) => CacheAndCursor;
 };
 export type MiniComponent = (mini: Mini) => MiniHtmlString;
@@ -144,10 +144,11 @@ export function resolveMiniValue(
   return value;
 }
 export function resolveMiniHtmlString(
-  stringLiterals: TemplateStringsArray,
+  stringLiterals: StringArray,
   unresolvedValues: MiniValue[],
   mini: Mini,
-  slots: string[]
+  slots: string[],
+  handlers: ClickHandler[]
 ): ResolvedMiniHtmlString {
   const resolvedValues: ResolvedMiniValue[] = [];
   let index = 0;
@@ -160,6 +161,7 @@ export function resolveMiniHtmlString(
   }
 
   return {
+    handlers,
     slots,
     stringLiterals,
     values: resolvedValues,
@@ -175,7 +177,7 @@ export function resolveMiniHtmlString(
   };
 }
 export function makeNewResolvedMiniHtmlString(
-  stringLiterals: TemplateStringsArray,
+  stringLiterals: StringArray,
   unresolvedValues: MiniValue[],
   mini?: Mini
 ) {
@@ -192,7 +194,8 @@ export function makeNewResolvedMiniHtmlString(
     stringLiterals,
     unresolvedValues,
     mini,
-    slots
+    slots,
+    []
   );
   // make slotids and push the cache entry
   // only write it to cache here if the cache did not exist
@@ -214,6 +217,7 @@ export function html(
     stringLiterals,
     values,
     resolve: (mini?: Mini): ResolvedMiniHtmlString => {
+      console.log("RESOLVE");
       if (mini && getCacheEntry(mini.cacheAndCursor)) {
         // CASE: mini already exists, we can assume cache exits too
         const cacheEntry = getResolvedMiniHtmlStringThrows(mini.cacheAndCursor);
@@ -224,7 +228,13 @@ export function html(
         const slots = htmlUnchanged
           ? cacheEntry.slots
           : values.map(() => crypto.randomUUID()); // in case the html changed, we need to make new slots
-        return resolveMiniHtmlString(stringLiterals, values, mini, slots);
+        return resolveMiniHtmlString(
+          stringLiterals,
+          values,
+          mini,
+          slots,
+          cacheEntry.handlers
+        );
       }
       // CASE: mini does not exist yet. Probably root component
 
@@ -234,7 +244,7 @@ export function html(
   };
 }
 export function makeOrUsePlaceholderFragment(
-  stringLiterals: TemplateStringsArray,
+  stringLiterals: StringArray,
   values: ResolvedMiniValue[],
   cacheAndCursor: CacheAndCursor
 ) {
@@ -294,7 +304,7 @@ export type CacheAndCursor = {
 };
 export type RenderArgs = {
   target: Element;
-  stringLiterals: TemplateStringsArray;
+  stringLiterals: StringArray;
   resolvedValues: ResolvedMiniValue[];
   cacheAndCursor: CacheAndCursor;
 };
@@ -352,7 +362,7 @@ export function getResolvedMiniHtmlStringThrows(
   return cacheEntry.value;
 }
 export function getHandlers(cacheAndCursor: CacheAndCursor) {
-  return getResolvedMiniHtmlStringThrows(cacheAndCursor).handlers ?? [];
+  return getResolvedMiniHtmlStringThrows(cacheAndCursor).handlers;
 }
 export function attachHandlers(
   placeholderFragment: DocumentFragment,
@@ -375,9 +385,10 @@ export function clickHandler(
   cb: (event?: MouseEvent) => void,
   cacheAndCursor: CacheAndCursor
 ) {
-  const handlers = getCacheEntry(cacheAndCursor)
-    ? getHandlers(cacheAndCursor)
-    : [];
+  if (!getCacheEntry(cacheAndCursor)) {
+    makeNewResolvedMiniHtmlString([], [], makeNewMini(cacheAndCursor));
+  }
+  const handlers = getHandlers(cacheAndCursor);
 
   const handler = handlers.find((handler) => handler.name === name);
   if (handler) return handler.id;
