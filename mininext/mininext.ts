@@ -281,6 +281,13 @@ export function makeOrUsePlaceholderFragment(
     index++;
   }
   const placeholderFragment = fragmentFromHtml(placeholder);
+  // add child elements to cache
+  for (const id of resolved.slots) {
+    const el = placeholderFragment.getElementById(id);
+    if (!el) continue;
+    if (!cacheAndCursor.cache.has(id))
+      cacheAndCursor.cache.set(id, { el, value: id });
+  }
   cacheEntry.el = placeholderFragment;
   return { placeholderFragment, ids: resolved.slots, newPlaceholder: true };
 }
@@ -374,7 +381,9 @@ export function getResolvedMiniHtmlStringThrows(
   const cacheEntry = getCacheEntryThrows(cacheAndCursor);
   if (typeof cacheEntry.value !== "object")
     throw new Error(
-      `primitive value, handlers only exist on ResolvedMiniHtmlString. ${cacheAndCursor}`
+      `primitive value, handlers only exist on ResolvedMiniHtmlString. ${JSON.stringify(
+        cacheEntry
+      )}`
     );
   return cacheEntry.value;
 }
