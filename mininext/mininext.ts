@@ -130,6 +130,7 @@ export function resolveMiniValue(
 ): ResolvedMiniValue {
   if (typeof value === "function") {
     const component = value(mini);
+    // if this happened we need to save the handlers to the cache
     return component.resolve();
   }
   if (typeof value === "object" && "resolve" in value) return value.resolve();
@@ -160,6 +161,8 @@ export function html(
       const resolvedValues: ResolvedMiniValue[] = [];
 
       for (const unresolvedValue of values) {
+        // here we should make ids and push it into cache, so the mini object has the latest handlers
+        // handlers attached to cache object
         resolvedValues.push(resolveMiniValue(unresolvedValue, mini));
       }
       return {
@@ -167,14 +170,14 @@ export function html(
         values: resolvedValues,
         render: (target: Element, id?: string, cache?: Cache) => {
           if (!cache) cache = _cache; //and cache here
-          return render(
+          return render({
             target,
             stringLiterals,
             resolvedValues,
             cache,
             _handlers,
-            id
-          );
+            id,
+          });
         },
       };
     },
@@ -237,14 +240,23 @@ export function updateValues(
   }
 }
 
-export function render(
-  target: Element,
-  stringLiterals: TemplateStringsArray,
-  resolvedValues: ResolvedMiniValue[],
-  cache: Cache,
-  _handlers: ClickHandler[],
-  id?: string
-) {
+export type RenderArgs = {
+  target: Element;
+  stringLiterals: TemplateStringsArray;
+  resolvedValues: ResolvedMiniValue[];
+  cache: Cache;
+  _handlers: ClickHandler[];
+  id?: string; // implicit in the cache, only value never found in other slots
+};
+
+export function render({
+  target,
+  stringLiterals,
+  resolvedValues,
+  cache,
+  _handlers,
+  id,
+}: RenderArgs) {
   if (!id) id = crypto.randomUUID();
 
   const { placeholderFragment, ids, newPlaceholder } =
