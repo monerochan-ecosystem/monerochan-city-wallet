@@ -93,93 +93,142 @@ function fragmentFromHtml(html: string): DocumentFragment {
 export type Mini = {
   html: typeof html;
   click: (name: string, cb: () => void) => string;
-  cache: Cache;
-  _handlers: ClickHandler[];
+  cacheAndCursor: CacheAndCursor;
 };
+export function makeNewMini(cac: CacheAndCursor): Mini {
+  return {
+    html,
+    click: (name, handler) => {
+      return clickHandler(name, handler, cac);
+    },
+    cacheAndCursor: cac,
+  };
+}
 export type MiniHtmlString = {
   stringLiterals: TemplateStringsArray;
   values: MiniValue[];
-  resolve(): ResolvedMiniHtmlString;
+  resolve(mini?: Mini): ResolvedMiniHtmlString;
 };
 export type ResolvedMiniHtmlString = {
   stringLiterals: TemplateStringsArray;
   values: ResolvedMiniValue[];
-  render: (
-    target: Element,
-    id?: string,
-    cache?: Cache
-  ) => {
-    id: string;
-    cache: Cache;
-  };
+  slots: string[];
+  handlers?: ClickHandler[];
+  render: (target: Element, cacheAndCursor?: CacheAndCursor) => CacheAndCursor;
 };
 export type MiniComponent = (mini: Mini) => MiniHtmlString;
 export type PrimitiveValue = string | number;
 export type MiniValue = PrimitiveValue | MiniComponent | MiniHtmlString;
 export type ResolvedMiniValue = PrimitiveValue | ResolvedMiniHtmlString;
 export type CacheObject = {
-  el: DocumentFragment | HTMLElement;
+  el?: DocumentFragment | HTMLElement;
   value: ResolvedMiniValue;
-  slots: string[];
 };
 
 export type Cache = Map<string, CacheObject>;
 export function resolveMiniValue(
   value: MiniValue,
-  mini: Mini
+  parentMini: Mini,
+  slotId: string
 ): ResolvedMiniValue {
+  // make new mini with slotid as cursor
+  const mini = makeNewMini({ ...parentMini.cacheAndCursor, cursor: slotId });
+
   if (typeof value === "function") {
     const component = value(mini);
     // if this happened we need to save the handlers to the cache
-    return component.resolve();
+    return component.resolve(mini);
   }
-  if (typeof value === "object" && "resolve" in value) return value.resolve();
+  if (typeof value === "object" && "resolve" in value)
+    return value.resolve(mini);
   return value;
+}
+export function resolveMiniHtmlString(
+  stringLiterals: TemplateStringsArray,
+  unresolvedValues: MiniValue[],
+  mini: Mini,
+  slots: string[]
+): ResolvedMiniHtmlString {
+  const resolvedValues: ResolvedMiniValue[] = [];
+  let index = 0;
+  for (const unresolvedValue of unresolvedValues) {
+    const slotId = slots[index];
+    if (!slotId)
+      throw new Error(`Could not find slot id for ${unresolvedValue}`);
+    resolvedValues.push(resolveMiniValue(unresolvedValue, mini, slotId));
+    index++;
+  }
+
+  return {
+    slots,
+    stringLiterals,
+    values: resolvedValues,
+    render: (target: Element, cacheAndCursor?: CacheAndCursor) => {
+      if (!cacheAndCursor) cacheAndCursor = mini.cacheAndCursor; //and cache here
+      return render({
+        target,
+        stringLiterals,
+        resolvedValues,
+        cacheAndCursor,
+      });
+    },
+  };
+}
+export function makeNewResolvedMiniHtmlString(
+  stringLiterals: TemplateStringsArray,
+  unresolvedValues: MiniValue[],
+  mini?: Mini
+) {
+  if (!mini) {
+    const cac = {
+      cache: new Map<string, CacheObject>(),
+      cursor: crypto.randomUUID(),
+    };
+    mini = makeNewMini(cac);
+  }
+
+  const slots = unresolvedValues.map(() => crypto.randomUUID());
+  const result = resolveMiniHtmlString(
+    stringLiterals,
+    unresolvedValues,
+    mini,
+    slots
+  );
+  // make slotids and push the cache entry
+  // only write it to cache here if the cache did not exist
+  // should only be updated in render
+  // we need to do this so we can save handler ids before first render
+
+  mini.cacheAndCursor.cache.set(mini.cacheAndCursor.cursor, {
+    value: result,
+  });
+
+  return result;
 }
 export function html(
   stringLiterals: TemplateStringsArray,
   ...values: MiniValue[]
 ): MiniHtmlString {
-  const _cache = new Map<string, CacheObject>();
   const _handlers: ClickHandler[] = []; // this is the wrong place to initialize handlers and cache
   return {
     stringLiterals,
     values,
-    resolve: (mini?: Mini) => {
-      if (!mini) {
-        // we should initialize handlers here (or should we? )
-        mini = {
-          html,
-          click: (name, handler) => {
-            return clickHandler(name, handler, _handlers);
-          },
-          _handlers,
-          cache: _cache,
-        };
+    resolve: (mini?: Mini): ResolvedMiniHtmlString => {
+      if (mini && getCacheEntry(mini.cacheAndCursor)) {
+        // CASE: mini already exists, we can assume cache exits too
+        const cacheEntry = getResolvedMiniHtmlStringThrows(mini.cacheAndCursor);
+        const htmlUnchanged = arraysEqual(
+          stringLiterals,
+          cacheEntry.stringLiterals
+        );
+        const slots = htmlUnchanged
+          ? cacheEntry.slots
+          : values.map(() => crypto.randomUUID()); // in case the html changed, we need to make new slots
+        return resolveMiniHtmlString(stringLiterals, values, mini, slots);
       }
+      // CASE: mini does not exist yet. Probably root component
 
-      const resolvedValues: ResolvedMiniValue[] = [];
-
-      for (const unresolvedValue of values) {
-        // here we should make ids and push it into cache, so the mini object has the latest handlers
-        // handlers attached to cache object
-        resolvedValues.push(resolveMiniValue(unresolvedValue, mini));
-      }
-      return {
-        stringLiterals,
-        values: resolvedValues,
-        render: (target: Element, id?: string, cache?: Cache) => {
-          if (!cache) cache = _cache; //and cache here
-          return render({
-            target,
-            stringLiterals,
-            resolvedValues,
-            cache,
-            _handlers,
-            id,
-          });
-        },
-      };
+      return makeNewResolvedMiniHtmlString(stringLiterals, values, mini);
     },
     //  resolveMiniHtmlString({ stringLiterals, values })
   };
@@ -187,7 +236,7 @@ export function html(
 export function makeOrUsePlaceholderFragment(
   stringLiterals: TemplateStringsArray,
   values: ResolvedMiniValue[],
-  cache: Cache
+  cacheAndCursor: CacheAndCursor
 ) {
   let placeholder = "";
   const ids = [];
@@ -216,7 +265,7 @@ export function updateValues(
   placeholderFragment: DocumentFragment,
   values: ResolvedMiniValue[],
   ids: string[],
-  cache: Cache
+  cacheAndCursor: CacheAndCursor
 ) {
   let index = 0;
   for (const value of values) {
@@ -239,49 +288,79 @@ export function updateValues(
     }
   }
 }
-
+export type CacheAndCursor = {
+  cache: Cache;
+  cursor: string;
+};
 export type RenderArgs = {
   target: Element;
   stringLiterals: TemplateStringsArray;
   resolvedValues: ResolvedMiniValue[];
-  cache: Cache;
-  _handlers: ClickHandler[];
-  id?: string; // implicit in the cache, only value never found in other slots
+  cacheAndCursor: CacheAndCursor;
 };
 
 export function render({
   target,
   stringLiterals,
   resolvedValues,
-  cache,
-  _handlers,
-  id,
+  cacheAndCursor,
 }: RenderArgs) {
-  if (!id) id = crypto.randomUUID();
-
   const { placeholderFragment, ids, newPlaceholder } =
-    makeOrUsePlaceholderFragment(stringLiterals, resolvedValues, cache);
+    makeOrUsePlaceholderFragment(
+      stringLiterals,
+      resolvedValues,
+      cacheAndCursor
+    );
 
-  updateValues(placeholderFragment, resolvedValues, ids, cache);
+  updateValues(placeholderFragment, resolvedValues, ids, cacheAndCursor);
   // if we still use the same string literals (= html snippet skeleton),
   // we dont need to replace, only values get updated if they changed
   if (newPlaceholder) {
-    attachHandlers(placeholderFragment, _handlers);
-    replace({ target, replacement: placeholderFragment, cache });
+    attachHandlers(placeholderFragment, cacheAndCursor);
+    replace({
+      target,
+      replacement: placeholderFragment,
+      cache: cacheAndCursor.cache,
+    });
   }
-  return { id, cache };
+  return cacheAndCursor;
 }
 export type ClickHandler = {
   cb: (event?: MouseEvent) => void;
   id: string;
   name: string;
 };
+export function getCacheEntry(cacheAndCursor: CacheAndCursor) {
+  return cacheAndCursor.cache.get(cacheAndCursor.cursor);
+}
+export function getCacheEntryThrows(cacheAndCursor: CacheAndCursor) {
+  const entry = getCacheEntry(cacheAndCursor);
+  if (!entry)
+    throw new Error(
+      `Could not find cache entry for cursor ${cacheAndCursor.cursor}`
+    );
+  return entry;
+}
+export function getResolvedMiniHtmlStringThrows(
+  cacheAndCursor: CacheAndCursor
+) {
+  const cacheEntry = getCacheEntryThrows(cacheAndCursor);
+  if (typeof cacheEntry.value !== "object")
+    throw new Error(
+      `primitive value, handlers only exist on ResolvedMiniHtmlString. ${cacheAndCursor}`
+    );
+  return cacheEntry.value;
+}
+export function getHandlers(cacheAndCursor: CacheAndCursor) {
+  return getResolvedMiniHtmlStringThrows(cacheAndCursor).handlers ?? [];
+}
 export function attachHandlers(
   placeholderFragment: DocumentFragment,
-  _handlers: ClickHandler[]
+  cacheAndCursor: CacheAndCursor
 ) {
+  const handlers = getHandlers(cacheAndCursor);
   // dont reattach event handlers if they have already been attached
-  for (const clickHandler of _handlers) {
+  for (const clickHandler of handlers) {
     const el = placeholderFragment.getElementById(clickHandler.id);
     if (!el)
       throw new Error(
@@ -294,8 +373,12 @@ export function attachHandlers(
 export function clickHandler(
   name: string,
   cb: (event?: MouseEvent) => void,
-  handlers: ClickHandler[]
+  cacheAndCursor: CacheAndCursor
 ) {
+  const handlers = getCacheEntry(cacheAndCursor)
+    ? getHandlers(cacheAndCursor)
+    : [];
+
   const handler = handlers.find((handler) => handler.name === name);
   if (handler) return handler.id;
   const id = crypto.randomUUID();
@@ -334,7 +417,8 @@ function escapeHtml(string?: any): string {
   div.textContent = string;
   return div.innerHTML;
 }
-function arraysEqual(arr1: string[], arr2: string[]): boolean {
+export type StringArray = string[] | TemplateStringsArray;
+function arraysEqual(arr1: StringArray, arr2: StringArray): boolean {
   if (arr1.length !== arr2.length) return false;
   return arr1.every((str, index) => str === arr2[index]);
 }
