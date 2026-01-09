@@ -217,7 +217,6 @@ export function html(
     stringLiterals,
     values,
     resolve: (mini?: Mini): ResolvedMiniHtmlString => {
-      console.log("RESOLVE");
       if (mini && getCacheEntry(mini.cacheAndCursor)) {
         // CASE: mini already exists, we can assume cache exits too
         const cacheEntry = getResolvedMiniHtmlStringThrows(mini.cacheAndCursor);
@@ -225,6 +224,11 @@ export function html(
           stringLiterals,
           cacheEntry.stringLiterals
         );
+        // in case we attached a handler, slots.length will be 0
+        // we need to make sure we actually have real slots
+        if (cacheEntry.slots.length === 0) {
+          cacheEntry.slots = values.map(() => crypto.randomUUID());
+        }
         const slots = htmlUnchanged
           ? cacheEntry.slots
           : values.map(() => crypto.randomUUID()); // in case the html changed, we need to make new slots
@@ -248,15 +252,25 @@ export function makeOrUsePlaceholderFragment(
   values: ResolvedMiniValue[],
   cacheAndCursor: CacheAndCursor
 ) {
+  const cacheEntry = getCacheEntryThrows(cacheAndCursor);
+  const resolved = getResolvedMiniHtmlStringThrows(cacheAndCursor);
+
+  if (cacheEntry.el) {
+    //if literals are the same as in cache, we use the old element
+    const htmlUnchanged = arraysEqual(stringLiterals, resolved.stringLiterals);
+    if (htmlUnchanged)
+      return {
+        placeholderFragment: cacheEntry.el,
+        ids: resolved.slots,
+        newPlaceholder: false,
+      };
+  }
   let placeholder = "";
-  const ids = [];
   let index = 0;
   const inside = { element: false, singleQuotes: false, doubleQuotes: false };
-  //if literals are the same as in cache, we use the old element
   for (const literal of stringLiterals) {
     isInside(literal, inside);
-    const id = crypto.randomUUID();
-    ids.push(id);
+    const id = resolved.slots[index];
     if (inside.element) {
       placeholder += literal + escapeHtml(values[index]);
     } else if (!inside.element && index < values.length) {
@@ -267,22 +281,24 @@ export function makeOrUsePlaceholderFragment(
     index++;
   }
   const placeholderFragment = fragmentFromHtml(placeholder);
-
-  return { placeholderFragment, ids, newPlaceholder: true };
+  cacheEntry.el = placeholderFragment;
+  return { placeholderFragment, ids: resolved.slots, newPlaceholder: true };
 }
 
 export function updateValues(
-  placeholderFragment: DocumentFragment,
+  placeholderFragment: DocumentFragment | HTMLElement,
   values: ResolvedMiniValue[],
   ids: string[],
   cacheAndCursor: CacheAndCursor
 ) {
+  const doc =
+    placeholderFragment instanceof HTMLElement ? document : placeholderFragment;
   let index = 0;
   for (const value of values) {
     const id = ids[index];
     index++;
     if (!id) throw new Error(`Could not find id in placeholder for ${value}`);
-    const el = placeholderFragment.getElementById(id);
+    const el = doc.getElementById(id);
     if (!el) continue;
     // throw new Error(
     //   `Could not find element in placeholder for ${value}, ${id}, ${placeholder}`
@@ -365,13 +381,15 @@ export function getHandlers(cacheAndCursor: CacheAndCursor) {
   return getResolvedMiniHtmlStringThrows(cacheAndCursor).handlers;
 }
 export function attachHandlers(
-  placeholderFragment: DocumentFragment,
+  placeholderFragment: DocumentFragment | HTMLElement,
   cacheAndCursor: CacheAndCursor
 ) {
   const handlers = getHandlers(cacheAndCursor);
+  const doc =
+    placeholderFragment instanceof HTMLElement ? document : placeholderFragment;
   // dont reattach event handlers if they have already been attached
   for (const clickHandler of handlers) {
-    const el = placeholderFragment.getElementById(clickHandler.id);
+    const el = doc.getElementById(clickHandler.id);
     if (!el)
       throw new Error(
         `Could not find element to attach handler for ${clickHandler.id}`
@@ -385,7 +403,8 @@ export function clickHandler(
   cb: (event?: MouseEvent) => void,
   cacheAndCursor: CacheAndCursor
 ) {
-  if (!getCacheEntry(cacheAndCursor)) {
+  const cacheEntry = getCacheEntry(cacheAndCursor);
+  if (!cacheEntry) {
     makeNewResolvedMiniHtmlString([], [], makeNewMini(cacheAndCursor));
   }
   const handlers = getHandlers(cacheAndCursor);
@@ -394,6 +413,7 @@ export function clickHandler(
   if (handler) return handler.id;
   const id = crypto.randomUUID();
   handlers.push({ cb, id, name });
+  delete cacheEntry?.el; // we want to dirty the cache in any case
   return id;
 }
 export type IsInside = {
