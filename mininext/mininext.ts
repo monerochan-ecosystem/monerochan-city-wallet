@@ -306,7 +306,8 @@ export function updateValues(
 
     if (typeof value == "object" && "render" in value) {
       //if values + templatestrings as in cache.get(id) are the same we dont render
-      value.render(el);
+
+      value.render(el, { ...cacheAndCursor, cursor: id });
       //should we call render in the domupdate?
     } else {
       //scheduleDomUpdate({ target: el, text: String(value) });
