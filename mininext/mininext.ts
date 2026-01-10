@@ -422,10 +422,8 @@ export function attachHandlers(
   // dont reattach event handlers if they have already been attached
   for (const clickHandler of handlers) {
     const el = doc.getElementById(clickHandler.id);
-    if (!el)
-      throw new Error(
-        `Could not find element to attach handler for ${clickHandler.id}`
-      );
+    if (!el) continue; // we dont throw here, just ignore
+    // (as there could be handlers that are not always attached)
     el.addEventListener("click", clickHandler.cb);
   }
 }
