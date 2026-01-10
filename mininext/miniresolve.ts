@@ -82,7 +82,7 @@ export function resolveValuesForCache(
 
       // CASE: primitive
       if (typeof value === "string" || typeof value === "number") {
-        cac.cache.set(childId, { value: childId, dirty: true });
+        cac.cache.set(childId, { value, dirty: true });
         return value;
       }
 
@@ -149,8 +149,9 @@ export function resolve(
 function deleteAllChildren(cac: CacheAndCursor) {
   const cacheEntry = getCacheEntry(cac);
   if (!cacheEntry) return;
-  if (cacheEntry.value !== "object") {
+  if (typeof cacheEntry.value !== "object") {
     cac.cache.delete(cac.cursor); // leaf primitive value
+    return;
   }
   const cacheValue = getResolvedMiniHtmlStringThrows(cac);
   if (!cacheValue.slots) return;
