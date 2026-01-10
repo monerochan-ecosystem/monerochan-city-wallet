@@ -21,7 +21,7 @@ type DomUpdateOptions = {
   text?: string;
 
   // Structural replacement: replace `target` with `replacement`.
-  target?: Element;
+  target?: Element | DocumentFragment | HTMLElement;
   replacement?: Element | DocumentFragment;
 
   cache: Cache;
@@ -114,7 +114,10 @@ export type ResolvedMiniHtmlString = {
   values: ResolvedMiniValue[];
   slots: string[];
   handlers: ClickHandler[];
-  render: (target: Element, cacheAndCursor?: CacheAndCursor) => CacheAndCursor;
+  render: (
+    target: Element | DocumentFragment | HTMLElement,
+    cacheAndCursor?: CacheAndCursor
+  ) => CacheAndCursor;
 };
 export type MiniComponent = (mini: Mini) => MiniHtmlString;
 export type PrimitiveValue = string | number;
@@ -165,7 +168,10 @@ export function resolveMiniHtmlString(
     slots,
     stringLiterals,
     values: resolvedValues,
-    render: (target: Element, cacheAndCursor?: CacheAndCursor) => {
+    render: (
+      target: Element | DocumentFragment | HTMLElement,
+      cacheAndCursor?: CacheAndCursor
+    ) => {
       if (!cacheAndCursor) cacheAndCursor = mini.cacheAndCursor; //and cache here
       return render({
         target,
@@ -254,10 +260,10 @@ export function makeOrUsePlaceholderFragment(
 ) {
   const cacheEntry = getCacheEntryThrows(cacheAndCursor);
   const resolved = getResolvedMiniHtmlStringThrows(cacheAndCursor);
-
   if (cacheEntry.el) {
     //if literals are the same as in cache, we use the old element
     const htmlUnchanged = arraysEqual(stringLiterals, resolved.stringLiterals);
+
     if (htmlUnchanged)
       return {
         placeholderFragment: cacheEntry.el,
@@ -289,9 +295,26 @@ export function makeOrUsePlaceholderFragment(
       cacheAndCursor.cache.set(id, { el, value: id });
   }
   cacheEntry.el = placeholderFragment;
+  resolved.stringLiterals = stringLiterals;
+  resolved.values = values;
   return { placeholderFragment, ids: resolved.slots, newPlaceholder: true };
 }
+export function updateValue(
+  el: DocumentFragment | HTMLElement,
+  value: ResolvedMiniValue,
+  id: string,
+  cacheAndCursor: CacheAndCursor
+) {
+  if (typeof value == "object" && "render" in value) {
+    //if values + templatestrings as in cache.get(id) are the same we dont render
 
+    value.render(el, { ...cacheAndCursor, cursor: id });
+    //should we call render in the domupdate?
+  } else {
+    //scheduleDomUpdate({ target: el, text: String(value) });
+    el.textContent = String(value);
+  }
+}
 export function updateValues(
   placeholderFragment: DocumentFragment | HTMLElement,
   values: ResolvedMiniValue[],
@@ -305,21 +328,13 @@ export function updateValues(
     const id = ids[index];
     index++;
     if (!id) throw new Error(`Could not find id in placeholder for ${value}`);
-    const el = doc.getElementById(id);
+
+    let el: DocumentFragment | HTMLElement | undefined | null =
+      doc.getElementById(id);
+
+    if (!el) el = cacheAndCursor.cache.get(id)?.el;
     if (!el) continue;
-    // throw new Error(
-    //   `Could not find element in placeholder for ${value}, ${id}, ${placeholder}`
-    // );
-
-    if (typeof value == "object" && "render" in value) {
-      //if values + templatestrings as in cache.get(id) are the same we dont render
-
-      value.render(el, { ...cacheAndCursor, cursor: id });
-      //should we call render in the domupdate?
-    } else {
-      //scheduleDomUpdate({ target: el, text: String(value) });
-      el.textContent = String(value);
-    }
+    updateValue(el, value, id, cacheAndCursor);
   }
 }
 export type CacheAndCursor = {
@@ -327,7 +342,7 @@ export type CacheAndCursor = {
   cursor: string;
 };
 export type RenderArgs = {
-  target: Element;
+  target: Element | DocumentFragment | HTMLElement;
   stringLiterals: StringArray;
   resolvedValues: ResolvedMiniValue[];
   cacheAndCursor: CacheAndCursor;
@@ -345,7 +360,6 @@ export function render({
       resolvedValues,
       cacheAndCursor
     );
-
   updateValues(placeholderFragment, resolvedValues, ids, cacheAndCursor);
   // if we still use the same string literals (= html snippet skeleton),
   // we dont need to replace, only values get updated if they changed
