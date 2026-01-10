@@ -1,0 +1,101 @@
+import type { StringArray } from "./minirender";
+
+export type ClickHandler = {
+  cb: (event?: MouseEvent) => void;
+  id: string;
+  name: string;
+};
+export function getCacheEntry(cacheAndCursor: CacheAndCursor) {
+  return cacheAndCursor.cache.get(cacheAndCursor.cursor);
+}
+export function getCacheEntryThrows(cacheAndCursor: CacheAndCursor) {
+  const entry = getCacheEntry(cacheAndCursor);
+  if (!entry)
+    throw new Error(
+      `Could not find cache entry for cursor ${cacheAndCursor.cursor}`
+    );
+  return entry;
+}
+export function getResolvedMiniHtmlStringThrows(
+  cacheAndCursor: CacheAndCursor
+) {
+  const cacheEntry = getCacheEntryThrows(cacheAndCursor);
+  if (typeof cacheEntry.value !== "object")
+    throw new Error(
+      `the result is a primitive value, we expected a ResolvedMiniCacheHtmlString. ${JSON.stringify(
+        cacheEntry
+      )}`
+    );
+  return cacheEntry.value;
+}
+export function getHandlers(cacheAndCursor: CacheAndCursor) {
+  return getResolvedMiniHtmlStringThrows(cacheAndCursor).handlers;
+}
+export function attachHandlers(
+  placeholderFragment: DocumentFragment | HTMLElement,
+  cacheAndCursor: CacheAndCursor
+) {
+  const handlers = getHandlers(cacheAndCursor);
+  if (!handlers) return;
+  const doc =
+    placeholderFragment instanceof HTMLElement ? document : placeholderFragment;
+  // dont reattach event handlers if they have already been attached
+  for (const clickHandler of handlers) {
+    const el = doc.getElementById(clickHandler.id);
+    if (!el) continue; // we dont throw here, just ignore
+    // (as there could be handlers that are not always attached)
+    el.addEventListener("click", clickHandler.cb);
+  }
+}
+
+export function clickHandler(
+  name: string,
+  cb: (event?: MouseEvent) => void,
+  cacheAndCursor: CacheAndCursor
+) {
+  let cacheEntry = getCacheEntry(cacheAndCursor);
+  if (!cacheEntry) {
+    cacheAndCursor.cache.set(cacheAndCursor.cursor, {
+      value: { stringLiterals: null, values: null, slots: null, handlers: [] },
+      dirty: true,
+    });
+    cacheEntry = getCacheEntryThrows(cacheAndCursor);
+  }
+  const cacheValue = getResolvedMiniHtmlStringThrows(cacheAndCursor);
+  if (!cacheValue.handlers) cacheValue.handlers = [];
+  const handlers = cacheValue.handlers;
+
+  const handler = handlers.find((handler) => handler.name === name);
+  if (handler) return handler.id; //CASE: handler already exists
+
+  const id = crypto.randomUUID();
+  handlers.push({ cb, id, name });
+  cacheEntry.dirty = true; // we want to dirty the cache in any case, not just if cache entry did not exist yet
+  return id;
+}
+export type CacheValue = PrimitiveValue | ResolvedMiniCacheHtmlString;
+
+export type CacheObject = {
+  el?: DocumentFragment | HTMLElement;
+  value: CacheValue;
+  dirty: boolean;
+};
+
+export type MiniCache = Map<string, CacheObject>;
+export type CacheAndCursor = {
+  cache: MiniCache;
+  cursor: string;
+};
+
+export type PrimitiveValue = string | number;
+
+export type ResolvedMiniCacheHtmlString = {
+  stringLiterals: StringArray | null;
+  values: ResolvedMiniCacheValue[] | null;
+  slots: string[] | null;
+  handlers: ClickHandler[] | null;
+};
+export type ResolvedMiniCacheValue =
+  | PrimitiveValue
+  | ResolvedMiniChildHtmlString;
+export type ResolvedMiniChildHtmlString = { childId: string };
