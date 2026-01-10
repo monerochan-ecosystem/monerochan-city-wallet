@@ -303,7 +303,8 @@ export function updateValue(
   el: DocumentFragment | HTMLElement,
   value: ResolvedMiniValue,
   id: string,
-  cacheAndCursor: CacheAndCursor
+  cacheAndCursor: CacheAndCursor,
+  cacheEntry?: CacheObject
 ) {
   if (typeof value == "object" && "render" in value) {
     //if values + templatestrings as in cache.get(id) are the same we dont render
@@ -312,7 +313,13 @@ export function updateValue(
     //should we call render in the domupdate?
   } else {
     //scheduleDomUpdate({ target: el, text: String(value) });
+    if (cacheEntry?.value === value) return;
     el.textContent = String(value);
+    if (!cacheEntry)
+      throw new Error(
+        `cache entry for ${id}, ${value} not found. Should be written as child in makeOrUsePlaceholderFragment`
+      );
+    cacheEntry.value = value;
   }
 }
 export function updateValues(
@@ -331,10 +338,13 @@ export function updateValues(
 
     let el: DocumentFragment | HTMLElement | undefined | null =
       doc.getElementById(id);
-
-    if (!el) el = cacheAndCursor.cache.get(id)?.el;
-    if (!el) continue;
-    updateValue(el, value, id, cacheAndCursor);
+    if (el) {
+      updateValue(el, value, id, cacheAndCursor, cacheAndCursor.cache.get(id));
+    } else {
+      const cacheEntry = cacheAndCursor.cache.get(id);
+      if (!cacheEntry?.el) continue;
+      updateValue(cacheEntry.el, value, id, cacheAndCursor, cacheEntry);
+    }
   }
 }
 export type CacheAndCursor = {
