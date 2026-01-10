@@ -1,18 +1,37 @@
-let rafScheduled = false;
-const writeQueue: Array<() => void> = [];
-
-function ensureRaf() {
-  if (rafScheduled) return;
-  rafScheduled = true;
-  requestAnimationFrame(flushDomUpdates);
+export type RootOptions = {
+  component: MiniHtmlString;
+  container: HTMLElement;
+  cac?: CacheAndCursor;
+};
+let roots: RootOptions[] = [];
+export function renderRoot(options: RootOptions) {
+  roots.push(options);
+  startRafLoop();
 }
+let rafRunning = false;
+function startRafLoop() {
+  if (rafRunning) return;
+  rafRunning = true;
+  function loop() {
+    for (const root of roots) {
+      const { component, container, cac } = root;
+      const resolvedComponent = cac
+        ? component.resolve(makeNewMini(cac))
+        : component.resolve();
+      root.cac = resolvedComponent.render(container, cac);
+    }
+    flushDomUpdates();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+const writeQueue: Array<DomUpdateOptions> = [];
 
 function flushDomUpdates() {
   for (const write of writeQueue) {
-    write();
+    replace(write);
   }
   writeQueue.length = 0;
-  rafScheduled = false;
 }
 
 type DomUpdateOptions = {
@@ -48,29 +67,7 @@ export function replace(options: DomUpdateOptions): void {
 }
 // only cache hits trigger dom update schedules ( if the value changed )
 export function scheduleDomUpdate(options: DomUpdateOptions): void {
-  writeQueue.push(() => {
-    const { textTarget, text, target, replacement } = options;
-
-    if (textTarget) {
-      if (!textTarget.isConnected) return;
-
-      if (typeof text === "string") {
-        if (textTarget.textContent === text) return;
-        textTarget.textContent = text;
-      }
-      return;
-    }
-
-    if (target && replacement) {
-      if (!target.isConnected) return;
-
-      const parent = target.parentNode;
-      if (!parent) return;
-      parent.replaceChild(replacement, target);
-    }
-  });
-
-  ensureRaf();
+  writeQueue.push(options);
 }
 
 function fragmentFromHtml(html: string): DocumentFragment {
@@ -375,7 +372,8 @@ export function render({
   // we dont need to replace, only values get updated if they changed
   if (newPlaceholder) {
     attachHandlers(placeholderFragment, cacheAndCursor);
-    replace({
+    //schedule dom update
+    scheduleDomUpdate({
       target,
       replacement: placeholderFragment,
       cache: cacheAndCursor.cache,
