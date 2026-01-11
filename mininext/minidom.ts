@@ -49,10 +49,8 @@ type DomUpdateOptions = {
   text?: string;
 
   // Structural replacement: replace `target` with `replacement`.
-  target?: Element | DocumentFragment | HTMLElement;
-  replacement?: Element | DocumentFragment;
-
-  cache: MiniCache;
+  target?: Element | HTMLElement;
+  replacement?: Element;
 };
 export function replace(options: DomUpdateOptions): void {
   const { textTarget, text, target, replacement } = options;

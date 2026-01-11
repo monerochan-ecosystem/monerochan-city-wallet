@@ -5,10 +5,9 @@ import {
   type CacheAndCursor,
   type CacheObject,
 } from "./minicache";
-import { scheduleDomUpdate } from "./minidom";
 
 export function render(
-  target: Element | DocumentFragment | HTMLElement,
+  target: Element | HTMLElement,
   cac: CacheAndCursor
 ): CacheAndCursor {
   const cacheEntry = getCacheEntryThrows(cac);
@@ -16,7 +15,7 @@ export function render(
   if (!htmlsnippet.stringLiterals || !htmlsnippet.values || !htmlsnippet.slots)
     throw new Error("should have lits,values & slots once resolved");
   const children: Map<string, CacheObject> = new Map();
-  let placeholderFragment: DocumentFragment | null = null;
+  let new_html_portion: HTMLElement | null = null;
 
   if (cacheEntry.dirty) {
     let placeholder = "";
@@ -38,12 +37,12 @@ export function render(
       }
       index++;
     }
-    placeholderFragment = fragmentFromHtml(placeholder);
+    new_html_portion = htmlPortion(placeholder);
+    const idmap = makeIdMap(new_html_portion);
     for (const childId of htmlsnippet.slots) {
-      const el = placeholderFragment.getElementById(childId);
       const cacheEntry = cac.cache.get(childId);
-      if (!el || !cacheEntry) continue;
-      cacheEntry.el = el;
+      if (!cacheEntry) continue;
+      cacheEntry.el = idmap.get(childId) as HTMLElement;
       children.set(childId, cacheEntry);
     }
   }
@@ -58,26 +57,23 @@ export function render(
   for (const [childId, child] of children) {
     const value = child.value;
     if (typeof value == "object") {
-      const target = placeholderFragment ?? cacheEntry.el;
-      if (!target)
-        throw new Error(`if not dirty should have el: ${htmlsnippet}`);
-      render(target, { ...cac, cursor: childId });
+      const childtarget = child.el;
+      if (!childtarget)
+        throw new Error(`if not dirty should have el: ${childId}`);
+      render(childtarget, { ...cac, cursor: childId });
     } else {
-      if (!child.dirty) continue;
-      if (!child.el) throw new Error(`${child} should have el`);
+      if (!child.dirty || !child.el) continue;
+      if (!child.el) throw new Error(`${child.value} should have el`);
       child.el.textContent = String(value);
       child.dirty = false;
     }
   }
-
-  if (placeholderFragment) {
-    attachHandlers(placeholderFragment, cac);
-    scheduleDomUpdate({
-      target,
-      replacement: placeholderFragment,
-      cache: cac.cache,
-    });
-    cacheEntry.el = placeholderFragment;
+  if (new_html_portion) {
+    //TODO fix this to work for elements that are not yet attached to the dom
+    attachHandlers(new_html_portion, cac);
+    const parent = target.parentNode;
+    if (parent) parent.replaceChild(new_html_portion, target);
+    cacheEntry.el = new_html_portion;
     cacheEntry.dirty = false;
   }
 
@@ -118,10 +114,11 @@ function escapeHtml(string?: any): string {
 }
 export type StringArray = string[] | TemplateStringsArray;
 
-function fragmentFromHtml(html: string): DocumentFragment {
+function htmlPortion(html: string): HTMLElement {
   const template = document.createElement("template");
   template.innerHTML = html;
-  const fragment = template.content.cloneNode(true) as DocumentFragment;
+
+  const fragment = template.content;
 
   const hasManyRoots = fragment.childElementCount > 1;
   if (hasManyRoots)
@@ -132,5 +129,21 @@ function fragmentFromHtml(html: string): DocumentFragment {
     Every mini html string should have only one root element.\n`
     );
 
-  return fragment;
+  return fragment.firstElementChild! as HTMLElement;
+}
+// if element is not in DOM yet we cant use getElementById
+export function makeIdMap(parent: Element): Map<string, HTMLElement> {
+  const idMap = new Map<string, HTMLElement>();
+
+  function recurse(el: Element): void {
+    if (el.id) {
+      idMap.set(el.id, el as HTMLElement);
+    }
+    for (const child of el.children) {
+      recurse(child);
+    }
+  }
+
+  recurse(parent);
+  return idMap;
 }

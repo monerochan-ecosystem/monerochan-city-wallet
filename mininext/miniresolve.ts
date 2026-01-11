@@ -50,7 +50,7 @@ export function resolveMiniHtmlString(
     stringLiterals,
     values: resolvedValues,
     render: (
-      target: Element | DocumentFragment | HTMLElement,
+      target: Element | HTMLElement,
       cacheAndCursor?: CacheAndCursor
     ) => {
       if (!cacheAndCursor) cacheAndCursor = mini.cacheAndCursor; //and cache here
@@ -65,7 +65,7 @@ export type ResolvedMiniHtmlString = {
   slots: string[];
   handlers: ClickHandler[] | null;
   render: (
-    target: Element | DocumentFragment | HTMLElement,
+    target: Element | HTMLElement,
     cacheAndCursor?: CacheAndCursor
   ) => CacheAndCursor;
 };

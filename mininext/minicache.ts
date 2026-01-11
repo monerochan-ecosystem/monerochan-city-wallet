@@ -32,7 +32,7 @@ export function getHandlers(cacheAndCursor: CacheAndCursor) {
   return getResolvedMiniHtmlStringThrows(cacheAndCursor).handlers;
 }
 export function attachHandlers(
-  placeholderFragment: DocumentFragment | HTMLElement,
+  placeholderFragment: HTMLElement,
   cacheAndCursor: CacheAndCursor
 ) {
   const handlers = getHandlers(cacheAndCursor);
@@ -76,7 +76,7 @@ export function clickHandler(
 export type CacheValue = PrimitiveValue | ResolvedMiniCacheHtmlString;
 
 export type CacheObject = {
-  el?: DocumentFragment | HTMLElement;
+  el?: HTMLElement;
   value: CacheValue;
   dirty: boolean;
 };
