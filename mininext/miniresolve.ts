@@ -153,7 +153,7 @@ export function resolve(
     handlers
   );
 }
-function deleteAllChildren(cac: CacheAndCursor) {
+function deleteAllChildren(cac: CacheAndCursor, last = true) {
   const cacheEntry = getCacheEntry(cac);
   if (!cacheEntry) return;
   if (typeof cacheEntry.value !== "object") {
@@ -161,10 +161,15 @@ function deleteAllChildren(cac: CacheAndCursor) {
     return;
   }
   const cacheValue = getResolvedMiniHtmlStringThrows(cac);
-  if (!cacheValue.slots) return;
-  for (const child of cacheValue.slots) {
-    deleteAllChildren({ ...cac, cursor: child });
+  if (!cacheValue.slots) {
+    // when attaching handlers we have a placeholder cache entry with slots null
+    return;
   }
+  for (const child of cacheValue.slots) {
+    deleteAllChildren({ ...cac, cursor: child }, false); // delete all children
+  }
+  if (last) return; // dont delete the node that called this
+  cac.cache.delete(cac.cursor); // delete intermediate nodes
 }
 function arraysEqual(arr1: StringArray, arr2: StringArray): boolean {
   if (arr1.length !== arr2.length) return false;
