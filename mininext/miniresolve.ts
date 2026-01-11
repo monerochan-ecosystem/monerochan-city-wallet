@@ -72,9 +72,10 @@ export type ResolvedMiniHtmlString = {
 export type ResolvedMiniValue = PrimitiveValue | ResolvedMiniHtmlString;
 export function resolveValuesForCache(
   unresolvedValues: MiniValue[],
-  cac: CacheAndCursor
+  cac: CacheAndCursor,
+  slots: string[] | null = null
 ) {
-  const slots = unresolvedValues.map(() => crypto.randomUUID());
+  if (!slots) slots = unresolvedValues.map(() => crypto.randomUUID());
   const values: ResolvedMiniCacheValue[] = unresolvedValues.map(
     (value, index) => {
       const childId = slots[index];
@@ -123,19 +124,26 @@ export function resolve(
     });
   } else {
     const cacheValue = getResolvedMiniHtmlStringThrows(cac);
+
     const htmlUnchanged = arraysEqual(
       stringLiterals,
       cacheValue.stringLiterals || []
     );
+    const { slots, values } = resolveValuesForCache(
+      unresolvedValues,
+      cac,
+      htmlUnchanged
+        ? cacheValue.slots
+        : unresolvedValues.map(() => crypto.randomUUID())
+    );
     if (!htmlUnchanged) {
       //recursively delete all children
       deleteAllChildren(cac);
-      const { slots, values } = resolveValuesForCache(unresolvedValues, cac);
       cacheValue.stringLiterals = stringLiterals;
-      cacheValue.values = values;
       cacheValue.slots = slots;
       cacheEntry.dirty = true;
     }
+    cacheValue.values = values;
   }
   // at this point we know the cache entry exists
 
