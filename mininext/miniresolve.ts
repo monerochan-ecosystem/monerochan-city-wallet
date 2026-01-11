@@ -103,15 +103,8 @@ export function resolveValuesForCache(
 export function resolve(
   stringLiterals: StringArray,
   unresolvedValues: MiniValue[],
-  mini?: Mini
+  mini: Mini
 ): ResolvedMiniHtmlString {
-  if (!mini) {
-    const cac = {
-      cache: new Map<string, CacheObject>(),
-      cursor: crypto.randomUUID(),
-    };
-    mini = makeNewMini(cac);
-  }
   // CASE our cache entry does not exist yet
   const cac = mini.cacheAndCursor;
   const cacheEntry = getCacheEntry(cac);

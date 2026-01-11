@@ -1,8 +1,8 @@
-import type { CacheAndCursor, MiniCache } from "./minicache";
-import { makeNewMini, type MiniHtmlString } from "./mininext";
+import type { CacheAndCursor, CacheObject, MiniCache } from "./minicache";
+import { makeNewMini, type Mini, type MiniHtmlString } from "./mininext";
 
 export type RootOptions = {
-  component: MiniHtmlString;
+  component: (mini: Mini) => MiniHtmlString;
   container: HTMLElement;
   cac?: CacheAndCursor;
 };
@@ -17,11 +17,17 @@ function startRafLoop() {
   rafRunning = true;
   function loop() {
     for (const root of roots) {
-      const { component, container, cac } = root;
-      const resolvedComponent = cac
-        ? component.resolve(makeNewMini(cac))
-        : component.resolve();
-      root.cac = resolvedComponent.render(container, cac);
+      let { component, cac } = root;
+      if (!cac) {
+        cac = {
+          cache: new Map<string, CacheObject>(),
+          cursor: crypto.randomUUID(),
+        };
+      }
+      const mini = makeNewMini(cac);
+      const evaluated = component(mini);
+      const resolved = evaluated.resolve(mini);
+      root.cac = resolved.render(root.container, cac);
     }
     flushDomUpdates();
     requestAnimationFrame(loop);

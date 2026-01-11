@@ -35,7 +35,7 @@ export function html(
   return {
     stringLiterals,
     values,
-    resolve: (mini?: Mini): ResolvedMiniHtmlString => {
+    resolve: (mini: Mini): ResolvedMiniHtmlString => {
       return resolve(stringLiterals, values, mini);
     },
   };
