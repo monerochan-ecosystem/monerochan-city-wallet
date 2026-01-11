@@ -45,6 +45,7 @@ export function render(
       cacheEntry.el = idmap.get(childId) as HTMLElement;
       children.set(childId, cacheEntry);
     }
+    attachHandlers(idmap, cac);
   }
 
   if (!cacheEntry.dirty) {
@@ -69,8 +70,6 @@ export function render(
     }
   }
   if (new_html_portion) {
-    //TODO fix this to work for elements that are not yet attached to the dom
-    attachHandlers(new_html_portion, cac);
     const parent = target.parentNode;
     if (parent) parent.replaceChild(new_html_portion, target);
     cacheEntry.el = new_html_portion;

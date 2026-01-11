@@ -2,7 +2,6 @@ import {
   getCacheEntry,
   getResolvedMiniHtmlStringThrows,
   type CacheAndCursor,
-  type CacheObject,
   type ClickHandler,
   type PrimitiveValue,
   type ResolvedMiniCacheValue,

@@ -32,16 +32,16 @@ export function getHandlers(cacheAndCursor: CacheAndCursor) {
   return getResolvedMiniHtmlStringThrows(cacheAndCursor).handlers;
 }
 export function attachHandlers(
-  placeholderFragment: HTMLElement,
+  idMap: Map<string, HTMLElement>,
   cacheAndCursor: CacheAndCursor
 ) {
   const handlers = getHandlers(cacheAndCursor);
   if (!handlers) return;
-  const doc =
-    placeholderFragment instanceof HTMLElement ? document : placeholderFragment;
+
   // dont reattach event handlers if they have already been attached
+  // call this only when a htmlstring is dirty (changed string literals)
   for (const clickHandler of handlers) {
-    const el = doc.getElementById(clickHandler.id);
+    const el = idMap.get(clickHandler.id);
     if (!el) continue; // we dont throw here, just ignore
     // (as there could be handlers that are not always attached)
     el.addEventListener("click", clickHandler.cb);
