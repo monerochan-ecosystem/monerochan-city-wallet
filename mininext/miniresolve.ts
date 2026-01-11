@@ -84,6 +84,7 @@ export function resolveValuesForCache(
       if (typeof value === "string" || typeof value === "number") {
         const cacheEntry = cac.cache.get(childId);
         if (cacheEntry) {
+          if (cacheEntry.value === value) return value;
           cacheEntry.value = value;
           cacheEntry.dirty = true;
           return value;
