@@ -7,6 +7,7 @@ import {
 } from "./minicache";
 import { resolve, type ResolvedMiniHtmlString } from "./miniresolve";
 export { renderRoot } from "./minidom";
+export { createRouter, type Params } from "./minirouter";
 export type Mini = {
   html: typeof html;
   click: (name: string, cb: () => void) => string;
