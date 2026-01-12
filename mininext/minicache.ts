@@ -56,7 +56,13 @@ export function clickHandler(
   let cacheEntry = getCacheEntry(cacheAndCursor);
   if (!cacheEntry) {
     cacheAndCursor.cache.set(cacheAndCursor.cursor, {
-      value: { stringLiterals: null, values: null, slots: null, handlers: [] },
+      value: {
+        stringLiterals: null,
+        values: null,
+        slots: null,
+        handlers: [],
+        state: null,
+      },
       dirty: true,
     });
     cacheEntry = getCacheEntryThrows(cacheAndCursor);
@@ -72,6 +78,38 @@ export function clickHandler(
   handlers.push({ cb, id, name });
   cacheEntry.dirty = true; // we want to dirty the cache in any case, not just if cache entry did not exist yet
   return id;
+}
+export function state<T>(
+  name: string,
+  value: T,
+  cacheAndCursor: CacheAndCursor
+): StateObject<T> {
+  let cacheEntry = getCacheEntry(cacheAndCursor);
+  if (!cacheEntry) {
+    cacheAndCursor.cache.set(cacheAndCursor.cursor, {
+      value: {
+        stringLiterals: null,
+        values: null,
+        slots: null,
+        handlers: null,
+        state: [],
+      },
+      dirty: true,
+    });
+    cacheEntry = getCacheEntryThrows(cacheAndCursor);
+  }
+  const cacheValue = getResolvedMiniHtmlStringThrows(cacheAndCursor);
+  if (!cacheValue.state) cacheValue.state = [];
+  const stateObjects = cacheValue.state;
+
+  const stateObject = stateObjects.find(
+    (stateObject) => stateObject.name === name
+  );
+  if (stateObject) return stateObject as StateObject<T>; //CASE: state already exists
+  const newStateObject: StateObject<T> = { value, name };
+  stateObjects.push(newStateObject);
+  cacheEntry.dirty = true; // we want to dirty the cache in any case, not just if cache entry did not exist yet
+  return newStateObject;
 }
 export type CacheValue = PrimitiveValue | ResolvedMiniCacheHtmlString;
 
@@ -94,8 +132,14 @@ export type ResolvedMiniCacheHtmlString = {
   values: ResolvedMiniCacheValue[] | null;
   slots: string[] | null;
   handlers: ClickHandler[] | null;
+  state: StateObject[] | null;
 };
 export type ResolvedMiniCacheValue =
   | PrimitiveValue
   | ResolvedMiniChildHtmlString;
 export type ResolvedMiniChildHtmlString = { childId: string };
+
+export type StateObject<T = unknown> = {
+  value: T;
+  name: string;
+};

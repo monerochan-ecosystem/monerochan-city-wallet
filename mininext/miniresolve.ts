@@ -112,7 +112,7 @@ export function resolve(
     const { slots, values } = resolveValuesForCache(unresolvedValues, cac);
 
     cac.cache.set(cac.cursor, {
-      value: { stringLiterals, values, slots, handlers: null },
+      value: { stringLiterals, values, slots, handlers: null, state: null },
       dirty: true,
     });
   } else {

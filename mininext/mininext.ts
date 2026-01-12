@@ -1,13 +1,16 @@
 import {
   clickHandler,
+  state,
   type CacheAndCursor,
   type PrimitiveValue,
+  type StateObject,
 } from "./minicache";
 import { resolve, type ResolvedMiniHtmlString } from "./miniresolve";
 export { renderRoot } from "./minidom";
 export type Mini = {
   html: typeof html;
   click: (name: string, cb: () => void) => string;
+  state: <T>(name: string, value: T) => StateObject<T>;
   cacheAndCursor: CacheAndCursor;
 };
 export function makeNewMini(cac: CacheAndCursor): Mini {
@@ -15,6 +18,9 @@ export function makeNewMini(cac: CacheAndCursor): Mini {
     html,
     click: (name, handler) => {
       return clickHandler(name, handler, cac);
+    },
+    state: (name, value) => {
+      return state(name, value, cac);
     },
     cacheAndCursor: cac,
   };
