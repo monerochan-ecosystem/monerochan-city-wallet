@@ -35,6 +35,11 @@ export type TypedRouter<TRoutes extends Record<string, any>> = {
     path: Path,
     params: Params<Path>
   ): void;
+  link(path: string): string;
+  link<Path extends RoutePaths<TRoutes>>(
+    path: Path,
+    params: Params<Path>
+  ): string;
   getCurrentPath(): string;
 };
 
@@ -124,6 +129,15 @@ export function createRouter<
       }) + append
     );
   }
+  function link(pathOrTemplate: any, params?: Record<string, string>): string {
+    let finalPath: string;
+    if (params && typeof pathOrTemplate === "string") {
+      finalPath = buildPath(pathOrTemplate, params);
+    } else {
+      finalPath = pathOrTemplate;
+    }
+    return finalPath.startsWith("/") ? finalPath : "/" + finalPath;
+  }
 
   return {
     component(mini: Mini): MiniHtmlString {
@@ -143,16 +157,9 @@ export function createRouter<
       pathOrTemplate: any,
       params?: Record<string, string>
     ): void {
-      let finalPath: string;
-      if (params && typeof pathOrTemplate === "string") {
-        finalPath = buildPath(pathOrTemplate, params);
-      } else {
-        finalPath = pathOrTemplate;
-      }
-      window.location.hash = finalPath.startsWith("/")
-        ? finalPath.slice(1)
-        : finalPath;
-    } as TypedRouter<TRoutes>["navigate"],
+      window.location.hash = link(pathOrTemplate, params);
+    },
+    link,
     getCurrentPath(): string {
       return currentPath;
     },
