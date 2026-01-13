@@ -1,5 +1,5 @@
 {
-  "include": ["wallet/**/*"],
+  "include": ["wallet/**/*", "background/**/*"],
   "compilerOptions": {
     // Environment setup & latest features
     "lib": ["ESNext"],

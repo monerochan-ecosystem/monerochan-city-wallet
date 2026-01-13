@@ -13,7 +13,7 @@ async function setupOffscreenDocument() {
     await creating;
   } else {
     creating = chrome.offscreen.createDocument({
-      url: "/background/offscreen/bridge.html",
+      url: "background.html",
       reasons: ["WORKERS"],
       justification: "worker for wallet syncing and scanning utxos.",
     });
