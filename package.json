@@ -1,10 +1,14 @@
 {
   "name": "monerochan-city-wallet",
   "scripts": {
+    "zipchrome": "(cd dist/chrome && zip -r ../chrome.zip .)",
     "copyfirefoxmanifest": "cp manifest/firefox.json dist/firefox/manifest.json",
     "copychromemanifest": "cp manifest/chrome.json dist/chrome/manifest.json",
     "buildfirefox": "bun build wallet/sidebar.html background/background.ts --outdir dist/firefox --target browser",
-    "buildchrome": "bun build wallet/sidebar.html background/offscreen/bridge.html background/offscreen/bridge.ts --outdir dist/chrome --target browser",
+    "chrome:background": "bun build background/offscreen/background.html  --outdir dist/chrome --target browser ",
+    "chrome:sw": "bun build background/offscreen/bridge.ts --outdir dist/chrome --target browser",
+    "chrome:sidebar": "bun build wallet/sidebar.html --outdir dist/chrome --target browser",
+    "buildchrome": "bun run chrome:background && bun run chrome:sw && bun run chrome:sidebar",
     "build": "bun run buildchrome && bun run copychromemanifest && bun run buildfirefox && bun run copyfirefoxmanifest",
     "clean": "rm -rf ./dist"
   },
