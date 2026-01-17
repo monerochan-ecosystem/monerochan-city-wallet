@@ -68,9 +68,16 @@ export function flatten(
 export function flattenValues(miniHtmlString: MiniHtmlString): MiniHtmlString {
   const literalsArray: string[] = [];
   const values: MiniValue[] = [];
+  let mergeWithPrior = false;
+
   let index = 0;
   for (const literal of miniHtmlString.stringLiterals) {
-    literalsArray.push(literal);
+    if (mergeWithPrior) {
+      mergeWithPrior = false;
+      literalsArray[index] += literal;
+    } else {
+      literalsArray.push(literal);
+    }
     const value = miniHtmlString.values[index];
     if (typeof value === "function") {
       throw new Error(
@@ -84,14 +91,19 @@ export function flattenValues(miniHtmlString: MiniHtmlString): MiniHtmlString {
          (every mini html string needs to have only one root element)`
       );
     } else if (typeof value === "object" && "resolve" in value) {
-      literalsArray.push(...value.stringLiterals);
+      const priorLiteral = literalsArray[index];
+      if (!priorLiteral) throw new Error("no prior literal, ");
+      literalsArray[index] = priorLiteral + value.stringLiterals[0];
+      literalsArray.push(...value.stringLiterals.slice(1));
+      mergeWithPrior = true;
+
       values.push(...value.values);
+      index += value.stringLiterals.slice(1).length;
     } else {
       if (typeof value === "string" || typeof value === "number")
         values.push(value);
+      index++;
     }
-
-    index++;
   }
   const stringLiterals = createTemplateStringsArray(literalsArray);
   return {
@@ -118,7 +130,18 @@ function combineMiniHtmlStrings(htmlstrings: MiniHtmlString[]): MiniHtmlString {
 }
 
 function combineTemplateStringsArrays(tsas: TemplateStringsArray[]) {
-  return createTemplateStringsArray(tsas.flatMap((tsa) => tsa));
+  const stringlits: string[] = [];
+  for (const litarray of tsas) {
+    const prior = stringlits.at(-1);
+    const first = litarray[0];
+    if (prior && first) {
+      stringlits[stringlits.length - 1] += first;
+      stringlits.push(...litarray.slice(1));
+    } else {
+      stringlits.push(...litarray);
+    }
+  }
+  return createTemplateStringsArray(stringlits);
 }
 function createTemplateStringsArray(strings: string[]): TemplateStringsArray {
   const stringsArray = [...strings];
