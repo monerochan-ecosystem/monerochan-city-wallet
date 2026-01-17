@@ -31,7 +31,7 @@ export function render(
       if (inside.element) {
         placeholder += literal + escapeHtml(htmlsnippet.values[index]);
       } else if (!inside.element && index < htmlsnippet.values.length) {
-        placeholder += literal + `<div id="${id}"></div>`;
+        placeholder += literal + `<span id="${id}"></span>`;
       } else {
         placeholder += literal;
       }
