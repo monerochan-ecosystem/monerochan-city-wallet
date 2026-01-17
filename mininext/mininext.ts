@@ -13,6 +13,10 @@ export type Mini = {
   click: (name: string, cb: () => void) => string;
   state: <T>(name: string, value: T) => StateObject<T>;
   cacheAndCursor: CacheAndCursor;
+  flatten(
+    htmlStringArray: MiniHtmlString[],
+    flattenRootFn?: (htmlstrings: MiniHtmlString) => MiniHtmlString
+  ): MiniHtmlString;
 };
 export function makeNewMini(cac: CacheAndCursor): Mini {
   return {
@@ -23,6 +27,7 @@ export function makeNewMini(cac: CacheAndCursor): Mini {
     state: (name, value) => {
       return state(name, value, cac);
     },
+    flatten,
     cacheAndCursor: cac,
   };
 }
@@ -46,4 +51,86 @@ export function html(
       return resolve(stringLiterals, values, mini);
     },
   };
+}
+export function standardFlattenRoot(
+  htmlstrings: MiniHtmlString
+): MiniHtmlString {
+  return html`<div>${htmlstrings}</div>`;
+}
+
+export function flatten(
+  htmlStringArray: MiniHtmlString[],
+  flattenRootFn = standardFlattenRoot
+): MiniHtmlString {
+  const flattenedArray = combineMiniHtmlStrings(htmlStringArray);
+  return flattenValues(flattenRootFn(flattenedArray));
+}
+export function flattenValues(miniHtmlString: MiniHtmlString): MiniHtmlString {
+  const literalsArray: string[] = [];
+  const values: MiniValue[] = [];
+  let index = 0;
+  for (const literal of miniHtmlString.stringLiterals) {
+    literalsArray.push(literal);
+    const value = miniHtmlString.values[index];
+    if (typeof value === "function") {
+      throw new Error(
+        `resolve components before passing them into the root element when flattening,
+         with const miniHtmlString = component(mini);
+         
+         optimally just have the root element's only value be the htmlstringsarray
+         you want to flatten. This is not the place for complex logic,
+         it is just to wrap your array in an <ul>, <ol> or <div> element.
+         
+         (every mini html string needs to have only one root element)`
+      );
+    } else if (typeof value === "object" && "resolve" in value) {
+      literalsArray.push(...value.stringLiterals);
+      values.push(...value.values);
+    } else {
+      if (typeof value === "string" || typeof value === "number")
+        values.push(value);
+    }
+
+    index++;
+  }
+  const stringLiterals = createTemplateStringsArray(literalsArray);
+  return {
+    stringLiterals,
+    values,
+    resolve: (mini: Mini): ResolvedMiniHtmlString => {
+      return resolve(stringLiterals, values, mini);
+    },
+  };
+}
+function combineMiniHtmlStrings(htmlstrings: MiniHtmlString[]): MiniHtmlString {
+  const stringLiterals = combineTemplateStringsArrays(
+    htmlstrings.map((hs) => hs.stringLiterals)
+  );
+  const values = htmlstrings.flatMap((hs) => hs.values);
+
+  return {
+    stringLiterals,
+    values,
+    resolve: (mini: Mini): ResolvedMiniHtmlString => {
+      return resolve(stringLiterals, values, mini);
+    },
+  };
+}
+
+function combineTemplateStringsArrays(tsas: TemplateStringsArray[]) {
+  return createTemplateStringsArray(tsas.flatMap((tsa) => tsa));
+}
+function createTemplateStringsArray(strings: string[]): TemplateStringsArray {
+  const stringsArray = [...strings];
+
+  const frozenRaw = Object.freeze([...strings]);
+
+  Object.defineProperty(stringsArray, "raw", {
+    value: frozenRaw,
+    writable: false,
+    enumerable: false,
+    configurable: false,
+  });
+
+  return Object.freeze(stringsArray) as TemplateStringsArray;
 }
