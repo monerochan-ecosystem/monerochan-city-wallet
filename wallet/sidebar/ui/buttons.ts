@@ -35,7 +35,7 @@ export function tactileSwitch(buttonText: string | MiniHtmlString) {
   </style></div>`;
   };
 }
-export function topMenu(mini: Mini) {
+export function lowerTopMenu(mini: Mini) {
   const historyButton = tactileSwitch("HISTORY");
   const receiveButton = tactileSwitch("RECEIVE");
 
@@ -72,7 +72,7 @@ export function topMenu(mini: Mini) {
           </div>  
 `;
 }
-export function bottomMenu(mini: Mini) {
+export function lowerBottomMenu(mini: Mini) {
   const walletsButton = tactileSwitch("WALLETS");
 
   const connectionButton = tactileSwitch(
