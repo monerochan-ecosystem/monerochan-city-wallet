@@ -30,6 +30,7 @@ export function tactileSwitch(id: string, buttonText: string | MiniHtmlString) {
           inset 0 4px 12px rgba(0, 0, 0, 0.45),
           0 15px 25px rgba(0, 0, 0, 0.4);
         cursor: pointer;
+        user-select: none;
       }
       .tactile-switch:hover {
         color: rgba(255, 255, 255, 0.7);
@@ -111,7 +112,6 @@ export function lowerBottomMenu() {
         justify-content: start;
         gap: 8px;
         margin-left: 8px;
-        margin-top: 50px;
       }
     </style>
   </div> `;
