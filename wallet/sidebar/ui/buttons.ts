@@ -35,6 +35,9 @@ export function tactileSwitch(id: string, buttonText: string | MiniHtmlString) {
       .tactile-switch:hover {
         color: rgba(255, 255, 255, 0.7);
       }
+      .active {
+        color: rgba(255, 255, 255, 0.7);
+      }
     </style>
   </div>`;
 }
