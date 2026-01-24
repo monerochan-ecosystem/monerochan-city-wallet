@@ -7,12 +7,12 @@ import {
   type ResolvedMiniCacheValue,
 } from "./minicache";
 import { makeNewMini, type Mini, type MiniValue } from "./mininext";
-import { render, type StringArray } from "./minirender";
+import { isInside, render, type StringArray } from "./minirender";
 
 export function resolveMiniValue(
   value: MiniValue,
   parentMini: Mini,
-  slotId: string
+  slotId: string,
 ): ResolvedMiniValue {
   // make new mini with slotid as cursor
   const mini = makeNewMini({ ...parentMini.cacheAndCursor, cursor: slotId });
@@ -31,7 +31,7 @@ export function resolveMiniHtmlString(
   unresolvedValues: MiniValue[],
   mini: Mini,
   slots: string[],
-  handlers: ClickHandler[] | null
+  handlers: ClickHandler[] | null,
 ): ResolvedMiniHtmlString {
   const resolvedValues: ResolvedMiniValue[] = [];
   let index = 0;
@@ -50,7 +50,7 @@ export function resolveMiniHtmlString(
     values: resolvedValues,
     render: (
       target: Element | HTMLElement,
-      cacheAndCursor?: CacheAndCursor
+      cacheAndCursor?: CacheAndCursor,
     ) => {
       if (!cacheAndCursor) cacheAndCursor = mini.cacheAndCursor; //and cache here
       return render(target, cacheAndCursor);
@@ -65,14 +65,14 @@ export type ResolvedMiniHtmlString = {
   handlers: ClickHandler[] | null;
   render: (
     target: Element | HTMLElement,
-    cacheAndCursor?: CacheAndCursor
+    cacheAndCursor?: CacheAndCursor,
   ) => CacheAndCursor;
 };
 export type ResolvedMiniValue = PrimitiveValue | ResolvedMiniHtmlString;
 export function resolveValuesForCache(
   unresolvedValues: MiniValue[],
   cac: CacheAndCursor,
-  slots: string[] | null = null
+  slots: string[] | null = null,
 ) {
   if (!slots) slots = unresolvedValues.map(() => crypto.randomUUID());
   const values: ResolvedMiniCacheValue[] = unresolvedValues.map(
@@ -96,14 +96,14 @@ export function resolveValuesForCache(
       // CASE: child mini htmlstring or component
 
       return { childId };
-    }
+    },
   );
   return { slots, values };
 }
 export function resolve(
   stringLiterals: StringArray,
   unresolvedValues: MiniValue[],
-  mini: Mini
+  mini: Mini,
 ): ResolvedMiniHtmlString {
   // CASE our cache entry does not exist yet
   const cac = mini.cacheAndCursor;
@@ -120,16 +120,21 @@ export function resolve(
 
     const htmlUnchanged = arraysEqual(
       stringLiterals,
-      cacheValue.stringLiterals || []
+      cacheValue.stringLiterals || [],
+    );
+    const styleOrTagContentChanged = parametricHtmlChanges(
+      stringLiterals,
+      cacheValue.values,
+      unresolvedValues,
     );
     const { slots, values } = resolveValuesForCache(
       unresolvedValues,
       cac,
       htmlUnchanged
         ? cacheValue.slots
-        : unresolvedValues.map(() => crypto.randomUUID())
+        : unresolvedValues.map(() => crypto.randomUUID()),
     );
-    if (!htmlUnchanged) {
+    if (!htmlUnchanged || styleOrTagContentChanged) {
       //recursively delete all children
       deleteAllChildren(cac);
       cacheValue.stringLiterals = stringLiterals;
@@ -150,7 +155,7 @@ export function resolve(
     unresolvedValues,
     mini,
     slots,
-    handlers
+    handlers,
   );
 }
 function deleteAllChildren(cac: CacheAndCursor, last = true) {
@@ -174,4 +179,30 @@ function deleteAllChildren(cac: CacheAndCursor, last = true) {
 function arraysEqual(arr1: StringArray, arr2: StringArray): boolean {
   if (arr1.length !== arr2.length) return false;
   return arr1.every((str, index) => str === arr2[index]);
+}
+
+export function parametricHtmlChanges(
+  stringLiterals: StringArray,
+  cached_values: ResolvedMiniCacheValue[] | null,
+  values: MiniValue[],
+): boolean {
+  const inside = {
+    element: false,
+    singleQuotes: false,
+    doubleQuotes: false,
+    lastElement: "",
+  };
+  let index = 0;
+  for (const literal of stringLiterals) {
+    isInside(literal, inside);
+    if (inside.element || inside.lastElement.trim().endsWith("<style")) {
+      const oldValue = cached_values ? cached_values[index] : undefined;
+      const newValue = values[index];
+      if (oldValue !== newValue) return true;
+      if (typeof oldValue === "undefined") return true;
+      if (typeof newValue === "undefined") return true;
+    }
+    index++;
+  }
+  return false;
 }
