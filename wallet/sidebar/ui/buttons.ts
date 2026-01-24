@@ -41,81 +41,19 @@ export function tactileSwitch(id: string, buttonText: string | MiniHtmlString) {
     </style>
   </div>`;
 }
-export const buttonIds = {
-  send: "send",
-  receive: "receive",
-  history: "history",
-  wallets: "wallets",
-  connection: "connection",
-} as const;
-export function lowerTopMenu() {
-  const historyButton = tactileSwitch(buttonIds.history, "HISTORY");
-  const receiveButton = tactileSwitch(buttonIds.receive, "RECEIVE");
-
-  const sendButton = tactileSwitch(
-    buttonIds.send,
-    html`<span>
-      <style>
-        .red-dot {
-          height: 4px;
-          width: 4px;
-          margin: 2px;
-          background-color: #ff4444;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-          border-radius: 50%;
-          display: inline-block;
-        }
-      </style>
-      SEND <span class="red-dot"></span
-    ></span>`,
-  );
-  return html`<div class="top-menu">
-    ${sendButton} ${receiveButton}
-    <div></div>
-    ${historyButton}
-    <style>
-      .top-menu {
-        display: grid;
-        grid-template-columns: 80px 80px 1fr 80px;
-        justify-content: start;
-        gap: 8px;
-        margin-left: 8px;
-      }
-    </style>
-  </div> `;
+export type IdMap = Record<string, string>;
+export function attachHandlers(
+  buttonIds: IdMap,
+  cb: (event: MouseEvent) => void,
+) {
+  for (const id in buttonIds) {
+    const button = document.getElementById(id);
+    if (button) button.onclick = cb;
+  }
 }
-export function lowerBottomMenu() {
-  const walletsButton = tactileSwitch(buttonIds.wallets, "WALLETS");
-
-  const connectionButton = tactileSwitch(
-    buttonIds.connection,
-    html`<span>
-      <style>
-        .green-dot {
-          height: 4px;
-          width: 4px;
-          margin: 2px;
-          background-color: #4ade80;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-          border-radius: 50%;
-          display: inline-block;
-        }
-      </style>
-      CONNECTION <span class="green-dot"></span
-    ></span>`,
-  );
-  return html`<div class="bottom-menu">
-    ${connectionButton}
-    <div></div>
-    ${walletsButton}
-    <style>
-      .bottom-menu {
-        display: grid;
-        grid-template-columns: 140px 1fr 140px;
-        justify-content: start;
-        gap: 8px;
-        margin-left: 8px;
-      }
-    </style>
-  </div> `;
+export function removeActive(buttonIds: IdMap) {
+  for (const id in buttonIds) {
+    const button = document.getElementById(id);
+    if (button) button.classList.remove("active");
+  }
 }
