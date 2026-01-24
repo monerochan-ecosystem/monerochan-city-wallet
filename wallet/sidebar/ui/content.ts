@@ -1,11 +1,15 @@
-import { html } from "../../../mininext/mininext";
+import { html, type MiniValue } from "../../../mininext/mininext";
+import { lowerButtonIds } from "../segments/walletLower";
 
-export const contentPlate = () => {
-  if (!window.activeWalletPlate) return html`<div></div>`;
+const leftUpper = "8% 21% 8% 9% / 4% 15% 6% 6%;";
+export const tacticleContentPlate = (
+  content: MiniValue,
+  border_radius: string,
+) => {
   return html`<div class="content-plate">
-    ${window.activeWalletPlate}<style>
+    ${content}<style>
       .content-plate {
-        border-radius: 8% 21% 8% 9% / 4% 15% 6% 6%;
+        border-radius: ${border_radius};
         height: 500px;
         width: 320px;
         margin-left: 7px;
@@ -34,4 +38,11 @@ export const contentPlate = () => {
       }
     </style>
   </div>`;
+};
+export const contentPlate = () => {
+  if (!window.activeWalletPlate) return html`<div></div>`;
+  if (window.activeWalletPlate === lowerButtonIds.send) {
+    return tacticleContentPlate(html`<div>SEND</div>`, leftUpper);
+  }
+  return html`<div></div>`;
 };
