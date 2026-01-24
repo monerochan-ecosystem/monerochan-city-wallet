@@ -12,10 +12,10 @@ export const tacticleContentPlate = (
     ${content}<style>
       .content-plate {
         border-radius: ${border_radius};
-        height: 500px;
         width: 320px;
         margin-left: 7px;
         margin-top: 15px;
+        margin-bottom: 40px;
         color: rgba(255, 255, 255, 0.3);
         background-color: #666;
         background-image: linear-gradient(
