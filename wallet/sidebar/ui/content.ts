@@ -1,7 +1,9 @@
 import { html, type MiniValue } from "../../../mininext/mininext";
 import { lowerButtonIds } from "../segments/walletLower";
-
+//                LU RU RL LL / LU RU RL LL
 const leftUpper = "8% 21% 8% 9% / 4% 15% 6% 6%;";
+const middleUpper = "8% 8% 8% 9% / 4% 4% 6% 6%;";
+const rightUpper = "21% 8% 8% 9% / 15% 4% 6% 6%;";
 export const tacticleContentPlate = (
   content: MiniValue,
   border_radius: string,
@@ -43,6 +45,12 @@ export const contentPlate = () => {
   if (!window.activeWalletPlate) return html`<div></div>`;
   if (window.activeWalletPlate === lowerButtonIds.send) {
     return tacticleContentPlate(html`<div>SEND</div>`, leftUpper);
+  }
+  if (window.activeWalletPlate === lowerButtonIds.receive) {
+    return tacticleContentPlate(html`<div>RECEIVE</div>`, middleUpper);
+  }
+  if (window.activeWalletPlate === lowerButtonIds.history) {
+    return tacticleContentPlate(html`<div>HISTORY</div>`, rightUpper);
   }
   return html`<div></div>`;
 };
