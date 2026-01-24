@@ -4,11 +4,12 @@ import {
   getResolvedMiniHtmlStringThrows,
   type CacheAndCursor,
   type CacheObject,
+  type ResolvedMiniCacheValue,
 } from "./minicache";
 
 export function render(
   target: Element | HTMLElement,
-  cac: CacheAndCursor
+  cac: CacheAndCursor,
 ): CacheAndCursor {
   const cacheEntry = getCacheEntryThrows(cac);
   const htmlsnippet = getResolvedMiniHtmlStringThrows(cac);
@@ -24,11 +25,12 @@ export function render(
       element: false,
       singleQuotes: false,
       doubleQuotes: false,
+      lastElement: "",
     };
     for (const literal of htmlsnippet.stringLiterals) {
       isInside(literal, inside);
       const id = htmlsnippet.slots[index];
-      if (inside.element) {
+      if (inside.element || inside.lastElement.trim().endsWith("<style")) {
         placeholder += literal + escapeHtml(htmlsnippet.values[index]);
       } else if (!inside.element && index < htmlsnippet.values.length) {
         placeholder += literal + `<span id="${id}"></span>`;
@@ -83,6 +85,7 @@ export type IsInside = {
   element: boolean;
   singleQuotes: boolean;
   doubleQuotes: boolean;
+  lastElement: string;
 };
 
 export function isInside(stringLiteral: string, isInside: IsInside) {
@@ -94,6 +97,7 @@ export function isInside(stringLiteral: string, isInside: IsInside) {
     if (char === ">" && !isInside.singleQuotes && !isInside.doubleQuotes) {
       isInside.element = false;
     }
+    if (isInside.element) isInside.lastElement += char;
     if (!isInside.element) continue;
     // Handle quotes
     if (char === "'" && !isInside.doubleQuotes) {
@@ -104,8 +108,14 @@ export function isInside(stringLiteral: string, isInside: IsInside) {
   }
 }
 
-function escapeHtml(string?: any): string {
+function escapeHtml(string?: ResolvedMiniCacheValue): string {
   if (!string) return "";
+  if (typeof string !== "string" && typeof string !== "number")
+    throw new Error(
+      `inside < html > tags or open style tags only use string | number as values.
+       ${JSON.stringify(string)}`,
+    );
+
   string = String(string);
   const div = document.createElement("div");
   div.textContent = string;
@@ -125,7 +135,7 @@ function htmlPortion(html: string): HTMLElement {
       `Mini html placeholder template:\n
     ${html}\n
     Root elements: ${fragment.childElementCount}
-    Every mini html string should have only one root element.\n`
+    Every mini html string should have only one root element.\n`,
     );
 
   return fragment.firstElementChild! as HTMLElement;
