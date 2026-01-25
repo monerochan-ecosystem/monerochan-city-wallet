@@ -1,12 +1,16 @@
 import { html, type MiniValue } from "../../../mininext/mininext";
 import { lowerButtonIds } from "../segments/walletLower";
 //                LU RU RL LL / LU RU RL LL
-const leftUpper = "8% 21% 8% 9% / 4% 15% 6% 6%;";
-const middleUpper = "8% 8% 8% 9% / 4% 4% 6% 6%;";
-const rightUpper = "21% 8% 8% 9% / 15% 4% 6% 6%;";
+const leftUpper = "8% 21% 8% 8% / 4% 15% 6% 6%;";
+const middleUpper = "8% 8% 8% 8% / 4% 4% 6% 6%;";
+const rightUpper = "21% 8% 8% 8% / 15% 4% 6% 6%;";
+const rightLower = "8% 8% 8% 21% / 4% 4% 6% 15%;";
+const leftLower = "8% 8% 21% 8% / 4% 4% 15% 6%;";
+
 export const tacticleContentPlate = (
   content: MiniValue,
   border_radius: string,
+  to: "top" | "bottom" = "bottom",
 ) => {
   return html`<div class="content-plate">
     ${content}<style>
@@ -19,7 +23,7 @@ export const tacticleContentPlate = (
         color: rgba(255, 255, 255, 0.3);
         background-color: #666;
         background-image: linear-gradient(
-          to bottom,
+          to ${to},
           transparent 0px 2px,
           rgba(0, 0, 0, 0.5) 2px 5px,
           transparent 5px 7px,
@@ -51,6 +55,12 @@ export const contentPlate = () => {
   }
   if (window.activeWalletPlate === lowerButtonIds.history) {
     return tacticleContentPlate(html`<div>HISTORY</div>`, rightUpper);
+  }
+  if (window.activeWalletPlate === lowerButtonIds.connection) {
+    return tacticleContentPlate(html`<div>CONNECTION</div>`, leftLower, "top");
+  }
+  if (window.activeWalletPlate === lowerButtonIds.wallets) {
+    return tacticleContentPlate(html`<div>WALLETS</div>`, rightLower, "top");
   }
   return html`<div></div>`;
 };
