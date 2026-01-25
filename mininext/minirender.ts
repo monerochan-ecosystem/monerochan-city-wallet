@@ -65,8 +65,9 @@ export function render(
         throw new Error(`if not dirty should have el: ${childId}`);
       render(childtarget, { ...cac, cursor: childId });
     } else {
-      if (!child.dirty || !child.el) continue;
-      if (!child.el) throw new Error(`${child.value} should have el`);
+      if (!child.dirty) continue;
+      if (!child.el) child.el = document.getElementById(childId) ?? undefined;
+      if (!child.el) continue; //throw new Error(`${child.value} should have el`);
       child.el.textContent = String(value);
       child.dirty = false;
     }
