@@ -28,7 +28,7 @@ export const walletUpper = () => {
     </div>
 
     <div class="track" id="track">
-      <div class="knob knob-left" id="knob">
+      <div class="knob" id="knob">
         <div class="knob-outer">
           <div class="knob-inner"></div>
         </div>
@@ -91,6 +91,7 @@ export const walletUpper = () => {
         cursor: pointer;
       }
       .knob {
+        width: 30px;
         height: 28px;
         cursor: pointer;
         transform: translate(3px, -5px);
@@ -122,11 +123,6 @@ export const walletUpper = () => {
         border-radius: 1px;
         transform: rotate(90deg);
         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
-      }
-
-      .knob-left {
-      }
-      .knob-right {
       }
 
       .labels {
