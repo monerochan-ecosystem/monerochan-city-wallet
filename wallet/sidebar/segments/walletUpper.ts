@@ -58,7 +58,6 @@ export const walletUpper = () => {
         position: absolute;
         width: 100px;
         height: 80px;
-        cursor: pointer;
       }
       #fire {
         position: absolute;
