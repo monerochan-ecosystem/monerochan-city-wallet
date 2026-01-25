@@ -35,7 +35,7 @@ export function tactileSwitch(id: string, buttonText: string | MiniHtmlString) {
       .tactile-switch:hover {
         color: rgba(255, 255, 255, 0.7);
       }
-      .active {
+      .active-switch {
         color: rgba(255, 255, 255, 0.7);
       }
     </style>
@@ -54,6 +54,9 @@ export function attachHandlers(
 export function removeActive(buttonIds: IdMap) {
   for (const id in buttonIds) {
     const button = document.getElementById(id);
-    if (button) button.classList.remove("active");
+    if (button) button.classList.remove("active-switch");
   }
+}
+export function addActive(target: HTMLElement) {
+  target.classList.add("active-switch");
 }

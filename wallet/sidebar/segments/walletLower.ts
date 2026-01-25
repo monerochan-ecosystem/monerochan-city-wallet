@@ -1,5 +1,5 @@
 import { html } from "../../../mininext/mininext";
-import { tactileSwitch } from "../ui/buttons";
+import { addActive, tactileSwitch } from "../ui/buttons";
 import { removeActive } from "../ui/buttons";
 import { contentPlate } from "../ui/content";
 
@@ -20,7 +20,7 @@ export function lowerClickHandler(e: MouseEvent) {
   const id = (e.currentTarget as HTMLElement | null)?.id as LowerButtonId;
   if (!id || !target) return;
   removeActive(lowerButtonIds);
-  target.classList.add("active");
+  addActive(target);
   if (window.activeWalletPlate === id) {
     window.activeWalletPlate = null;
     removeActive(lowerButtonIds);
