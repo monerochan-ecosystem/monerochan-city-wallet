@@ -3,26 +3,32 @@ export const safetyButtonIds = {
   fire: "fire",
   safe: "safe",
 } as const;
-export type SafteyButtonIds =
+export type SafetyButtonIds =
   (typeof safetyButtonIds)[keyof typeof safetyButtonIds];
 export function safetyClickHandler(e: MouseEvent) {
   const target = e.currentTarget as HTMLElement | null;
-  const id = (e.currentTarget as HTMLElement | null)?.id as SafteyButtonIds;
+  const id = (e.currentTarget as HTMLElement | null)?.id as SafetyButtonIds;
   if (!id || !target) return;
   const knob = document.getElementById("knob");
   const fireLabel = document.getElementById("fire-label");
   const safeLabel = document.getElementById("safe-label");
-  if (knob && fireLabel && safeLabel) {
+  const fireButton = document.getElementById("fire");
+  const safeButton = document.getElementById("safe");
+  if (knob && fireLabel && safeLabel && fireButton && safeButton) {
     if (id === "fire") {
       knob.classList.add("knob-fire");
       fireLabel.classList.remove("deselected-label");
       safeLabel.classList.add("deselected-label");
       window.unlocked = true;
+      fireButton.style.cursor = "default";
+      safeButton.style.cursor = "pointer";
     } else {
       fireLabel.classList.add("deselected-label");
       safeLabel.classList.remove("deselected-label");
       knob.classList.remove("knob-fire");
       window.unlocked = false;
+      fireButton.style.cursor = "pointer";
+      safeButton.style.cursor = "default";
     }
   }
 }
