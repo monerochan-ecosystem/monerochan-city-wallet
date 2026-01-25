@@ -1,7 +1,7 @@
 import { html } from "../../../mininext/mininext";
 import { addActive, tactileSwitch } from "../ui/buttons";
 import { removeActive } from "../ui/buttons";
-import { contentPlate } from "../ui/content";
+import { plate } from "../ui/content";
 
 export const walletLower = () => {
   return html` <div class="lower">
@@ -12,7 +12,7 @@ export const walletLower = () => {
         height: 100%;
       }
     </style>
-    ${lowerTopMenu()} ${contentPlate()} ${lowerBottomMenu()}
+    ${lowerTopMenu()} ${plate()} ${lowerBottomMenu()}
   </div>`;
 };
 export function lowerClickHandler(e: MouseEvent) {
@@ -103,8 +103,7 @@ export function lowerBottomMenu() {
       .bottom-menu {
         display: grid;
         grid-template-columns: 140px 1fr 140px;
-        justify-content: start;
-        gap: 8px;
+
         margin-left: 8px;
       }
     </style>
