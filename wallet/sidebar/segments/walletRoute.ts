@@ -10,7 +10,7 @@ import {
 } from "./walletLower";
 import {
   safetyButtonIds,
-  safteyClickHandler,
+  safetyClickHandler,
   walletUpper,
 } from "./walletUpper";
 declare global {
@@ -26,7 +26,7 @@ export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
   window.walletRouteParams = params;
   //derive current wallet from that
   // with window.wallets
-  attachHandlers(safetyButtonIds, safteyClickHandler);
+  attachHandlers(safetyButtonIds, safetyClickHandler);
   attachHandlers(lowerButtonIds, lowerClickHandler);
   return mini.html`
         <div class="main">

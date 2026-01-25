@@ -5,17 +5,24 @@ export const safetyButtonIds = {
 } as const;
 export type SafteyButtonIds =
   (typeof safetyButtonIds)[keyof typeof safetyButtonIds];
-export function safteyClickHandler(e: MouseEvent) {
+export function safetyClickHandler(e: MouseEvent) {
   const target = e.currentTarget as HTMLElement | null;
   const id = (e.currentTarget as HTMLElement | null)?.id as SafteyButtonIds;
   if (!id || !target) return;
   const knob = document.getElementById("knob");
-  if (knob) {
-    knob.classList.remove("knob-fire");
-    window.unlocked = false;
+  const fireLabel = document.getElementById("fire-label");
+  const safeLabel = document.getElementById("safe-label");
+  if (knob && fireLabel && safeLabel) {
     if (id === "fire") {
       knob.classList.add("knob-fire");
+      fireLabel.classList.remove("deselected-label");
+      safeLabel.classList.add("deselected-label");
       window.unlocked = true;
+    } else {
+      fireLabel.classList.add("deselected-label");
+      safeLabel.classList.remove("deselected-label");
+      knob.classList.remove("knob-fire");
+      window.unlocked = false;
     }
   }
 }
@@ -23,8 +30,8 @@ export function safteyClickHandler(e: MouseEvent) {
 export const walletUpper = () => {
   return html` <div class="upper">
     <div class="labels">
-      <div class="safe-label">0</div>
-      <div class="fire-label">1.37 XMR</div>
+      <div class="safe-label" id="safe-label">0</div>
+      <div class="fire-label deselected-label" id="fire-label">1.37 XMR</div>
     </div>
 
     <div class="track" id="track">
@@ -144,6 +151,9 @@ export const walletUpper = () => {
       .fire-label {
         color: #ff4444;
         white-space: nowrap;
+      }
+      .deselected-label {
+        opacity: 0.5;
       }
 
       .divider {
