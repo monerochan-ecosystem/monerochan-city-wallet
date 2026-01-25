@@ -33,10 +33,10 @@ export function tactileSwitch(id: string, buttonText: string | MiniHtmlString) {
         user-select: none;
       }
       .tactile-switch:hover {
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 0.9);
       }
       .active-switch {
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 0.9);
       }
     </style>
   </div>`;
@@ -79,7 +79,7 @@ export function actionButton(id: string, buttonText: string | MiniHtmlString) {
           rgba(255, 255, 255, 0.5) 7px 10px,
           rgba(0, 0, 0, 0.14) 10px 16px
         );
-        outline: 2px solid rgba(102, 102, 102, 0.5);
+        outline: 2px solid rgba(102, 102, 102, 0.9);
         display: flex;
         align-items: flex-end;
         justify-content: flex-end;
@@ -94,7 +94,8 @@ export function actionButton(id: string, buttonText: string | MiniHtmlString) {
         user-select: none;
       }
       .action-button:hover {
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 0.9);
+        outline: 2px solid rgba(255, 255, 255, 0.9);
       }
       .active-action-button {
         color: rgba(255, 255, 255, 0.7);

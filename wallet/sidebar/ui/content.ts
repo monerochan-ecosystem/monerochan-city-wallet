@@ -18,8 +18,8 @@ export const tacticleContentPlate = (
     ${content}<style>
       .content-plate {
         border-radius: ${border_radius};
-        width: 320px;
         margin-left: 7px;
+        margin-right: 7px;
         margin-top: 15px;
         margin-bottom: 20px;
         color: rgba(255, 255, 255, 0.3);
@@ -48,12 +48,33 @@ export const tacticleContentPlate = (
   </div>`;
 };
 export const plate = () => {
-  if (!window.activeWalletPlate) return html`<div></div>`;
+  let plate = html`<div></div>`;
+  if (!window.activeWalletPlate) return plate;
   if (window.activeWalletPlate === lowerButtonIds.send) {
-    return tacticleContentPlate(html`<div>SEND</div>`, leftUpper);
+    //return tacticleContentPlate(html`<div>SEND</div>`, leftUpper);
+    return html`<div class="plate">
+      <style>
+        .plate {
+          display: grid;
+          grid-template-rows: 1fr 80px;
+          height: 100%;
+        }
+        .actions {
+          display: grid;
+          grid-template-columns: 140px 1fr 140px;
+          margin-left: 8px;
+        }
+      </style>
+      ${tacticleContentPlate(html`<div>SEND</div>`, leftUpper)}
+      <div class="actions">
+        ${actionButton("send-action", "SEND")}
+        <div></div>
+        ${actionButton("reset-send", "RESET")}
+      </div>
+    </div>`;
   }
   if (window.activeWalletPlate === lowerButtonIds.receive) {
-    console.log(currentlySelectedWallet());
+    // console.log(currentlySelectedWallet());
     //return tacticleContentPlate(html`<div>RECEIVE</div>`, middleUpper);
     return html`<div class="plate">
       <style>
@@ -69,7 +90,11 @@ export const plate = () => {
         }
       </style>
       ${tacticleContentPlate(html`<div></div>`, middleUpper)}
-      <div class="actions">${actionButton("new-address", "NEW ADDRESS")}</div>
+      <div class="actions">
+        ${actionButton("new-address", "NEW ADDRESS")}
+        <div></div>
+        ${actionButton("copy-address", "COPY")}
+      </div>
     </div>`;
   }
   if (window.activeWalletPlate === lowerButtonIds.history) {
@@ -81,5 +106,5 @@ export const plate = () => {
   if (window.activeWalletPlate === lowerButtonIds.wallets) {
     return tacticleContentPlate(html`<div>WALLETS</div>`, rightLower, "top");
   }
-  return html`<div></div>`;
+  return plate;
 };
