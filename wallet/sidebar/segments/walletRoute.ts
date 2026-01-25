@@ -8,12 +8,17 @@ import {
   walletLower,
   type LowerButtonId,
 } from "./walletLower";
-import { walletUpper } from "./walletUpper";
+import {
+  safetyButtonIds,
+  safteyClickHandler,
+  walletUpper,
+} from "./walletUpper";
 declare global {
   interface Window {
     walletRouteParams?: WalletRouteParams | null;
     activeWalletPlate?: LowerButtonId | null;
     wallets?: ManyScanCachesOpened;
+    unlocked?: boolean;
   }
 }
 
@@ -21,6 +26,7 @@ export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
   window.walletRouteParams = params;
   //derive current wallet from that
   // with window.wallets
+  attachHandlers(safetyButtonIds, safteyClickHandler);
   attachHandlers(lowerButtonIds, lowerClickHandler);
   return mini.html`
         <div class="main">

@@ -3,6 +3,23 @@ export const safetyButtonIds = {
   fire: "fire",
   safe: "safe",
 } as const;
+export type SafteyButtonIds =
+  (typeof safetyButtonIds)[keyof typeof safetyButtonIds];
+export function safteyClickHandler(e: MouseEvent) {
+  const target = e.currentTarget as HTMLElement | null;
+  const id = (e.currentTarget as HTMLElement | null)?.id as SafteyButtonIds;
+  if (!id || !target) return;
+  const knob = document.getElementById("knob");
+  if (knob) {
+    knob.classList.remove("knob-fire");
+    window.unlocked = false;
+    if (id === "fire") {
+      knob.classList.add("knob-fire");
+      window.unlocked = true;
+    }
+  }
+}
+
 export const walletUpper = () => {
   return html` <div class="upper">
     <div class="labels">
@@ -28,12 +45,14 @@ export const walletUpper = () => {
         position: absolute;
         width: 100px;
         height: 80px;
+        cursor: pointer;
       }
       #fire {
         position: absolute;
         margin-left: 100px;
         width: 170px;
         height: 80px;
+        cursor: pointer;
       }
       .upper {
         height: 199px;
@@ -75,9 +94,12 @@ export const walletUpper = () => {
         height: 28px;
         cursor: pointer;
         transform: translate(3px, -5px);
-        transition: transform 0.3s ease;
+        transition: transform 0.1s linear;
         display: flex;
         align-items: center;
+      }
+      .knob-fire {
+        transform: translate(172px, -5px);
       }
       .knob-outer {
         width: 24px;
