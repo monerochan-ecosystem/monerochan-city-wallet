@@ -46,13 +46,17 @@ export function attachHandlers(
   buttonIds: IdMap,
   cb: (event: MouseEvent) => void,
 ) {
-  for (const id in buttonIds) {
+  for (const idKey in buttonIds) {
+    const id = buttonIds[idKey];
+    if (!id) continue;
     const button = document.getElementById(id);
     if (button) button.onclick = cb;
   }
 }
 export function removeActive(buttonIds: IdMap) {
-  for (const id in buttonIds) {
+  for (const idKey in buttonIds) {
+    const id = buttonIds[idKey];
+    if (!id) continue;
     const button = document.getElementById(id);
     if (button) button.classList.remove("active-switch");
   }
