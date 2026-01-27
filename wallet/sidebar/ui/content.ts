@@ -1,13 +1,13 @@
 import { html, type MiniValue } from "../../../mininext/mininext";
+import { receivePlate } from "../segments/receive";
 import { lowerButtonIds } from "../segments/walletLower";
-import { currentlySelectedWallet } from "../segments/walletRoute";
 import { actionButton } from "./buttons";
-//                LU RU RL LL / LU RU RL LL
-const leftUpper = "25px 66px 25px 25px / 21px 78px 31px 31px;";
-const middleUpper = "25px 25px 25px 25px / 21px 21px 31px 31px;";
-const rightUpper = "66px 25px 25px 25px / 78px 21px 31px 31px;";
-const rightLower = "25px 25px 25px 66px / 21px 21px 31px 78px;";
-const leftLower = "25px 25px 66px 25px / 21px 21px 78px 31px;";
+//                        LU RU RL LL / LU RU RL LL
+export const leftUpper = "25px 66px 25px 25px / 21px 78px 31px 31px;";
+export const middleUpper = "25px 25px 25px 25px / 21px 21px 31px 31px;";
+export const rightUpper = "66px 25px 25px 25px / 78px 21px 31px 31px;";
+export const rightLower = "25px 25px 25px 66px / 21px 21px 31px 78px;";
+export const leftLower = "25px 25px 66px 25px / 21px 21px 78px 31px;";
 
 export const tacticleContentPlate = (
   content: MiniValue,
@@ -33,10 +33,8 @@ export const tacticleContentPlate = (
           rgba(0, 0, 0, 0.14) 10px 16px
         );
         outline: 2px solid rgba(102, 102, 102, 0.5);
-        display: flex;
-        align-items: flex-end;
-        justify-content: flex-end;
-        padding: 0px 4px;
+
+        padding: 18px 12px 12px;
         box-sizing: border-box;
         font-size: 12px;
         font-weight: bold;
@@ -47,6 +45,7 @@ export const tacticleContentPlate = (
     </style>
   </div>`;
 };
+
 export const plate = () => {
   let plate = html`<div></div>`;
   if (!window.activeWalletPlate) return plate;
@@ -74,28 +73,7 @@ export const plate = () => {
     </div>`;
   }
   if (window.activeWalletPlate === lowerButtonIds.receive) {
-    // console.log(currentlySelectedWallet());
-    //return tacticleContentPlate(html`<div>RECEIVE</div>`, middleUpper);
-    return html`<div class="plate">
-      <style>
-        .plate {
-          display: grid;
-          grid-template-rows: 1fr 80px;
-          height: 100%;
-        }
-        .actions {
-          display: grid;
-          grid-template-columns: 140px 1fr 140px;
-          margin-left: 8px;
-        }
-      </style>
-      ${tacticleContentPlate(html`<div></div>`, middleUpper)}
-      <div class="actions">
-        ${actionButton("new-address", "NEW ADDRESS")}
-        <div></div>
-        ${actionButton("copy-address", "COPY")}
-      </div>
-    </div>`;
+    return receivePlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.history) {
     return tacticleContentPlate(html`<div>HISTORY</div>`, rightUpper);
