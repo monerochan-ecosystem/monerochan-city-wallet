@@ -15,7 +15,15 @@ export const tacticleContentPlate = (
   to: "top" | "bottom" = "bottom",
 ) => {
   return html`<div class="content-plate">
-    ${content}<style>
+    <div class="content-plate-inner">${content}</div>
+    <style>
+      .content-plate-inner {
+        max-height: calc(100vh - 451px);
+
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #888 #333;
+      }
       .content-plate {
         border-radius: ${border_radius};
         margin-left: 7px;

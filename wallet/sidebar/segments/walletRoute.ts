@@ -35,7 +35,6 @@ export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
                 display: flex;
                 flex-direction: column;
                 height: 100%;
-                max-height: 900px;
                 padding: 8px;
                 gap: 11px;
             }

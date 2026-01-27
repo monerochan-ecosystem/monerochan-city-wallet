@@ -29,7 +29,6 @@ export function receivePlate() {
       .plate {
         display: grid;
         grid-template-rows: 1fr 80px;
-        height: 100%;
       }
       .actions {
         display: grid;
