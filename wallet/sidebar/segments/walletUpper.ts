@@ -1,4 +1,5 @@
 import { html } from "../../../mininext/mininext";
+import { currentlySelectedWallet } from "./walletRoute";
 export const safetyButtonIds = {
   fire: "fire",
   safe: "safe",
@@ -34,10 +35,14 @@ export function safetyClickHandler(e: MouseEvent) {
 }
 
 export const walletUpper = () => {
+  const wallet = currentlySelectedWallet();
+  // TODO: format amount with commas
   return html` <div class="upper">
     <div class="labels">
       <div class="safe-label" id="safe-label">0</div>
-      <div class="fire-label deselected-label" id="fire-label">1.37 XMR</div>
+      <div class="fire-label deselected-label" id="fire-label">
+        ${String(wallet?.amount)} XMR
+      </div>
     </div>
 
     <div class="track" id="track">
