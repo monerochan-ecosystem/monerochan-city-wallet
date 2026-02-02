@@ -1,4 +1,5 @@
 import { html, type MiniValue } from "../../../mininext/mininext";
+import { connectionPlate } from "../segments/connection";
 import { receivePlate } from "../segments/receive";
 import { lowerButtonIds } from "../segments/walletLower";
 import { actionButton } from "./buttons";
@@ -13,12 +14,13 @@ export const tacticleContentPlate = (
   content: MiniValue,
   border_radius: string,
   to: "top" | "bottom" = "bottom",
+  inner_distract_height: string = "451px",
 ) => {
   return html`<div class="content-plate">
     <div class="content-plate-inner">${content}</div>
     <style>
       .content-plate-inner {
-        max-height: calc(100vh - 451px);
+        max-height: calc(100vh - ${inner_distract_height});
 
         overflow-y: auto;
         scrollbar-width: thin;
@@ -87,7 +89,7 @@ export const plate = () => {
     return tacticleContentPlate(html`<div>HISTORY</div>`, rightUpper);
   }
   if (window.activeWalletPlate === lowerButtonIds.connection) {
-    return tacticleContentPlate(html`<div>CONNECTION</div>`, leftLower, "top");
+    return connectionPlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.wallets) {
     return tacticleContentPlate(html`<div>WALLETS</div>`, rightLower, "top");
