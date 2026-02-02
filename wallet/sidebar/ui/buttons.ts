@@ -87,7 +87,7 @@ export function actionButton(id: string, buttonText: string | MiniHtmlString) {
         display: flex;
         align-items: flex-end;
         justify-content: flex-end;
-        padding: 0px 4px;
+        padding: 0px 6px 2px 0px;
         box-sizing: border-box;
         font-size: 12px;
         font-weight: bold;

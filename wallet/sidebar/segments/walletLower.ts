@@ -2,6 +2,7 @@ import { html } from "../../../mininext/mininext";
 import { addActive, tactileSwitch } from "../ui/buttons";
 import { removeActive } from "../ui/buttons";
 import { plate } from "../ui/content";
+import { sendPossible } from "./send";
 
 export const walletLower = () => {
   return html` <div class="lower">
@@ -39,25 +40,34 @@ export const lowerButtonIds = {
   wallets: "wallets",
   connection: "connection",
 } as const;
+export const sendButtonDotStyles = html` <style>
+  .red-dot {
+    height: 4px;
+    width: 4px;
+    margin: 2px;
+    background-color: #ff4444;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .grey-dot {
+    height: 4px;
+    width: 4px;
+    margin: 2px;
+    background-color: #666;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    display: inline-block;
+  }
+</style>`;
 export function lowerTopMenu() {
   const historyButton = tactileSwitch(lowerButtonIds.history, "HISTORY");
   const receiveButton = tactileSwitch(lowerButtonIds.receive, "RECEIVE");
-
+  const sendButtonClass = sendPossible() ? "red-dot" : "grey-dot";
   const sendButton = tactileSwitch(
     lowerButtonIds.send,
     html`<span>
-      <style>
-        .red-dot {
-          height: 4px;
-          width: 4px;
-          margin: 2px;
-          background-color: #ff4444;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-          border-radius: 50%;
-          display: inline-block;
-        }
-      </style>
-      SEND <span class="red-dot"></span
+      ${sendButtonDotStyles} SEND <span class="${sendButtonClass}"></span
     ></span>`,
   );
   return html`<div class="top-menu">

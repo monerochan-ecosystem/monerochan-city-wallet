@@ -1,6 +1,7 @@
 import { html, type MiniValue } from "../../../mininext/mininext";
 import { connectionPlate } from "../segments/connection";
 import { receivePlate } from "../segments/receive";
+import { sendPlate } from "../segments/send";
 import { lowerButtonIds } from "../segments/walletLower";
 import { actionButton } from "./buttons";
 //                        LU RU RL LL / LU RU RL LL
@@ -60,27 +61,7 @@ export const plate = () => {
   let plate = html`<div></div>`;
   if (!window.activeWalletPlate) return plate;
   if (window.activeWalletPlate === lowerButtonIds.send) {
-    //return tacticleContentPlate(html`<div>SEND</div>`, leftUpper);
-    return html`<div class="plate">
-      <style>
-        .plate {
-          display: grid;
-          grid-template-rows: 1fr 80px;
-          height: 100%;
-        }
-        .actions {
-          display: grid;
-          grid-template-columns: 140px 1fr 140px;
-          margin-left: 8px;
-        }
-      </style>
-      ${tacticleContentPlate(html`<div>SEND</div>`, leftUpper)}
-      <div class="actions">
-        ${actionButton("send-action", "SEND")}
-        <div></div>
-        ${actionButton("reset-send", "RESET")}
-      </div>
-    </div>`;
+    return sendPlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.receive) {
     return receivePlate();
