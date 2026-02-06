@@ -65,10 +65,17 @@ export function addActive(target: HTMLElement) {
   target.classList.add("active-switch");
 }
 
-export function actionButton(id: string, buttonText: string | MiniHtmlString) {
-  return html`<div id="${id}" class="action-button">
+export function actionButton(
+  id: string,
+  buttonText: string | MiniHtmlString,
+  active: boolean = true,
+) {
+  const buttonClass = active ? "action-button" : "inactive-action-button";
+  const opacity = active ? 1 : 0.3;
+  const cursor = active ? "pointer" : "not-allowed";
+  return html`<div id="${id}" class="${buttonClass}">
     ${buttonText}<style>
-      .action-button {
+      .${buttonClass} {
         border-radius: 3% 10% 6% 16% / 18% 72% 21% 74%;
         height: 30px;
         min-width: 75px;
@@ -94,8 +101,9 @@ export function actionButton(id: string, buttonText: string | MiniHtmlString) {
         box-shadow:
           inset 0 4px 12px rgba(0, 0, 0, 0.45),
           0 15px 25px rgba(0, 0, 0, 0.4);
-        cursor: pointer;
+        cursor: ${cursor};
         user-select: none;
+        opacity: ${opacity};
       }
       .action-button:hover {
         color: rgba(255, 255, 255, 0.9);
