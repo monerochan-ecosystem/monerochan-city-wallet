@@ -3,7 +3,7 @@ import {
   type ParseAddressError,
   type ParsedAddress,
 } from "@spirobel/monero-wallet-api";
-import { html } from "../../../mininext/mininext";
+import { html, type MiniHtmlString } from "../../../mininext/mininext";
 import { actionButton } from "../ui/buttons";
 import { leftUpper, tacticleContentPlate } from "../ui/content";
 import { sendButtonDotStyles } from "./walletLower";
@@ -33,54 +33,76 @@ export function sendPlateContent() {
       addressInput.value = addressInputvalue;
     }
   }
-  const parsedAddressMessage = addressInputvalue.length
-    ? parsedAddress?.address
-      ? html`<div>
-          parsed valid ${parsedAddress.network} address:
-          <div class="parsed-address">${parsedAddress.address}</div>
-          <style>
-            .parsed-address {
-              width: 245px;
-              word-wrap: break-word;
-              display: inline-block;
-              margin-bottom: 20px;
-            }
-          </style>
-        </div>`
-      : "invalid address"
+  const parsedAmountMessage: string = "0.00";
+  let parsedAddressMessage: MiniHtmlString | string = addressInputvalue.length
+    ? html`<div style="user-select: none;">invalid address</div>`
     : "";
-  return html`<div class="address-input">
-    <style>
-      .address-input {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      #addressInput {
-        color: white;
-        background: #333;
-        margin-right: 12px;
-        margin-top: 12px;
-        font-size: 16px;
-        padding: 2px;
-      }
-      #addressInput:focus {
-        outline: none;
-        border: 2px solid #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-      }
-      #addressInput::selection {
-        background: #007bff;
-      }
-    </style>
+  if (parsedAddress && "address" in parsedAddress) {
+    parsedAddressMessage = html`<div>
+      <div style="user-select: none;">
+        destination address (${parsedAddress.network}):</div>
+        <div class="parsed-address">${parsedAddress.address}</div>
+        <style>
+          .parsed-address {
+            width: 245px;
+            word-wrap: break-word;
+            display: inline-block;
+            margin-top: 8px;
+            color: white;
+          }
+        </style>
+      </div>
+    </div>`;
+  }
 
-    <input
-      type="text"
-      id="addressInput"
-      name="addressInput"
-      placeholder="Enter address"
-    />
-    <div class="parsed-address-message">${parsedAddressMessage}</div>
+  return html`<div>
+    <div class="input-block">
+      <input
+        type="text"
+        id="amountInput"
+        name="amountInput"
+        class="send-input-element"
+        placeholder="Enter amount"
+      />
+      <div>
+        <span style="user-select: none;"> selected amount: </span>
+        <span style="color:white">${parsedAmountMessage}</span>
+      </div>
+    </div>
+    <div class="input-block">
+      <style>
+        .input-block {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .send-input-element {
+          color: white;
+          background: #333;
+          margin-right: 12px;
+          margin-top: 12px;
+          font-size: 16px;
+          padding: 2px;
+        }
+        .send-input-element:focus {
+          outline: none;
+          border: 2px solid #007bff;
+          box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+        .send-input-element::selection {
+          background: #007bff;
+        }
+      </style>
+
+      <input
+        type="text"
+        id="addressInput"
+        name="addressInput"
+        class="send-input-element"
+        placeholder="Enter address"
+      />
+      <div class="parsed-address-message">${parsedAddressMessage}</div>
+    </div>
   </div>`;
 }
 export function sendPlate() {
