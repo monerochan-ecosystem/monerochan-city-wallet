@@ -115,6 +115,16 @@ export function resolve(
       value: { stringLiterals, values, slots, handlers: null, state: null },
       dirty: true,
     });
+  } else if (cacheEntry && typeof cacheEntry.value !== "object") {
+    const { slots, values } = resolveValuesForCache(unresolvedValues, cac);
+    cacheEntry.dirty = true;
+    cacheEntry.value = {
+      stringLiterals,
+      values,
+      slots,
+      handlers: null,
+      state: null,
+    };
   } else {
     const cacheValue = getResolvedMiniHtmlStringThrows(cac);
 
