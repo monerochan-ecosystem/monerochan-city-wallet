@@ -48,3 +48,8 @@ export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
 export function currentlySelectedWallet() {
   return window.wallets?.wallets[0];
 }
+export function connectedToNode(): boolean {
+  //todo check if there was a connection status update
+  // in the last 10 seconds
+  return false;
+}

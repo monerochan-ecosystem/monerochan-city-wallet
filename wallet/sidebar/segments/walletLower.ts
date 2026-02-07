@@ -2,7 +2,7 @@ import { html } from "../../../mininext/mininext";
 import { addActive, tactileSwitch } from "../ui/buttons";
 import { removeActive } from "../ui/buttons";
 import { plate } from "../ui/content";
-import { sendPossible } from "./send";
+import { walletUnlocked } from "./send";
 
 export const walletLower = () => {
   return html` <div class="lower">
@@ -63,7 +63,7 @@ export const sendButtonDotStyles = html` <style>
 export function lowerTopMenu() {
   const historyButton = tactileSwitch(lowerButtonIds.history, "HISTORY");
   const receiveButton = tactileSwitch(lowerButtonIds.receive, "RECEIVE");
-  const sendButtonClass = sendPossible() ? "red-dot" : "grey-dot";
+  const sendButtonClass = walletUnlocked() ? "red-dot" : "grey-dot";
   const sendButton = tactileSwitch(
     lowerButtonIds.send,
     html`<span>
