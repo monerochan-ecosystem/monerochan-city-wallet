@@ -9,32 +9,98 @@ import { leftUpper, tacticleContentPlate } from "../ui/content";
 import { sendButtonDotStyles } from "./walletLower";
 import { connectedToNode } from "./walletRoute";
 
+let parsedAmount: bigint | null = null;
+let amountInputValue = "";
+export function parseAmountCallback() {
+  const amountInput = document.getElementById(
+    "amountInput",
+  ) as HTMLInputElement | null;
+  if (!amountInput) return;
+  parsedAmount = convertAmountBigInt(amountInput.value);
+  amountInputValue = amountInput.value;
+}
+export function convertBigIntAmount(amount: bigint): string {
+  let display_amount = "";
+  // to go from atomic units to display amount,
+  // we move from the end to the beginning and insert a dot 12 digits in
+  // https://www.getmonero.org/resources/moneropedia/atomic-units.html
+  let afterDot = amount.toString().padStart(12, "0").slice(-12);
+  let beforeDot = amount.toString().padStart(12, "0").slice(0, -12);
+  if (!beforeDot || beforeDot.startsWith("0")) beforeDot = "0";
+  display_amount = beforeDot + ".";
+  display_amount += afterDot;
+  // remove trailing zeros
+  while (display_amount[display_amount.length - 1] === "0") {
+    display_amount = display_amount.slice(0, -1);
+  }
+  const last_char = display_amount.at(-1);
+  if (last_char === ".") display_amount = display_amount.slice(0, -1);
+  // trailing . or , should be removed
+  return display_amount;
+}
+export function convertAmountBigInt(amount_double: string): bigint {
+  // accept both dot and comma
+  amount_double = amount_double.replaceAll(",", ".");
+  const last_char = amount_double.at(-1);
+  if (last_char === ".") amount_double = amount_double.slice(0, -1);
+  // trailing . or , should be removed
+  const beforeDot = amount_double.split(".")[0];
+  let afterDot = amount_double.split(".")[1];
+  if (!afterDot) afterDot = "000000000000";
+  afterDot = afterDot?.padEnd(12, "0").slice(0, 12);
+  let bigIntString = afterDot;
+  if (beforeDot?.length && !beforeDot.startsWith("0"))
+    bigIntString = beforeDot + afterDot;
+
+  let amount = BigInt("0");
+  try {
+    amount = BigInt(bigIntString);
+  } catch (error) {
+    // in case the input is not a valid number,
+    // the amount stays zero. Keeps the UI easy for copy and paste
+  }
+  return amount;
+}
 export function walletUnlocked() {
   return window.unlocked;
 }
-let addressInputvalue = "";
+let addressInputValue = "";
 let parsedAddress: ParseAddressError | ParsedAddress | null = null;
+
 export async function parseAddressCallback() {
   const addressInput = document.getElementById(
     "addressInput",
   ) as HTMLInputElement | null;
   if (!addressInput) return;
   parsedAddress = await parseAddress(addressInput.value.trim());
-  addressInputvalue = addressInput.value;
+  addressInputValue = addressInput.value;
 }
+
 export function sendPlateContent() {
+  const amountInput = document.getElementById(
+    "amountInput",
+  ) as HTMLInputElement | null;
+
+  if (amountInput) {
+    amountInput.oninput = parseAmountCallback;
+    if (amountInput.value.length === 0 && amountInputValue.length > 0) {
+      amountInput.value = amountInputValue;
+    }
+  }
   const addressInput = document.getElementById(
     "addressInput",
   ) as HTMLInputElement | null;
 
   if (addressInput) {
     addressInput.oninput = parseAddressCallback;
-    if (addressInput.value.length === 0 && addressInputvalue.length > 0) {
-      addressInput.value = addressInputvalue;
+    if (addressInput.value.length === 0 && addressInputValue.length > 0) {
+      addressInput.value = addressInputValue;
     }
   }
-  const parsedAmountMessage: string = "0.00";
-  let parsedAddressMessage: MiniHtmlString | string = addressInputvalue.length
+  const parsedAmountMessage: string = parsedAmount
+    ? convertBigIntAmount(parsedAmount)
+    : "0.00";
+  let parsedAddressMessage: MiniHtmlString | string = addressInputValue.length
     ? html`<div style="user-select: none;">invalid address</div>`
     : "";
   if (parsedAddress && "address" in parsedAddress) {
