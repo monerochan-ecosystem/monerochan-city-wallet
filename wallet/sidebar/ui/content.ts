@@ -21,7 +21,7 @@ export const tacticleContentPlate = (
     <div class="content-plate-inner">${content}</div>
     <style>
       .content-plate-inner {
-        max-height: calc(100vh - ${inner_distract_height});
+        height: calc(100vh - ${inner_distract_height});
 
         overflow-y: auto;
         scrollbar-width: thin;

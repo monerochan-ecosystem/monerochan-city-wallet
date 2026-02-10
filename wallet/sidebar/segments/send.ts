@@ -121,7 +121,7 @@ export function sendPlateContent() {
     </div>`;
   }
 
-  return html`<div>
+  return html`<div class="send-plate-container">
     <div class="input-block">
       <input
         type="text"
@@ -137,6 +137,11 @@ export function sendPlateContent() {
     </div>
     <div class="input-block">
       <style>
+        .send-plate-container {
+          height: 100%;
+          display: grid;
+          grid-template-rows: 56px 1fr 40px;
+        }
         .input-block {
           display: flex;
           flex-direction: column;
@@ -169,6 +174,24 @@ export function sendPlateContent() {
       />
       <div class="parsed-address-message">${parsedAddressMessage}</div>
     </div>
+    ${!connectedToNode()
+      ? html`
+          <div>
+            <style>
+              .connection-warning {
+                color: #e74c3c;
+                margin-top: 8px;
+                margin-bottom: 8px;
+                user-select: none;
+              }
+            </style>
+            <span class="connection-warning">no connection to node</span><br />
+            <span class="connection-hint">
+              select a different node in connection menu <br />
+            </span>
+          </div>
+        `
+      : ""}
   </div>`;
 }
 export function sendPlate() {
