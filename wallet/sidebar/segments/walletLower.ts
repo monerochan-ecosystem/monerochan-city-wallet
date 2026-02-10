@@ -3,6 +3,7 @@ import { addActive, tactileSwitch } from "../ui/buttons";
 import { removeActive } from "../ui/buttons";
 import { plate } from "../ui/content";
 import { walletUnlocked } from "./send";
+import { connectedToNode } from "./walletRoute";
 
 export const walletLower = () => {
   return html` <div class="lower">
@@ -87,7 +88,7 @@ export function lowerTopMenu() {
 }
 export function lowerBottomMenu() {
   const walletsButton = tactileSwitch(lowerButtonIds.wallets, "WALLETS");
-
+  const dotColor = connectedToNode() ? "green-dot" : "grey-dot";
   const connectionButton = tactileSwitch(
     lowerButtonIds.connection,
     html`<span>
@@ -101,8 +102,17 @@ export function lowerBottomMenu() {
           border-radius: 50%;
           display: inline-block;
         }
+        .grey-dot {
+          height: 4px;
+          width: 4px;
+          margin: 2px;
+          background-color: #666;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+          border-radius: 50%;
+          display: inline-block;
+        }
       </style>
-      CONNECTION <span class="green-dot"></span
+      CONNECTION <span class="${dotColor}"></span
     ></span>`,
   );
   return html`<div class="bottom-menu">
