@@ -1,6 +1,7 @@
-import { readDir } from "@spirobel/monero-wallet-api";
+import { get_info, readDir } from "@spirobel/monero-wallet-api";
 import { flatten, html } from "../../../mininext/mininext";
 import { leftLower, tacticleContentPlate } from "../ui/content";
+import { textInput } from "../ui/input";
 let fileObjects: { filename: string; content: string }[] = [];
 async function readFiles() {
   const files = [];
@@ -10,6 +11,23 @@ async function readFiles() {
     files.push({ filename, content });
   }
   return files;
+}
+let nodeUrlInputValue = "";
+let test_result = "";
+let status_message = "";
+async function sendTestRequestHandler() {
+  const nodeUrlInput = document.getElementById(
+    "nodeUrl",
+  ) as HTMLInputElement | null;
+  if (!nodeUrlInput) return;
+  try {
+    const test = await get_info(nodeUrlInput.value);
+    status_message = `get_info response success`;
+    test_result = JSON.stringify(test, null, 2);
+  } catch (err) {
+    status_message = `get_info response failed`;
+    test_result = "";
+  }
 }
 export function connectionPlate() {
   readFiles().then((files) => {
@@ -24,6 +42,21 @@ export function connectionPlate() {
       </div>`,
   );
   const files = flatten(dirlist);
+  const nodeUrlInput = document.getElementById(
+    "nodeUrl",
+  ) as HTMLInputElement | null;
+  const sendTestRequest = document.getElementById(
+    "sendTestRequest",
+  ) as HTMLInputElement | null;
+  if (sendTestRequest) {
+    sendTestRequest.onclick = sendTestRequestHandler;
+  }
+
+  if (nodeUrlInput) {
+    if (nodeUrlInput.value.length === 0 && nodeUrlInputValue.length > 0) {
+      nodeUrlInput.value = nodeUrlInputValue;
+    }
+  }
   return tacticleContentPlate(
     html`<div>
       <style>
@@ -41,8 +74,99 @@ export function connectionPlate() {
           margin-bottom: 12px;
           cursor: pointer;
         }
+        .link-closed {
+          margin-top: 5px;
+          color: #0000ff;
+          text-decoration: underline;
+          font-family: serif;
+          font-size: 16px;
+          margin-bottom: 12px;
+          cursor: pointer;
+        }
+        .link-open {
+          color: #551a8b;
+          text-decoration: underline;
+          font-family: serif;
+          font-size: 16px;
+          margin-bottom: 12px;
+          cursor: pointer;
+        }
+        .no-side-effect-action {
+          box-shadow:
+            inset 0 4px 12px rgba(0, 0, 0, 0.45),
+            0 5px 8px rgba(0, 0, 0, 0.4);
+          margin-top: 4px;
+          font-size: 14px;
+          margin-bottom: 12px;
+          cursor: pointer;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          padding: 2px 4px;
+        }
+        .no-side-effect-action:hover {
+          color: white;
+        }
+        .side-effect-action {
+          box-shadow:
+            inset 0 4px 12px rgba(0, 0, 0, 0.45),
+            0 5px 8px rgba(0, 0, 0, 0.4);
+          margin-left: 13px;
+          margin-top: 4px;
+          font-size: 14px;
+          margin-bottom: 12px;
+          cursor: pointer;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          padding: 2px 4px;
+        }
+        .side-effect-action:hover {
+          color: white;
+        }
+        .send-test {
+          margin-top: 15px;
+          margin-bottom: 12px;
+          margin-left: 5px;
+          user-select: none;
+        }
+        .test-result {
+          margin-top: 4px;
+          margin-bottom: 12px;
+          height: 300px;
+          width: 250px;
+          background-color: #333;
+          overflow-y: auto;
+          text-wrap: auto;
+        }
+        #openDevSettings {
+          margin-top: 5px;
+          text-decoration: underline;
+          font-family: serif;
+          font-size: 16px;
+          margin-bottom: 12px;
+          cursor: pointer;
+        }
+        #openDevSettings:hover {
+          color: white;
+        }
       </style>
-      developer settings ${files}
+      ${textInput("nodeUrl", "Enter node URL")}
+      <div class="send-test">
+        <span class="no-side-effect-action" id="sendTestRequest">
+          TEST CONNECTION</span
+        >
+        <span class="no-side-effect-action"> RESET</span>
+        <span class="side-effect-action"> SAVE</span>
+      </div>
+      <div style="margin-left: 14px;">
+        <div style="height: 14px;">
+          <span style="user-select: none;"> ${status_message}</span>
+        </div>
+        <pre class="test-result">        ${test_result}</pre>
+      </div>
+      <div style="margin-top: 40px">
+        <span id="openDevSettings">open developer settings </span>
+        ${files}
+      </div>
     </div>`,
     leftLower,
     "top",
