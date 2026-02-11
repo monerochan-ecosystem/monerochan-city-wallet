@@ -15,6 +15,10 @@ async function readFiles() {
 let nodeUrlInputValue = "";
 let test_result = "";
 let status_message = "";
+let openDevSettings = false;
+function openDevSettingsHandler() {
+  openDevSettings = !openDevSettings;
+}
 async function sendTestRequestHandler() {
   const nodeUrlInput = document.getElementById(
     "nodeUrl",
@@ -42,16 +46,21 @@ export function connectionPlate() {
       </div>`,
   );
   const files = flatten(dirlist);
-  const nodeUrlInput = document.getElementById(
-    "nodeUrl",
+  const openDevSettingsButton = document.getElementById(
+    "openDevSettingsButton",
   ) as HTMLInputElement | null;
+  if (openDevSettingsButton) {
+    openDevSettingsButton.onclick = openDevSettingsHandler;
+  }
   const sendTestRequest = document.getElementById(
     "sendTestRequest",
   ) as HTMLInputElement | null;
   if (sendTestRequest) {
     sendTestRequest.onclick = sendTestRequestHandler;
   }
-
+  const nodeUrlInput = document.getElementById(
+    "nodeUrl",
+  ) as HTMLInputElement | null;
   if (nodeUrlInput) {
     if (nodeUrlInput.value.length === 0 && nodeUrlInputValue.length > 0) {
       nodeUrlInput.value = nodeUrlInputValue;
@@ -137,16 +146,20 @@ export function connectionPlate() {
           overflow-y: auto;
           text-wrap: auto;
         }
-        #openDevSettings {
+        #openDevSettingsButton {
           margin-top: 5px;
           text-decoration: underline;
           font-family: serif;
           font-size: 16px;
           margin-bottom: 12px;
           cursor: pointer;
+          ${openDevSettings ? "color: #551a8b;" : ""}
         }
-        #openDevSettings:hover {
-          color: white;
+        #openDevSettingsButton:hover {
+          ${openDevSettings
+          ? "color: rgba(255, 255, 255, 0.3)"
+          : "color: white;"}
+
         }
       </style>
       ${textInput("nodeUrl", "Enter node URL")}
@@ -163,10 +176,10 @@ export function connectionPlate() {
         </div>
         <pre class="test-result">        ${test_result}</pre>
       </div>
-      <div style="margin-top: 40px">
-        <span id="openDevSettings">open developer settings </span>
-        ${files}
+      <div style="margin-top: 60px">
+        <span id="openDevSettingsButton">developer settings </span>
       </div>
+      <div id="devSettings">${openDevSettings ? files : ""}</div>
     </div>`,
     leftLower,
     "top",
