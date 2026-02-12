@@ -18,6 +18,12 @@ async function readFiles() {
 }
 async function readNodeUrl() {
   nodeUrlInputValue = (await readNodeUrlFromScanSettings()) || null;
+  const nodeUrlInput = document.getElementById(
+    "nodeUrl",
+  ) as HTMLInputElement | null;
+  if (nodeUrlInput) {
+    nodeUrlInput.value = nodeUrlInputValue || "";
+  }
 }
 let nodeUrlInputValue: string | null = null;
 let test_result = "";
@@ -31,6 +37,10 @@ export function updateNodeUrlCallback() {
 function openDevSettingsHandler() {
   openDevSettings = !openDevSettings;
 }
+function saveNodeUrlHandler() {
+  console.log("saveNodeUrlHandler");
+}
+
 async function sendTestRequestHandler() {
   const nodeUrlInput = document.getElementById(
     "nodeUrl",
@@ -69,6 +79,18 @@ export function connectionPlate() {
   ) as HTMLInputElement | null;
   if (sendTestRequest) {
     sendTestRequest.onclick = sendTestRequestHandler;
+  }
+  const resetNodeUrl = document.getElementById(
+    "resetNodeUrl",
+  ) as HTMLInputElement | null;
+  if (resetNodeUrl) {
+    resetNodeUrl.onclick = readNodeUrl;
+  }
+  const saveNodeUrl = document.getElementById(
+    "saveNodeUrl",
+  ) as HTMLInputElement | null;
+  if (saveNodeUrl) {
+    saveNodeUrl.onclick = saveNodeUrlHandler;
   }
   const nodeUrlInput = document.getElementById(
     "nodeUrl",
@@ -186,8 +208,8 @@ export function connectionPlate() {
         <span class="no-side-effect-action" id="sendTestRequest">
           TEST CONNECTION</span
         >
-        <span class="no-side-effect-action"> RESET</span>
-        <span class="side-effect-action"> SAVE</span>
+        <span class="no-side-effect-action" id="resetNodeUrl"> RESET</span>
+        <span class="side-effect-action" id="saveNodeUrl"> SAVE</span>
       </div>
       <div style="margin-left: 14px;">
         <div style="height: 14px;">
