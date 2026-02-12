@@ -131,7 +131,7 @@ export function connectionPlate() {
           box-shadow:
             inset 0 4px 12px rgba(0, 0, 0, 0.45),
             0 5px 8px rgba(0, 0, 0, 0.4);
-          margin-left: 13px;
+          margin-left: 29px;
           margin-top: 4px;
           font-size: 14px;
           margin-bottom: 12px;
@@ -144,9 +144,10 @@ export function connectionPlate() {
           color: white;
         }
         .send-test {
-          margin-top: 15px;
-          margin-bottom: 12px;
-          margin-left: 5px;
+          display: flex;
+          gap: 5px;
+          margin-top: 4px;
+          margin-bottom: 4px;
           user-select: none;
         }
         .test-result {
