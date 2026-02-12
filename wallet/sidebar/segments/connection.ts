@@ -1,4 +1,8 @@
-import { get_info, readDir } from "@spirobel/monero-wallet-api";
+import {
+  get_info,
+  readDir,
+  readNodeUrlFromScanSettings,
+} from "@spirobel/monero-wallet-api";
 import { flatten, html } from "../../../mininext/mininext";
 import { leftLower, tacticleContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
@@ -12,7 +16,10 @@ async function readFiles() {
   }
   return files;
 }
-let nodeUrlInputValue = "";
+async function readNodeUrl() {
+  nodeUrlInputValue = (await readNodeUrlFromScanSettings()) || null;
+}
+let nodeUrlInputValue: string | null = null;
 let test_result = "";
 let status_message = "";
 let openDevSettings = false;
@@ -62,9 +69,14 @@ export function connectionPlate() {
     "nodeUrl",
   ) as HTMLInputElement | null;
   if (nodeUrlInput) {
-    if (nodeUrlInput.value.length === 0 && nodeUrlInputValue.length > 0) {
+    if (
+      nodeUrlInput.value.length === 0 &&
+      nodeUrlInputValue &&
+      nodeUrlInputValue.length > 0
+    ) {
       nodeUrlInput.value = nodeUrlInputValue;
     }
+    if (nodeUrlInputValue === null) readNodeUrl();
   }
   return tacticleContentPlate(
     html`<div>
