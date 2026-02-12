@@ -4,11 +4,12 @@ export type WalletCacheChangedEvent = {
   payload: CacheChangedCallbackParameters;
 };
 export type ExtensionMessage =
+  | ChangeNodeUrlEvent
   | WalletCacheChangedEvent
   | { type: "ping"; payload?: never }
   | { type: "response"; payload: any };
 export function sendWalletChangedEvent(
-  payload: CacheChangedCallbackParameters
+  payload: CacheChangedCallbackParameters,
 ) {
   const msg: WalletCacheChangedEvent = {
     type: "walletCacheChanged",
@@ -18,9 +19,29 @@ export function sendWalletChangedEvent(
 }
 export function receiveWalletChangedEvent(
   msg: ExtensionMessage,
-  cb: (payload: CacheChangedCallbackParameters) => void
+  cb: (payload: CacheChangedCallbackParameters) => void,
 ) {
   if (msg.type === "walletCacheChanged") {
+    cb(msg.payload);
+  }
+}
+export type ChangeNodeUrlPayload = { nodeUrl: string };
+export type ChangeNodeUrlEvent = {
+  type: "changeNodeUrl";
+  payload: ChangeNodeUrlPayload;
+};
+export function sendChangeNodeUrlEvent(nodeUrl: string) {
+  const msg: ChangeNodeUrlEvent = {
+    type: "changeNodeUrl",
+    payload: { nodeUrl },
+  };
+  browser.runtime.sendMessage(msg).catch(() => {});
+}
+export function receiveChangeNodeUrlEvent(
+  msg: ExtensionMessage,
+  cb: (payload: ChangeNodeUrlPayload) => void,
+) {
+  if (msg.type === "changeNodeUrl") {
     cb(msg.payload);
   }
 }

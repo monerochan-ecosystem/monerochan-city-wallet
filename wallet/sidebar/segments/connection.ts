@@ -2,10 +2,12 @@ import {
   get_info,
   readDir,
   readNodeUrlFromScanSettings,
+  writeNodeUrlToScanSettings,
 } from "@spirobel/monero-wallet-api";
 import { flatten, html } from "../../../mininext/mininext";
 import { leftLower, tacticleContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
+import { sendChangeNodeUrlEvent } from "../../../background/messagebus";
 let fileObjects: { filename: string; content: string }[] = [];
 async function readFiles() {
   const files = [];
@@ -37,8 +39,15 @@ export function updateNodeUrlCallback() {
 function openDevSettingsHandler() {
   openDevSettings = !openDevSettings;
 }
-function saveNodeUrlHandler() {
-  console.log("saveNodeUrlHandler");
+async function resetNodeUrlHandler() {
+  await readNodeUrl();
+  status_message = "Node URL reset";
+}
+async function saveNodeUrlHandler() {
+  if (!nodeUrlInputValue) return;
+  await writeNodeUrlToScanSettings(nodeUrlInputValue);
+  sendChangeNodeUrlEvent(nodeUrlInputValue);
+  status_message = "Node URL saved";
 }
 
 async function sendTestRequestHandler() {
@@ -84,7 +93,7 @@ export function connectionPlate() {
     "resetNodeUrl",
   ) as HTMLInputElement | null;
   if (resetNodeUrl) {
-    resetNodeUrl.onclick = readNodeUrl;
+    resetNodeUrl.onclick = resetNodeUrlHandler;
   }
   const saveNodeUrl = document.getElementById(
     "saveNodeUrl",
@@ -159,7 +168,7 @@ export function connectionPlate() {
           box-shadow:
             inset 0 4px 12px rgba(0, 0, 0, 0.45),
             0 5px 8px rgba(0, 0, 0, 0.4);
-          margin-left: 29px;
+          margin-left: 12px;
           margin-top: 4px;
           font-size: 14px;
           margin-bottom: 12px;
@@ -209,6 +218,7 @@ export function connectionPlate() {
           TEST CONNECTION</span
         >
         <span class="no-side-effect-action" id="resetNodeUrl"> RESET</span>
+        <span></span>
         <span class="side-effect-action" id="saveNodeUrl"> SAVE</span>
       </div>
       <div style="margin-left: 14px;">
@@ -217,7 +227,7 @@ export function connectionPlate() {
         </div>
         <pre class="test-result">        ${test_result}</pre>
       </div>
-      <div style="margin-top: 60px">
+      <div style="margin-top: 50px">
         <span id="openDevSettingsButton">developer settings </span>
       </div>
       <div id="devSettings">${openDevSettings ? files : ""}</div>

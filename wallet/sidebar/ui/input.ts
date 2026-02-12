@@ -11,6 +11,7 @@ export function textInput(id: string, placeholder: string) {
       .text-input-element {
         color: white;
         background: #333;
+        width: 280px;
         margin-right: 12px;
         margin-top: 12px;
         font-size: 16px;
