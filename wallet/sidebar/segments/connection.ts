@@ -23,6 +23,11 @@ let nodeUrlInputValue: string | null = null;
 let test_result = "";
 let status_message = "";
 let openDevSettings = false;
+export function updateNodeUrlCallback() {
+  const nodeUrl = document.getElementById("nodeUrl") as HTMLInputElement | null;
+  if (!nodeUrl) return;
+  nodeUrlInputValue = nodeUrl.value;
+}
 function openDevSettingsHandler() {
   openDevSettings = !openDevSettings;
 }
@@ -69,6 +74,7 @@ export function connectionPlate() {
     "nodeUrl",
   ) as HTMLInputElement | null;
   if (nodeUrlInput) {
+    nodeUrlInput.oninput = updateNodeUrlCallback;
     if (
       nodeUrlInput.value.length === 0 &&
       nodeUrlInputValue &&
