@@ -1,6 +1,7 @@
 import { readDir } from "@spirobel/monero-wallet-api";
 import { html, flatten } from "../../../mininext/mininext";
 import { textInput } from "../ui/input";
+import { router } from "../router";
 let fileObjects: { filename: string; content: string; opened: boolean }[] = [];
 async function readFiles() {
   const files = [];
@@ -11,7 +12,19 @@ async function readFiles() {
   }
   return files;
 }
-
+async function deleteAllfiles() {
+  for (const file of fileObjects) {
+    await Bun.file(file.filename).delete();
+  }
+}
+async function wipeWalletCallback() {
+  const wipeWallet = document.getElementById(
+    "wipeWallet",
+  ) as HTMLInputElement | null;
+  if (!wipeWallet) return;
+  if (wipeWallet.value === "DELETE ALL FILES") await deleteAllfiles();
+  router.navigate("/onboarding");
+}
 async function exportWallet() {
   const download = (filename: string, text: string) =>
     Object.assign(document.createElement("a"), {
@@ -75,9 +88,15 @@ export function developerSettings() {
   const files = flatten(dirlist);
   const exportWalletButton = document.getElementById(
     "exportWallet",
-  ) as HTMLInputElement | null;
+  ) as HTMLElement | null;
   if (exportWalletButton) {
     exportWalletButton.onclick = exportWallet;
+  }
+  const wipeWalletInput = document.getElementById(
+    "wipeWallet",
+  ) as HTMLInputElement | null;
+  if (wipeWalletInput) {
+    wipeWalletInput.oninput = wipeWalletCallback;
   }
   return html`<div>
     <style>
