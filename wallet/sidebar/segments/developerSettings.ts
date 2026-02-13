@@ -1,5 +1,6 @@
 import { readDir } from "@spirobel/monero-wallet-api";
 import { html, flatten } from "../../../mininext/mininext";
+import { textInput } from "../ui/input";
 let fileObjects: { filename: string; content: string; opened: boolean }[] = [];
 async function readFiles() {
   const files = [];
@@ -9,6 +10,24 @@ async function readFiles() {
     files.push({ filename, content, opened: false });
   }
   return files;
+}
+
+async function exportWallet() {
+  const download = (filename: string, text: string) =>
+    Object.assign(document.createElement("a"), {
+      href: URL.createObjectURL(new Blob([text], { type: "text/plain" })),
+      download: filename,
+    }).click();
+
+  const backup = {
+    files: fileObjects.map((file) => {
+      return {
+        filename: file.filename,
+        content: file.content,
+      };
+    }),
+  };
+  download("wallets.json", JSON.stringify(backup, null, 2));
 }
 function openFile(e: MouseEvent) {
   const target = e.currentTarget as HTMLElement | null;
@@ -52,7 +71,14 @@ export function developerSettings() {
       (element as HTMLElement).onclick = openFile;
     }
   }
+
   const files = flatten(dirlist);
+  const exportWalletButton = document.getElementById(
+    "exportWallet",
+  ) as HTMLInputElement | null;
+  if (exportWalletButton) {
+    exportWalletButton.onclick = exportWallet;
+  }
   return html`<div>
     <style>
       .dir {
@@ -86,8 +112,34 @@ export function developerSettings() {
         margin-bottom: 12px;
         cursor: pointer;
       }
+      #exportWallet {
+        box-shadow:
+          inset 0 4px 12px rgba(0, 0, 0, 0.45),
+          0 5px 8px rgba(0, 0, 0, 0.4);
+        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        padding: 2px 4px;
+      }
+      #exportWallet:hover {
+        color: white;
+      }
     </style>
-    Sharing the content of these files will result in the loss of your funds &
-    privacy. ${files}
+    <div style="margin-top: 12px">
+      Sharing the content of these files will result in the loss of your funds &
+      privacy.
+    </div>
+    <div style="margin-bottom: 36px; margin-top: 12px">
+      <span id="exportWallet">EXPORT WALLETS</span>
+    </div>
+    <div>
+      <span> type DELETE ALL FILES to reset your wallet: </span>
+      ${textInput("wipeWallet", "DELETE ALL FILES")}
+    </div>
+    <div style="margin-top: 32px">inspect files:</div>
+    ${files}
   </div>`;
 }
