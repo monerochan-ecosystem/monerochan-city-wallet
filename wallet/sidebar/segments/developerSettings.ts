@@ -22,8 +22,10 @@ function openFile(e: MouseEvent) {
   if (content) {
     if (target.classList.contains("file-closed")) {
       content.innerText = "";
+      content.style.backgroundColor = "unset";
     } else {
       content.innerText = fileObject.content;
+      content.style.backgroundColor = "#333";
     }
   }
 }
@@ -61,6 +63,11 @@ export function developerSettings() {
       }
       .filename {
         user-select: none;
+      }
+      .content {
+        padding: 5px;
+        overflow-y: auto;
+        text-wrap: auto;
       }
       .file-opened {
         color: #551a8b;
