@@ -1,23 +1,14 @@
 import {
   get_info,
-  readDir,
   readNodeUrlFromScanSettings,
   writeNodeUrlToScanSettings,
 } from "@spirobel/monero-wallet-api";
-import { flatten, html } from "../../../mininext/mininext";
+import { html } from "../../../mininext/mininext";
 import { leftLower, tacticleContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
 import { sendChangeNodeUrlEvent } from "../../../background/messagebus";
-let fileObjects: { filename: string; content: string }[] = [];
-async function readFiles() {
-  const files = [];
-  const filenames = await readDir("");
-  for (const filename of filenames) {
-    const content = await Bun.file(filename).text();
-    files.push({ filename, content });
-  }
-  return files;
-}
+import { developerSettings } from "./developerSettings";
+
 async function readNodeUrl() {
   nodeUrlInputValue = (await readNodeUrlFromScanSettings()) || null;
   const nodeUrlInput = document.getElementById(
@@ -65,18 +56,6 @@ async function sendTestRequestHandler() {
   }
 }
 export function connectionPlate() {
-  readFiles().then((files) => {
-    fileObjects = files;
-  });
-
-  const dirlist = fileObjects.map(
-    (dir) =>
-      html`<div class="dir">
-        <div class="filename">${dir.filename}</div>
-        <div class="content">${dir.content}</div>
-      </div>`,
-  );
-  const files = flatten(dirlist);
   const openDevSettingsButton = document.getElementById(
     "openDevSettingsButton",
   ) as HTMLInputElement | null;
@@ -118,20 +97,6 @@ export function connectionPlate() {
   return tacticleContentPlate(
     html`<div>
       <style>
-        .dir {
-          width: 270px;
-          word-wrap: break-word;
-          display: inline-block;
-          margin-bottom: 20px;
-        }
-        .filename {
-          color: #551a8b;
-          text-decoration: underline;
-          font-family: serif;
-          font-size: 16px;
-          margin-bottom: 12px;
-          cursor: pointer;
-        }
         .link-closed {
           margin-top: 5px;
           color: #0000ff;
@@ -230,7 +195,7 @@ export function connectionPlate() {
       <div style="margin-top: 50px">
         <span id="openDevSettingsButton">developer settings </span>
       </div>
-      <div id="devSettings">${openDevSettings ? files : ""}</div>
+      <div id="devSettings">${openDevSettings ? developerSettings() : ""}</div>
     </div>`,
     leftLower,
     "top",
