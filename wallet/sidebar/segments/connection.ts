@@ -199,6 +199,6 @@ export function connectionPlate() {
     </div>`,
     leftLower,
     "top",
-    "398px",
+    "calc(100vh - 398px)",
   );
 }

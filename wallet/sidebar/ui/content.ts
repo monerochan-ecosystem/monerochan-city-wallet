@@ -15,13 +15,13 @@ export const tacticleContentPlate = (
   content: MiniValue,
   border_radius: string,
   to: "top" | "bottom" = "bottom",
-  inner_distract_height: string = "451px",
+  inner_height: string = "calc(100vh - 451px)",
 ) => {
   return html`<div class="content-plate">
     <div class="content-plate-inner">${content}</div>
     <style>
       .content-plate-inner {
-        height: calc(100vh - ${inner_distract_height});
+        height: ${inner_height};
 
         overflow-y: auto;
         scrollbar-width: thin;
