@@ -5,7 +5,7 @@ import {
 } from "@spirobel/monero-wallet-api";
 import { html, type MiniHtmlString } from "../../../mininext/mininext";
 import { actionButton } from "../ui/buttons";
-import { leftUpper, tacticleContentPlate } from "../ui/content";
+import { leftUpper, tactileContentPlate } from "../ui/content";
 import { sendButtonDotStyles } from "./walletLower";
 import { connectedToNode } from "./walletRoute";
 
@@ -213,7 +213,7 @@ export function sendPlate() {
         margin-left: 14px;
       }
     </style>
-    ${tacticleContentPlate(sendPlateContent(), leftUpper)}
+    ${tactileContentPlate(sendPlateContent(), leftUpper)}
     <div class="actions">
       ${actionButton(
         "send-action",

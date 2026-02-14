@@ -4,7 +4,7 @@ import {
   writeNodeUrlToScanSettings,
 } from "@spirobel/monero-wallet-api";
 import { html } from "../../../mininext/mininext";
-import { leftLower, tacticleContentPlate } from "../ui/content";
+import { leftLower, tactileContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
 import { sendChangeNodeUrlEvent } from "../../../background/messagebus";
 import { developerSettings } from "./developerSettings";
@@ -94,7 +94,7 @@ export function connectionPlate() {
     }
     if (nodeUrlInputValue === null) readNodeUrl();
   }
-  return tacticleContentPlate(
+  return tactileContentPlate(
     html`<div>
       <style>
         .link-closed {

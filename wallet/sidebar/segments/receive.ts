@@ -1,6 +1,6 @@
 import { flatten, html } from "../../../mininext/mininext";
 import { actionButton, attachHandlers } from "../ui/buttons";
-import { middleUpper, tacticleContentPlate } from "../ui/content";
+import { middleUpper, tactileContentPlate } from "../ui/content";
 import { currentlySelectedWallet } from "./walletRoute";
 export type ReceiveActionButtonIds =
   (typeof receiveActionButtonIds)[keyof typeof receiveActionButtonIds];
@@ -42,7 +42,7 @@ export function receivePlate() {
         margin-bottom: 20px;
       }
     </style>
-    ${tacticleContentPlate(plateContent, middleUpper)}
+    ${tactileContentPlate(plateContent, middleUpper)}
     <div class="actions">
       ${actionButton(receiveActionButtonIds.newAddress, "NEW ADDRESS")}
       <div></div>

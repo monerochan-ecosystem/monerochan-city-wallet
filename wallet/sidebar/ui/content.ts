@@ -11,23 +11,24 @@ export const rightUpper = "66px 25px 25px 25px / 78px 21px 31px 31px;";
 export const rightLower = "25px 25px 25px 66px / 21px 21px 31px 78px;";
 export const leftLower = "25px 25px 66px 25px / 21px 21px 78px 31px;";
 
-export const tacticleContentPlate = (
+export const tactileContentPlate = (
   content: MiniValue,
   border_radius: string,
   to: "top" | "bottom" = "bottom",
   inner_height: string = "calc(100vh - 451px)",
+  className: string = "content-plate",
 ) => {
-  return html`<div class="content-plate">
-    <div class="content-plate-inner">${content}</div>
+  return html`<div class="${className}">
+    <div class="${className}-inner">${content}</div>
     <style>
-      .content-plate-inner {
+      .${className}-inner {
         height: ${inner_height};
 
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: #888 #333;
       }
-      .content-plate {
+      .${className} {
         border-radius: ${border_radius};
         margin-left: 7px;
         margin-right: 7px;
@@ -67,13 +68,13 @@ export const plate = () => {
     return receivePlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.history) {
-    return tacticleContentPlate(html`<div>HISTORY</div>`, rightUpper);
+    return tactileContentPlate(html`<div>HISTORY</div>`, rightUpper);
   }
   if (window.activeWalletPlate === lowerButtonIds.connection) {
     return connectionPlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.wallets) {
-    return tacticleContentPlate(html`<div>WALLETS</div>`, rightLower, "top");
+    return tactileContentPlate(html`<div>WALLETS</div>`, rightLower, "top");
   }
   return plate;
 };
