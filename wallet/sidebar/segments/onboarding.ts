@@ -1,7 +1,8 @@
 import { flatten, html } from "../../../mininext/mininext";
 import { generateSeedphrase } from "@spirobel/seedphrase";
+import { actionButton, tactileSwitch } from "../ui/buttons";
 
-const seedphrase = generateSeedphrase().split(" ");
+let seedphrase: string[] = []; //generateSeedphrase().split(" ");
 export function onboarding() {
   return html`<div class="main">
     <style>
@@ -13,7 +14,7 @@ export function onboarding() {
         gap: 11px;
       }
     </style>
-    ${onboardingUpper()}
+    ${onboardingUpper()} ${onboardingTopMenu()}
   </div>`;
 }
 
@@ -22,6 +23,7 @@ function onboardingUpper() {
     return html`<div class="seed-phrase" id="word${i + 1}">${word}</div>`;
   });
   return flatten(seedwords, (htmlstrings) => {
+    const words = seedwords.length ? htmlstrings : "";
     return html`<div class="upper">
       <style>
         .upper {
@@ -90,9 +92,33 @@ function onboardingUpper() {
           white-space: nowrap;
         }
       </style>
-      ${htmlstrings}
+      ${words}
       <div class="divider"></div>
       <div class="passphrase">this is my secret password</div>
     </div>`;
   });
+}
+function generateSeedphraseCB() {
+  seedphrase = generateSeedphrase().split(" ");
+}
+function onboardingTopMenu() {
+  const generateButton = actionButton("generate", "GENERATE SEEDPHRASE");
+  const recoverWallet = tactileSwitch("recover", "RECOVER");
+  const generateEl = document.getElementById("generate") as HTMLElement | null;
+  if (generateEl) {
+    generateEl.onclick = generateSeedphraseCB;
+  }
+  return html`<div class="top-menu">
+    ${generateButton} ${recoverWallet}
+
+    <style>
+      .top-menu {
+        display: grid;
+        grid-template-columns: 200px 130px;
+        justify-content: start;
+        gap: 8px;
+        margin-left: 8px;
+      }
+    </style>
+  </div> `;
 }
