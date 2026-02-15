@@ -148,30 +148,40 @@ function onboardingUpper() {
 }
 function generateSeedphraseCB() {
   seedphrase = generateSeedphrase().split(" ");
+  closeRecoveryPlate();
 }
 let recoverPlateOpened = false;
-
-function recoverWalletCB() {
+function closeRecoveryPlate() {
+  recoverPlateOpened = false;
+  const recoverPlate = document.getElementById(
+    "recover-plate",
+  ) as HTMLElement | null;
+  if (recoverPlate) {
+    recoverPlate.style.display = "none";
+  }
   const recoverEl = document.getElementById("recover") as HTMLElement | null;
+  if (!recoverEl) return;
+  recoverEl.classList.remove("active-switch");
+}
+function openRecoveryPlate() {
+  const recoverEl = document.getElementById("recover") as HTMLElement | null;
+
+  recoverPlateOpened = true;
+  const recoverPlate = document.getElementById(
+    "recover-plate",
+  ) as HTMLElement | null;
+  if (recoverPlate) {
+    recoverPlate.style.display = "block";
+  }
   if (recoverEl) {
     recoverEl.classList.add("active-switch");
   }
+}
+function recoverWalletCB() {
   if (!recoverPlateOpened) {
-    recoverPlateOpened = true;
-    const recoverPlate = document.getElementById(
-      "recover-plate",
-    ) as HTMLElement | null;
-    if (recoverPlate) {
-      recoverPlate.style.display = "block";
-    }
+    openRecoveryPlate();
   } else {
-    recoverPlateOpened = false;
-    const recoverPlate = document.getElementById(
-      "recover-plate",
-    ) as HTMLElement | null;
-    if (recoverPlate) {
-      recoverPlate.style.display = "none";
-    }
+    closeRecoveryPlate();
   }
 }
 function onboardingTopMenu() {
