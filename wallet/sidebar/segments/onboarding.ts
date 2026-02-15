@@ -31,38 +31,8 @@ export function onboarding() {
         color: white;
       }
     </style>
-    ${onboardingUpper()} ${onboardingTopMenu()}
-    <div style="height:233px">
-      ${recoverPlateOpened
-        ? tactileContentPlate(
-            html`<div style="padding: 8px">
-              <div style=" margin-top: 12px;">recover by seedphrase</div>
-
-              ${textInput("recoverySeedphrase", "Enter Seedphrase to recover")}
-              <div style="margin-bottom: 19px; margin-top: 34px">
-                recover by wallet file import
-              </div>
-
-              <div style="">
-                <span id="importWallet">IMPORT WALLETFILE</span>
-              </div>
-            </div>`,
-            rightUpper,
-            undefined,
-            "182px",
-            "recover-plate",
-            "recover-plate",
-          )
-        : ""}
-    </div>
-    ${tactileContentPlate(
-      html`<div style="padding: 8px">
-        ${textInput("seedoffsetPassphrase", "Enter Seedoffset Passphrase")}
-      </div>`,
-      middleUpper,
-      "top",
-      "100px",
-    )}
+    ${onboardingUpper()} ${onboardingTopMenu()} ${recoveryPlate()}
+    ${seedoffsetPassphraseInput()} ${onboardingBottomMenu()}
   </div>`;
 }
 
@@ -142,7 +112,7 @@ function onboardingUpper() {
       </style>
       ${words}
       <div class="divider"></div>
-      <div class="passphrase">this is my secret password</div>
+      <div class="passphrase">${String(seedOffsetInputValue)}</div>
     </div>`;
   });
 }
@@ -184,6 +154,32 @@ function recoverWalletCB() {
     closeRecoveryPlate();
   }
 }
+
+function recoveryPlate() {
+  return html` <div style="height:233px">
+    ${recoverPlateOpened
+      ? tactileContentPlate(
+          html`<div style="padding: 8px">
+            <div style=" margin-top: 12px;">recover by seedphrase</div>
+
+            ${textInput("recoverySeedphrase", "Enter Seedphrase to recover")}
+            <div style="margin-bottom: 19px; margin-top: 34px">
+              recover by wallet file import
+            </div>
+
+            <div style="">
+              <span id="importWallet">IMPORT WALLETFILE</span>
+            </div>
+          </div>`,
+          rightUpper,
+          undefined,
+          "182px",
+          "recover-plate",
+          "recover-plate",
+        )
+      : ""}
+  </div>`;
+}
 function onboardingTopMenu() {
   const generateButton = actionButton("generate", "GENERATE SEEDPHRASE");
   const recoverWallet = tactileSwitch("recover", "RECOVER");
@@ -210,4 +206,45 @@ function onboardingTopMenu() {
       }
     </style>
   </div> `;
+}
+let seedOffsetInputValue: string = "";
+
+function updateSeedoffsetPassphraseCB() {
+  const offsetPassphrase = document.getElementById(
+    "seedoffsetPassphrase",
+  ) as HTMLInputElement | null;
+  if (!offsetPassphrase) return;
+  seedOffsetInputValue = offsetPassphrase.value;
+}
+function seedoffsetPassphraseInput() {
+  const seedOffsetInput = document.getElementById(
+    "seedoffsetPassphrase",
+  ) as HTMLInputElement | null;
+  if (seedOffsetInput) {
+    seedOffsetInput.oninput = updateSeedoffsetPassphraseCB;
+  }
+  return tactileContentPlate(
+    html`<div style="padding: 8px">
+      ${textInput("seedoffsetPassphrase", "Enter Seedoffset Passphrase")}
+    </div>`,
+    middleUpper,
+    "top",
+    "100px",
+  );
+}
+function onboardingBottomMenu() {
+  const setupWallet = actionButton("finish-setup", "FINISH SETUP");
+  const resetSetup = tactileSwitch("reset", "RESET");
+  return html`<div class="bottom-menu">
+    ${setupWallet} ${resetSetup}
+    <style>
+      .bottom-menu {
+        display: grid;
+        grid-template-columns: 200px 130px;
+        justify-content: start;
+        gap: 8px;
+        margin-left: 8px;
+      }
+    </style>
+  </div>`;
 }
