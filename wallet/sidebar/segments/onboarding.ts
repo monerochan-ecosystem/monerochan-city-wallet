@@ -1,6 +1,8 @@
 import { flatten, html } from "../../../mininext/mininext";
 import { generateSeedphrase } from "@spirobel/seedphrase";
 import { actionButton, tactileSwitch } from "../ui/buttons";
+import { middleUpper, rightUpper, tactileContentPlate } from "../ui/content";
+import { textInput } from "../ui/input";
 
 let seedphrase: string[] = []; //generateSeedphrase().split(" ");
 export function onboarding() {
@@ -13,8 +15,54 @@ export function onboarding() {
         padding: 8px;
         gap: 11px;
       }
+      #importWallet {
+        box-shadow:
+          inset 0 4px 12px rgba(0, 0, 0, 0.45),
+          0 5px 8px rgba(0, 0, 0, 0.4);
+        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        padding: 2px 4px;
+      }
+      #importWallet:hover {
+        color: white;
+      }
     </style>
     ${onboardingUpper()} ${onboardingTopMenu()}
+    <div style="height:233px">
+      ${recoverPlateOpened
+        ? tactileContentPlate(
+            html`<div style="padding: 8px">
+              <div style=" margin-top: 12px;">recover by seedphrase</div>
+
+              ${textInput("recoverySeedphrase", "Enter Seedphrase to recover")}
+              <div style="margin-bottom: 19px; margin-top: 34px">
+                recover by wallet file import
+              </div>
+
+              <div style="">
+                <span id="importWallet">IMPORT WALLETFILE</span>
+              </div>
+            </div>`,
+            rightUpper,
+            undefined,
+            "182px",
+            "recover-plate",
+            "recover-plate",
+          )
+        : ""}
+    </div>
+    ${tactileContentPlate(
+      html`<div style="padding: 8px">
+        ${textInput("seedoffsetPassphrase", "Enter Seedoffset Passphrase")}
+      </div>`,
+      middleUpper,
+      "top",
+      "100px",
+    )}
   </div>`;
 }
 
@@ -101,12 +149,43 @@ function onboardingUpper() {
 function generateSeedphraseCB() {
   seedphrase = generateSeedphrase().split(" ");
 }
+let recoverPlateOpened = false;
+
+function recoverWalletCB() {
+  const recoverEl = document.getElementById("recover") as HTMLElement | null;
+  if (recoverEl) {
+    recoverEl.classList.add("active-switch");
+  }
+  if (!recoverPlateOpened) {
+    recoverPlateOpened = true;
+    const recoverPlate = document.getElementById(
+      "recover-plate",
+    ) as HTMLElement | null;
+    if (recoverPlate) {
+      recoverPlate.style.display = "block";
+    }
+  } else {
+    recoverPlateOpened = false;
+    const recoverPlate = document.getElementById(
+      "recover-plate",
+    ) as HTMLElement | null;
+    if (recoverPlate) {
+      recoverPlate.style.display = "none";
+    }
+  }
+}
 function onboardingTopMenu() {
   const generateButton = actionButton("generate", "GENERATE SEEDPHRASE");
   const recoverWallet = tactileSwitch("recover", "RECOVER");
   const generateEl = document.getElementById("generate") as HTMLElement | null;
   if (generateEl) {
     generateEl.onclick = generateSeedphraseCB;
+  }
+  const recoverWalletEl = document.getElementById(
+    "recover",
+  ) as HTMLElement | null;
+  if (recoverWalletEl) {
+    recoverWalletEl.onclick = recoverWalletCB;
   }
   return html`<div class="top-menu">
     ${generateButton} ${recoverWallet}

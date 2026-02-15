@@ -17,8 +17,9 @@ export const tactileContentPlate = (
   to: "top" | "bottom" = "bottom",
   inner_height: string = "calc(100vh - 451px)",
   className: string = "content-plate",
+  id: string = "",
 ) => {
-  return html`<div class="${className}">
+  return html`<div class="${className}" ${id ? `id="${id}"` : ""}>
     <div class="${className}-inner">${content}</div>
     <style>
       .${className}-inner {
