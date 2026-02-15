@@ -239,6 +239,7 @@ function seedoffsetPassphraseInput() {
   }
   return tactileContentPlate(
     html`<div style="padding: 8px">
+      <span> seedoffset passphrase</span>
       ${textInput("seedoffsetPassphrase", "Enter Seedoffset Passphrase")}
     </div>`,
     middleUpper,
@@ -246,7 +247,21 @@ function seedoffsetPassphraseInput() {
     "100px",
   );
 }
+function resetCB() {
+  seedphrase = [];
+  seedOffsetInputValue = "";
+  const seedOffsetInput = document.getElementById(
+    "seedoffsetPassphrase",
+  ) as HTMLInputElement | null;
+  if (seedOffsetInput) {
+    seedOffsetInput.value = "";
+  }
+}
 function onboardingBottomMenu() {
+  const resetEL = document.getElementById("reset") as HTMLElement | null;
+  if (resetEL) {
+    resetEL.onclick = resetCB;
+  }
   const setupWallet = actionButton("finish-setup", "FINISH SETUP");
   const resetSetup = tactileSwitch("reset", "RESET");
   return html`<div class="bottom-menu">
