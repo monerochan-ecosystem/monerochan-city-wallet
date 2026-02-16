@@ -257,12 +257,19 @@ function resetCB() {
     seedOffsetInput.value = "";
   }
 }
+function finishPossible() {
+  return seedphrase.length > 0;
+}
 function onboardingBottomMenu() {
   const resetEL = document.getElementById("reset") as HTMLElement | null;
   if (resetEL) {
     resetEL.onclick = resetCB;
   }
-  const setupWallet = actionButton("finish-setup", "FINISH SETUP");
+  const setupWallet = actionButton(
+    "finish-setup",
+    "FINISH SETUP",
+    finishPossible(),
+  );
   const resetSetup = tactileSwitch("reset", "RESET");
   return html`<div class="bottom-menu">
     ${setupWallet} ${resetSetup}
