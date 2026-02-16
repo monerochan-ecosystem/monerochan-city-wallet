@@ -1,5 +1,5 @@
 import { flatten, html } from "../../../mininext/mininext";
-import { generateSeedphrase } from "@spirobel/seedphrase";
+import { generateSeedphrase, validateSeedphrase } from "@spirobel/seedphrase";
 import { actionButton, tactileSwitch } from "../ui/buttons";
 import { middleUpper, rightUpper, tactileContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
@@ -168,16 +168,63 @@ function recoverWalletCB() {
     closeRecoveryPlate();
   }
 }
+let recoveryMessage = html`<div class="recovery-message"></div>`;
+function updateRecoverySeedphraseCB() {
+  const recoverySeedphraseInput = document.getElementById(
+    "recoverySeedphrase",
+  ) as HTMLInputElement | null;
+  if (recoverySeedphraseInput) {
+    const isValid = validateSeedphrase(recoverySeedphraseInput.value.trim());
+    if (isValid) {
+      recoveryMessage = html`<div class="recovery-message">
+        <span>seedphrase is valid</span>
+      </div>`;
+      seedphrase = recoverySeedphraseInput.value.trim().split(" ");
+    } else if (recoverySeedphraseInput.value.length === 0) {
+      seedphrase = [];
+      recoveryMessage = html`<div class="recovery-message"></div>`;
+    } else {
+      seedphrase = [];
+      recoveryMessage = html`<div class="recovery-message-error">
+        <span>recovery seedphrase is not valid</span>
+      </div>`;
+    }
+  }
+}
 
 function recoveryPlate() {
+  const recoverySeedphraseInput = document.getElementById(
+    "recoverySeedphrase",
+  ) as HTMLInputElement | null;
+  if (recoverySeedphraseInput) {
+    recoverySeedphraseInput.oninput = updateRecoverySeedphraseCB;
+  }
   return html` <div style="height:233px">
     ${recoverPlateOpened
       ? tactileContentPlate(
           html`<div style="padding: 8px">
-            <div style=" margin-top: 12px;">recover by seedphrase</div>
+            <div class="seedphraserecover">
+              <style>
+                .seedphraserecover {
+                  height: 88px;
+                }
+                .recovery-message {
+                  color: #4ade80;
+                  margin-left: 7px;
+                  margin-top: 4px;
+                }
+                .recovery-message-error {
+                  color: #ff4444;
+                  margin-left: 7px;
+                  margin-top: 4px;
+                }
+              </style>
+              <div style="margin-top: 12px;">recover by seedphrase</div>
 
-            ${textInput("recoverySeedphrase", "Enter Seedphrase to recover")}
-            <div style="margin-bottom: 19px; margin-top: 34px">
+              ${textInput("recoverySeedphrase", "Enter Seedphrase to recover")}
+              ${recoveryMessage}
+            </div>
+            <div style="margin-bottom: 19px;">
               recover by wallet file import
             </div>
 
@@ -256,6 +303,11 @@ function resetCB() {
   if (seedOffsetInput) {
     seedOffsetInput.value = "";
   }
+  recoveryMessage = html`<div class="recovery-message"></div>`;
+  const recoverySeedphraseInput = document.getElementById(
+    "recoverySeedphrase",
+  ) as HTMLInputElement | null;
+  if (recoverySeedphraseInput) recoverySeedphraseInput.value = "";
 }
 function finishPossible() {
   return seedphrase.length > 0;
