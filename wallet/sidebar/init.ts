@@ -12,8 +12,14 @@ if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
 }
 export async function init() {
-  const scan_settings_file = await Bun.file(SCAN_SETTINGS_STORE_NAME_DEFAULT);
-  if (scan_settings_file.size === 0) {
+  const scan_settings_file_content = await Bun.file(
+    SCAN_SETTINGS_STORE_NAME_DEFAULT,
+  )
+    .text()
+    .catch(() => "");
+  if (scan_settings_file_content.length) {
+    router.navigate("/main/no_domain/single/0");
+  } else {
     router.navigate("/onboarding");
     return;
   }
