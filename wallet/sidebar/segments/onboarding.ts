@@ -1,8 +1,21 @@
 import { flatten, html } from "../../../mininext/mininext";
-import { generateSeedphrase, validateSeedphrase } from "@spirobel/seedphrase";
+import {
+  generateSeedphrase,
+  getWalletSecret,
+  validateSeedphrase,
+  WALLET_DEFAULT_ROUTE,
+  walletRouteToString,
+} from "@spirobel/seedphrase";
 import { actionButton, tactileSwitch } from "../ui/buttons";
 import { middleUpper, rightUpper, tactileContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
+import {
+  SCAN_SETTINGS_STORE_NAME_DEFAULT,
+  writeEnvLineToDotEnvRefresh,
+  writeWalletSecretsToDotEnv,
+  writeWalletToScanSettings,
+} from "@spirobel/monero-wallet-api";
+import { router } from "../router";
 
 let seedphrase: string[] = []; //generateSeedphrase().split(" ");
 export function onboarding() {
@@ -317,6 +330,12 @@ function onboardingBottomMenu() {
   if (resetEL) {
     resetEL.onclick = resetCB;
   }
+  const finishEL = document.getElementById(
+    "finish-setup",
+  ) as HTMLElement | null;
+  if (finishEL) {
+    finishEL.onclick = finishCB;
+  }
   const setupWallet = actionButton(
     "finish-setup",
     "FINISH SETUP",
@@ -335,4 +354,22 @@ function onboardingBottomMenu() {
       }
     </style>
   </div>`;
+}
+
+async function finishCB() {
+  if (!finishPossible()) return;
+  await writeEnvLineToDotEnvRefresh("SEEDPHRASE", seedphrase.join(" "));
+  await writeEnvLineToDotEnvRefresh("PASSPHRASE", seedOffsetInputValue);
+
+  const spendkeySecretSeed = getWalletSecret(
+    WALLET_DEFAULT_ROUTE,
+    seedphrase.join(" "),
+    seedOffsetInputValue, //passphrase
+  );
+  let primary_address = await writeWalletSecretsToDotEnv(spendkeySecretSeed);
+  await writeWalletToScanSettings({
+    primary_address,
+    wallet_route: walletRouteToString(WALLET_DEFAULT_ROUTE),
+  });
+  router.navigate(walletRouteToString(WALLET_DEFAULT_ROUTE));
 }
