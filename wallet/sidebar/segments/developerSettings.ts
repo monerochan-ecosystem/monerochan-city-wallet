@@ -22,8 +22,10 @@ async function wipeWalletCallback() {
     "wipeWallet",
   ) as HTMLInputElement | null;
   if (!wipeWallet) return;
-  if (wipeWallet.value === "DELETE ALL FILES") await deleteAllfiles();
-  router.navigate("/onboarding");
+  if (wipeWallet.value === "DELETE ALL FILES") {
+    await deleteAllfiles();
+    router.navigate("/onboarding");
+  }
 }
 async function exportWallet() {
   const download = (filename: string, text: string) =>
