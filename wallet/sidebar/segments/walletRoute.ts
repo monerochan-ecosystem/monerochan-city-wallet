@@ -46,6 +46,7 @@ export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
 };
 
 export function currentlySelectedWallet() {
+  if (!window.wallets) return undefined;
   return window.wallets?.wallets[0];
 }
 export function connectedToNode(): boolean {
