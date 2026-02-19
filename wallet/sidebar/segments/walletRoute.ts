@@ -46,8 +46,16 @@ export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
 };
 
 export function currentlySelectedWallet() {
-  if (!window.wallets) return undefined;
+  if (!window.wallets?.wallets) return undefined;
   return window.wallets?.wallets[0];
+}
+export function currentStartingHeight() {
+  if (!window.wallets?.wallets) return undefined;
+  return window.wallets.start_height;
+}
+export function setCurrentStartingHeight(start_height: number | null) {
+  if (!window.wallets?.wallets) throw new Error("no wallets");
+  window.wallets.changeStartHeight(start_height);
 }
 export function connectedToNode(): boolean {
   //todo check if there was a connection status update
