@@ -83,6 +83,16 @@ async function sendTestRequestHandler() {
     const test = await get_info(nodeUrlInput.value);
     status_message = `get_info response success`;
     test_result = JSON.stringify(test, null, 2);
+    const new_height = test.height;
+    if (!startHeightInputValue) {
+      startHeightInputValue = new_height;
+      const startHeightInput = document.getElementById(
+        "startHeight",
+      ) as HTMLInputElement | null;
+      if (startHeightInput) {
+        startHeightInput.value = String(startHeightInputValue || "") || "";
+      }
+    }
   } catch (err) {
     status_message = `get_info response failed`;
     test_result = "";
