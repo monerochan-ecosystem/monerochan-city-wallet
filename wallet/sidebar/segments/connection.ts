@@ -8,6 +8,7 @@ import { leftLower, tactileContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
 import { sendChangeNodeUrlEvent } from "../../../background/messagebus";
 import { developerSettings } from "./developerSettings";
+import { currentStartingHeight, setCurrentStartingHeight } from "./walletRoute";
 
 async function readNodeUrl() {
   nodeUrlInputValue = (await readNodeUrlFromScanSettings()) || null;
@@ -18,27 +19,65 @@ async function readNodeUrl() {
     nodeUrlInput.value = nodeUrlInputValue || "";
   }
 }
+function readStartHeight() {
+  startHeightInputValue = currentStartingHeight() || null;
+  const startHeightInput = document.getElementById(
+    "startHeight",
+  ) as HTMLInputElement | null;
+  if (startHeightInput) {
+    startHeightInput.value = String(startHeightInputValue || "") || "";
+  }
+}
 let nodeUrlInputValue: string | null = null;
+let startHeightInputValue: number | null | false = false; // null is a valid value so we use false as a placeholder
+let height_error = "";
 let test_result = "";
 let status_message = "";
 let openDevSettings = false;
-export function updateNodeUrlCallback() {
+function updateNodeUrlCallback() {
   const nodeUrl = document.getElementById("nodeUrl") as HTMLInputElement | null;
   if (!nodeUrl) return;
   nodeUrlInputValue = nodeUrl.value;
+}
+function updateStartHeightCallback() {
+  const startHeight = document.getElementById(
+    "startHeight",
+  ) as HTMLInputElement | null;
+  if (!startHeight) return;
+
+  const parsed = parseInt(startHeight.value);
+  if (isNaN(parsed)) {
+    height_error = "invalid blockheight";
+  } else {
+    height_error = "";
+    startHeightInputValue = parsed;
+    startHeight.value = String(parsed);
+  }
+  if (startHeight.value.length === 0) {
+    startHeightInputValue = null;
+    height_error = "";
+  }
+  const hel = document.getElementById("startHeightError");
+  if (hel) hel.textContent = height_error;
 }
 function openDevSettingsHandler() {
   openDevSettings = !openDevSettings;
 }
 async function resetNodeUrlHandler() {
   await readNodeUrl();
-  status_message = "Node URL reset";
+  await readStartHeight();
+  status_message = "Node URL, start height reset";
 }
 async function saveNodeUrlHandler() {
   if (!nodeUrlInputValue) return;
   await writeNodeUrlToScanSettings(nodeUrlInputValue);
   sendChangeNodeUrlEvent(nodeUrlInputValue);
   status_message = "Node URL saved";
+
+  if (startHeightInputValue !== false) {
+    await setCurrentStartingHeight(startHeightInputValue);
+    status_message = "Node URL, start height saved";
+  }
 }
 
 async function sendTestRequestHandler() {
@@ -93,6 +132,16 @@ export function connectionPlate() {
       nodeUrlInput.value = nodeUrlInputValue;
     }
     if (nodeUrlInputValue === null) readNodeUrl();
+  }
+  const startHeightInput = document.getElementById(
+    "startHeight",
+  ) as HTMLInputElement | null;
+  if (startHeightInput) {
+    startHeightInput.oninput = updateStartHeightCallback;
+    if (startHeightInput.value.length === 0 && startHeightInputValue !== null) {
+      startHeightInput.value = String(startHeightInputValue);
+    }
+    if (startHeightInputValue === false) readStartHeight();
   }
   return tactileContentPlate(
     html`<div>
@@ -177,6 +226,8 @@ export function connectionPlate() {
 
         }
       </style>
+      ${textInput("startHeight", "Enter start height")}
+      <span id="startHeightError" style="color: red"></span>
       ${textInput("nodeUrl", "Enter node URL")}
       <div class="send-test">
         <span class="no-side-effect-action" id="sendTestRequest">
