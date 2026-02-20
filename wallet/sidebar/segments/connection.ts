@@ -5,7 +5,7 @@ import {
 } from "@spirobel/monero-wallet-api";
 import { html } from "../../../mininext/mininext";
 import { leftLower, tactileContentPlate } from "../ui/content";
-import { textInput } from "../ui/input";
+import { integerInput, textInput } from "../ui/input";
 import { sendChangeNodeUrlEvent } from "../../../background/messagebus";
 import { developerSettings } from "./developerSettings";
 import { currentStartingHeight, setCurrentStartingHeight } from "./walletRoute";
@@ -30,7 +30,6 @@ function readStartHeight() {
 }
 let nodeUrlInputValue: string | null = null;
 let startHeightInputValue: number | null | false = false; // null is a valid value so we use false as a placeholder
-let height_error = "";
 let test_result = "";
 let status_message = "";
 let openDevSettings = false;
@@ -47,18 +46,13 @@ function updateStartHeightCallback() {
 
   const parsed = parseInt(startHeight.value);
   if (isNaN(parsed)) {
-    height_error = "invalid blockheight";
   } else {
-    height_error = "";
     startHeightInputValue = parsed;
     startHeight.value = String(parsed);
   }
   if (startHeight.value.length === 0) {
     startHeightInputValue = null;
-    height_error = "";
   }
-  const hel = document.getElementById("startHeightError");
-  if (hel) hel.textContent = height_error;
 }
 function openDevSettingsHandler() {
   openDevSettings = !openDevSettings;
@@ -226,9 +220,10 @@ export function connectionPlate() {
 
         }
       </style>
-      ${textInput("startHeight", "Enter start height")}
-      <span id="startHeightError" style="color: red"></span>
+      ${integerInput("startHeight", "Enter scan start height")}
+      <span>start height (set to chain tip if left empty) </span>
       ${textInput("nodeUrl", "Enter node URL")}
+      <span>node url</span>
       <div class="send-test">
         <span class="no-side-effect-action" id="sendTestRequest">
           TEST CONNECTION</span
