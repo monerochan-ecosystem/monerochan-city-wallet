@@ -72,10 +72,16 @@ export function developerSettings() {
   const dirlist = fileObjects.map(
     (file, i) =>
       html`<div class="dir">
-        <div class="filename file-closed" id="${String(i)}">
+        <div
+          class="filename ${file.opened ? "file-opened" : "file-closed"}"
+          id="${String(i)}"
+        >
           ${file.filename}
         </div>
-        <div class="content" id="${String(i)}-content">
+        <div
+          class="content ${file.opened ? "content-opened" : "content-closed"}"
+          id="${String(i)}-content"
+        >
           ${file.opened ? file.content : ""}
         </div>
       </div>`,
@@ -114,6 +120,12 @@ export function developerSettings() {
         padding: 5px;
         overflow-y: auto;
         text-wrap: auto;
+      }
+      .content-opened {
+        background-color: #333;
+      }
+      .content-closed {
+        background-color: unset;
       }
       .file-opened {
         color: #551a8b;
