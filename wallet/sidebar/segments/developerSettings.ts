@@ -106,7 +106,6 @@ export function developerSettings() {
         width: 270px;
         word-wrap: break-word;
         display: inline-block;
-        margin-bottom: 20px;
       }
       .filename {
         user-select: none;
@@ -124,14 +123,16 @@ export function developerSettings() {
         margin-bottom: 12px;
         cursor: pointer;
       }
+
       .file-closed {
-        margin-top: 5px;
-        color: #0000ff;
+        color: rgba(255, 255, 255, 0.3);
         text-decoration: underline;
         font-family: serif;
         font-size: 16px;
-        margin-bottom: 12px;
         cursor: pointer;
+      }
+      .file-closed:hover {
+        color: #551a8b;
       }
       #exportWallet {
         box-shadow:
@@ -160,7 +161,9 @@ export function developerSettings() {
       <span> type DELETE ALL FILES to reset your wallet: </span>
       ${textInput("wipeWallet", "DELETE ALL FILES")}
     </div>
-    <div style="margin-top: 32px">inspect files:</div>
+    <div style="margin-top: 85px; margin-bottom: 7px">
+      inspect wallet files:
+    </div>
     ${files}
   </div>`;
 }

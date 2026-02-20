@@ -198,7 +198,7 @@ export function connectionPlate() {
         .test-result {
           margin-top: 4px;
           margin-bottom: 12px;
-          height: 300px;
+          height: 210px;
           width: 250px;
           background-color: #333;
           overflow-y: auto;
@@ -238,7 +238,7 @@ export function connectionPlate() {
         </div>
         <pre class="test-result">        ${test_result}</pre>
       </div>
-      <div style="margin-top: 50px">
+      <div style="margin-top: 27px">
         <span id="openDevSettingsButton">developer settings </span>
       </div>
       <div id="devSettings">${openDevSettings ? developerSettings() : ""}</div>
