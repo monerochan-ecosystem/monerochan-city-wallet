@@ -37,6 +37,8 @@ function updateNodeUrlCallback() {
   const nodeUrl = document.getElementById("nodeUrl") as HTMLInputElement | null;
   if (!nodeUrl) return;
   nodeUrlInputValue = nodeUrl.value;
+  test_result = "";
+  status_message = "";
 }
 function updateStartHeightCallback() {
   const startHeight = document.getElementById(
@@ -61,12 +63,14 @@ async function resetNodeUrlHandler() {
   await readNodeUrl();
   await readStartHeight();
   status_message = "Node URL, start height reset";
+  test_result = "";
 }
 async function saveNodeUrlHandler() {
   if (!nodeUrlInputValue) return;
   await writeNodeUrlToScanSettings(nodeUrlInputValue);
   sendChangeNodeUrlEvent(nodeUrlInputValue);
   status_message = "Node URL saved";
+  test_result = "";
 
   if (startHeightInputValue !== false) {
     await setCurrentStartingHeight(startHeightInputValue);
@@ -80,7 +84,12 @@ async function sendTestRequestHandler() {
   ) as HTMLInputElement | null;
   if (!nodeUrlInput) return;
   try {
-    const test = await get_info(nodeUrlInput.value);
+    nodeUrlInputValue = nodeUrlInput.value.trim();
+    if (nodeUrlInputValue.endsWith("/")) {
+      nodeUrlInputValue = nodeUrlInputValue.slice(0, -1);
+    }
+    nodeUrlInput.value = nodeUrlInputValue;
+    const test = await get_info(nodeUrlInputValue);
     status_message = `get_info response success`;
     test_result = JSON.stringify(test, null, 2);
     const new_height = test.height;
