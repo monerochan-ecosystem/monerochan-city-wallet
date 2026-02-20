@@ -3,7 +3,7 @@ import {
   readNodeUrlFromScanSettings,
   writeNodeUrlToScanSettings,
 } from "@spirobel/monero-wallet-api";
-import { html } from "../../../mininext/mininext";
+import { html, type MiniHtmlString } from "../../../mininext/mininext";
 import { leftLower, tactileContentPlate } from "../ui/content";
 import { integerInput, textInput } from "../ui/input";
 import { sendChangeNodeUrlEvent } from "../../../background/messagebus";
@@ -28,17 +28,27 @@ function readStartHeight() {
     startHeightInput.value = String(startHeightInputValue || "") || "";
   }
 }
+const empty_status_message = html`<div></div>`;
+function positiveStatusMessage(message: string) {
+  return html`<div class="status-message-positive">${message}</div>`;
+}
+function negativeStatusMessage(message: string) {
+  return html`<div class="status-message-negative">${message}</div>`;
+}
+function neutralStatusMessage(message: string) {
+  return html`<div class="status-message-neutral">${message}</div>`;
+}
 let nodeUrlInputValue: string | null = null;
 let startHeightInputValue: number | null | false = false; // null is a valid value so we use false as a placeholder
 let test_result = "";
-let status_message = "";
+let status_message: MiniHtmlString = empty_status_message;
 let openDevSettings = false;
 function updateNodeUrlCallback() {
   const nodeUrl = document.getElementById("nodeUrl") as HTMLInputElement | null;
   if (!nodeUrl) return;
   nodeUrlInputValue = nodeUrl.value;
   test_result = "";
-  status_message = "";
+  status_message = empty_status_message;
 }
 function updateStartHeightCallback() {
   const startHeight = document.getElementById(
@@ -62,19 +72,19 @@ function openDevSettingsHandler() {
 async function resetNodeUrlHandler() {
   await readNodeUrl();
   await readStartHeight();
-  status_message = "Node URL, start height reset";
+  status_message = neutralStatusMessage("Node URL, start height reset");
   test_result = "";
 }
 async function saveNodeUrlHandler() {
   if (!nodeUrlInputValue) return;
   await writeNodeUrlToScanSettings(nodeUrlInputValue);
   sendChangeNodeUrlEvent(nodeUrlInputValue);
-  status_message = "Node URL saved";
+  status_message = positiveStatusMessage("Node URL saved");
   test_result = "";
 
   if (startHeightInputValue !== false) {
     await setCurrentStartingHeight(startHeightInputValue);
-    status_message = "Node URL, start height saved";
+    status_message = positiveStatusMessage("Node URL, start height saved");
   }
 }
 
@@ -90,7 +100,7 @@ async function sendTestRequestHandler() {
     }
     nodeUrlInput.value = nodeUrlInputValue;
     const test = await get_info(nodeUrlInputValue);
-    status_message = `get_info response success`;
+    status_message = positiveStatusMessage(`get_info response success`);
     test_result = JSON.stringify(test, null, 2);
     const new_height = test.height;
     if (!startHeightInputValue) {
@@ -103,7 +113,7 @@ async function sendTestRequestHandler() {
       }
     }
   } catch (err) {
-    status_message = `get_info response failed`;
+    status_message = negativeStatusMessage(`get_info response failed`);
     test_result = "";
   }
 }
@@ -237,6 +247,12 @@ export function connectionPlate() {
           ? "color: rgba(255, 255, 255, 0.3)"
           : "color: white;"}
 
+        }
+        .status-message-positive {
+          color: #00ff00;
+        }
+        .status-message-negative {
+          color: #ff0000;
         }
       </style>
       ${integerInput("startHeight", "Enter scan start height")}
