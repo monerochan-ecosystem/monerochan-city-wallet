@@ -44,7 +44,10 @@ export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
             ${walletLower()}
         </div>`;
 };
-
+export function allWallets() {
+  if (!window.wallets?.wallets) return [];
+  return window.wallets.wallets;
+}
 export function currentlySelectedWallet() {
   if (!window.wallets?.wallets) return undefined;
   return window.wallets?.wallets[0];

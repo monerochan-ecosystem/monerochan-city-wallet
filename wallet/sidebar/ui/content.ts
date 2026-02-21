@@ -3,7 +3,7 @@ import { connectionPlate } from "../segments/connection";
 import { receivePlate } from "../segments/receive";
 import { sendPlate } from "../segments/send";
 import { lowerButtonIds } from "../segments/walletLower";
-import { actionButton } from "./buttons";
+import { walletsPlate } from "../segments/wallets";
 //                        LU RU RL LL / LU RU RL LL
 export const leftUpper = "25px 66px 25px 25px / 21px 78px 31px 31px;";
 export const middleUpper = "25px 25px 25px 25px / 21px 21px 31px 31px;";
@@ -75,7 +75,7 @@ export const plate = () => {
     return connectionPlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.wallets) {
-    return tactileContentPlate(html`<div>WALLETS</div>`, rightLower, "top");
+    return walletsPlate();
   }
   return plate;
 };
