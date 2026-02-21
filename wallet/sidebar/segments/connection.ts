@@ -6,7 +6,7 @@ import {
 import { html, type MiniHtmlString } from "../../../mininext/mininext";
 import { leftLower, tactileContentPlate } from "../ui/content";
 import { integerInput, textInput } from "../ui/input";
-import { sendChangeNodeUrlEvent } from "../../../background/messagebus";
+import { sendChangeNodeUrlStartHeightEvent } from "../../../background/messagebus";
 import { developerSettings } from "./developerSettings";
 import { currentStartingHeight, setCurrentStartingHeight } from "./walletRoute";
 
@@ -78,7 +78,6 @@ async function resetNodeUrlHandler() {
 async function saveNodeUrlHandler() {
   if (!nodeUrlInputValue) return;
   await writeNodeUrlToScanSettings(nodeUrlInputValue);
-  sendChangeNodeUrlEvent(nodeUrlInputValue);
   status_message = positiveStatusMessage("Node URL saved");
   test_result = "";
 
@@ -86,6 +85,7 @@ async function saveNodeUrlHandler() {
     await setCurrentStartingHeight(startHeightInputValue);
     status_message = positiveStatusMessage("Node URL, start height saved");
   }
+  sendChangeNodeUrlStartHeightEvent(nodeUrlInputValue);
 }
 
 async function sendTestRequestHandler() {

@@ -4,7 +4,7 @@ export type WalletCacheChangedEvent = {
   payload: CacheChangedCallbackParameters;
 };
 export type ExtensionMessage =
-  | ChangeNodeUrlEvent
+  | ChangeNodeUrlStartHeightEvent
   | WalletCacheChangedEvent
   | { type: "ping"; payload?: never }
   | { type: "response"; payload: any };
@@ -25,23 +25,29 @@ export function receiveWalletChangedEvent(
     cb(msg.payload);
   }
 }
-export type ChangeNodeUrlPayload = { nodeUrl: string };
-export type ChangeNodeUrlEvent = {
-  type: "changeNodeUrl";
-  payload: ChangeNodeUrlPayload;
+export type ChangeNodeUrlStartHeightPayload = {
+  nodeUrl?: string;
+  start_height?: number;
 };
-export function sendChangeNodeUrlEvent(nodeUrl: string) {
-  const msg: ChangeNodeUrlEvent = {
-    type: "changeNodeUrl",
-    payload: { nodeUrl },
+export type ChangeNodeUrlStartHeightEvent = {
+  type: "changeNodeUrlStartHeight";
+  payload: ChangeNodeUrlStartHeightPayload;
+};
+export function sendChangeNodeUrlStartHeightEvent(
+  nodeUrl?: string,
+  start_height?: number,
+) {
+  const msg: ChangeNodeUrlStartHeightEvent = {
+    type: "changeNodeUrlStartHeight",
+    payload: { nodeUrl, start_height },
   };
   browser.runtime.sendMessage(msg).catch(() => {});
 }
-export function receiveChangeNodeUrlEvent(
+export function receiveChangeNodeUrlStartHeightEvent(
   msg: ExtensionMessage,
-  cb: (payload: ChangeNodeUrlPayload) => void,
+  cb: (payload: ChangeNodeUrlStartHeightPayload) => void,
 ) {
-  if (msg.type === "changeNodeUrl") {
+  if (msg.type === "changeNodeUrlStartHeight") {
     cb(msg.payload);
   }
 }
