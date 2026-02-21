@@ -4,12 +4,12 @@ export type ExtractRouteParam<Path extends string> =
   Path extends `:${infer Param}/${infer Rest}`
     ? Param | ExtractRouteParam<Rest>
     : Path extends `:${infer Param}`
-    ? Param
-    : Path extends `${infer Prefix}/*`
-    ? ExtractRouteParam<Prefix> | "*"
-    : Path extends `${infer _Prefix}/${infer Rest}`
-    ? ExtractRouteParam<Rest>
-    : never;
+      ? Param
+      : Path extends `${infer Prefix}/*`
+        ? ExtractRouteParam<Prefix> | "*"
+        : Path extends `${infer _Prefix}/${infer Rest}`
+          ? ExtractRouteParam<Rest>
+          : never;
 
 export type Params<Path extends string> = {
   [Param in ExtractRouteParam<Path>]: string;
@@ -17,7 +17,7 @@ export type Params<Path extends string> = {
 
 export type Handler<Path extends string = string> = (
   params: Params<Path>,
-  mini: Mini
+  mini: Mini,
 ) => MiniHtmlString;
 
 export type RoutePaths<RoutesObj> = {
@@ -33,18 +33,18 @@ export type TypedRouter<TRoutes extends Record<string, any>> = {
   navigate(path: string): void;
   navigate<Path extends RoutePaths<TRoutes>>(
     path: Path,
-    params: Params<Path>
+    params: Params<Path>,
   ): void;
   link(path: string): string;
   link<Path extends RoutePaths<TRoutes>>(
     path: Path,
-    params: Params<Path>
+    params: Params<Path>,
   ): string;
   getCurrentPath(): string;
 };
 
 export function createRouter<
-  const TRoutes extends Record<string, Handler<any>>
+  const TRoutes extends Record<string, Handler<any>>,
 >(routes: TRoutes): TypedRouter<TRoutes> {
   let currentPath = "";
 
@@ -85,7 +85,7 @@ export function createRouter<
   function pathMatch(
     template: string,
     path: string,
-    isPrefix = false
+    isPrefix = false,
   ): { params: Record<string, string>; rest?: string } | null {
     const templateParts = template.split("/").filter(Boolean);
     const pathParts = path.split("/").filter(Boolean);
@@ -136,7 +136,9 @@ export function createRouter<
     } else {
       finalPath = pathOrTemplate;
     }
-    return finalPath.startsWith("/") ? finalPath : "/" + finalPath;
+    const result = finalPath.startsWith("/") ? finalPath : "/" + finalPath;
+
+    return result.startsWith("#") ? result : "#" + result;
   }
 
   return {
@@ -155,7 +157,7 @@ export function createRouter<
     },
     navigate: function (
       pathOrTemplate: any,
-      params?: Record<string, string>
+      params?: Record<string, string>,
     ): void {
       window.location.hash = link(pathOrTemplate, params);
     },
