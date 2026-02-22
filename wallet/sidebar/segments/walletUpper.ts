@@ -1,4 +1,5 @@
 import { html } from "../../../mininext/mininext";
+import { convertBigIntAmount } from "./send";
 import { currentlySelectedWallet } from "./walletRoute";
 export const safetyButtonIds = {
   fire: "fire",
@@ -33,15 +34,22 @@ export function safetyClickHandler(e: MouseEvent) {
     }
   }
 }
+export function truncateDecimalString(str: string, decimals = 3): string {
+  if (!str.includes(".")) return str;
 
+  const [integer, fraction = ""] = str.split(".");
+  const truncatedFraction = fraction.slice(0, decimals);
+  return truncatedFraction ? `${integer}.${truncatedFraction}` : integer!;
+}
 export const walletUpper = () => {
   const wallet = currentlySelectedWallet();
-  // TODO: format amount with commas
+  const amount = convertBigIntAmount(wallet?.amount || 0n);
+  const amountTrun = truncateDecimalString(amount, 3);
   return html` <div class="upper">
     <div class="labels">
       <div class="safe-label" id="safe-label">0</div>
       <div class="fire-label deselected-label" id="fire-label">
-        ${String(wallet?.amount)} XMR
+        ${amountTrun} XMR
       </div>
     </div>
 
