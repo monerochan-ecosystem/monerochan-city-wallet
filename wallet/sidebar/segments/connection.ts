@@ -165,7 +165,7 @@ export function connectionPlate() {
       startHeightInput.value.length === 0 &&
       startHeightInputValue !== false
     ) {
-      startHeightInput.value = String(startHeightInputValue);
+      startHeightInput.value = String(startHeightInputValue || "");
     }
     if (startHeightInputValue === false) readStartHeight();
   }
