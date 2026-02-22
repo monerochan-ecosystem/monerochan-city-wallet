@@ -1,5 +1,6 @@
 import { html, type MiniValue } from "../../../mininext/mininext";
 import { connectionPlate } from "../segments/connection";
+import { historyPlate } from "../segments/history";
 import { receivePlate } from "../segments/receive";
 import { sendPlate } from "../segments/send";
 import { lowerButtonIds } from "../segments/walletLower";
@@ -69,7 +70,7 @@ export const plate = () => {
     return receivePlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.history) {
-    return tactileContentPlate(html`<div>HISTORY</div>`, rightUpper);
+    return historyPlate();
   }
   if (window.activeWalletPlate === lowerButtonIds.connection) {
     return connectionPlate();
