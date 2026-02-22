@@ -161,7 +161,10 @@ export function connectionPlate() {
   ) as HTMLInputElement | null;
   if (startHeightInput) {
     startHeightInput.oninput = updateStartHeightCallback;
-    if (startHeightInput.value.length === 0 && startHeightInputValue !== null) {
+    if (
+      startHeightInput.value.length === 0 &&
+      startHeightInputValue !== false
+    ) {
       startHeightInput.value = String(startHeightInputValue);
     }
     if (startHeightInputValue === false) readStartHeight();
