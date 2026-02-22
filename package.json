@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@spirobel/monero-wallet-api": "../monero-wallet-api/typescript/",
+    "@spirobel/seedphrase": "../monero-wallet-api/seedphrase/",
     "@types/bun": "latest",
     "@types/chrome": "0.1.32"
   },
