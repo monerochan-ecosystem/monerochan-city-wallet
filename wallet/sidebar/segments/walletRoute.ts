@@ -1,4 +1,7 @@
-import type { ManyScanCachesOpened } from "@spirobel/monero-wallet-api";
+import {
+  readConnectionStatusDefaultLocation,
+  type ManyScanCachesOpened,
+} from "@spirobel/monero-wallet-api";
 import type { Mini } from "../../../mininext/mininext";
 import type { WalletRouteParams } from "../router";
 import { attachHandlers } from "../ui/buttons";
@@ -60,8 +63,34 @@ export async function setCurrentStartingHeight(start_height: number | null) {
   if (!window.wallets?.wallets) throw new Error("no wallets");
   await window.wallets.changeStartHeight(start_height);
 }
+let interval: null | number | NodeJS.Timeout = null;
+let connected_to_node = false;
+
 export function connectedToNode(): boolean {
-  //todo check if there was a connection status update
-  // in the last 10 seconds
-  return false;
+  if (!interval) interval = setInterval(checkConnection, 500);
+  return connected_to_node;
+}
+
+async function checkConnection() {
+  const connectionStatus = await readConnectionStatusDefaultLocation();
+  if (
+    connectionStatus?.last_packet.status === "OK" &&
+    isWithinLast10Seconds(connectionStatus?.last_packet.timestamp)
+  ) {
+    connected_to_node = true;
+  } else {
+    connected_to_node = false;
+  }
+}
+
+function isWithinLast10Seconds(timestamp?: string): boolean {
+  if (!timestamp) return false;
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) {
+    return false;
+  }
+  const now = Date.now();
+  const tsTime = date.getTime();
+  const ageInMs = now - tsTime;
+  return ageInMs >= 0 && ageInMs <= 10_000;
 }
