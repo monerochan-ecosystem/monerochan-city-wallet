@@ -3,6 +3,7 @@ import { html, flatten } from "../../../mininext/mininext";
 import { textInput } from "../ui/input";
 import { router } from "../router";
 import { sendWalletWipeEvent } from "../../../background/messagebus";
+import { currentlySelectedWallet } from "./walletRoute";
 let fileObjects: { filename: string; content: string; opened: boolean }[] = [];
 async function readFiles() {
   const files = [];
@@ -66,7 +67,30 @@ function openFile(e: MouseEvent) {
     }
   }
 }
-
+async function regTestOneBlock() {
+  const wallet_address = currentlySelectedWallet()?.primary_address;
+  const node_url = currentlySelectedWallet()?.node_url;
+  const payload = {
+    jsonrpc: "2.0",
+    id: "0",
+    method: "generateblocks",
+    params: {
+      amount_of_blocks: 1,
+      wallet_address: wallet_address,
+    },
+  };
+  try {
+    const response = await fetch(`${node_url}/json_rpc`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    console.log(JSON.stringify(result, null, 2));
+  } catch (e) {
+    console.error("Error:", e);
+  }
+}
 export function developerSettings() {
   if (!fileObjects.length)
     readFiles().then((files) => {
@@ -123,6 +147,12 @@ export function developerSettings() {
   if (wipeWalletInput) {
     wipeWalletInput.oninput = wipeWalletCallback;
   }
+  const regTestOneBlockBtn = document.getElementById(
+    "regtestOneBlock",
+  ) as HTMLElement | null;
+  if (regTestOneBlockBtn) {
+    regTestOneBlockBtn.onclick = regTestOneBlock;
+  }
   return html`<div>
     <style>
       .dir {
@@ -174,8 +204,25 @@ export function developerSettings() {
         border: 2px solid rgba(255, 255, 255, 0.3);
         border-radius: 4px;
         padding: 2px 4px;
+        user-select: none;
       }
       #exportWallet:hover {
+        color: white;
+      }
+      #regtestOneBlock {
+        box-shadow:
+          inset 0 4px 12px rgba(0, 0, 0, 0.45),
+          0 5px 8px rgba(0, 0, 0, 0.4);
+        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        padding: 2px 4px;
+        user-select: none;
+      }
+      #regtestOneBlock:hover {
         color: white;
       }
     </style>
@@ -194,5 +241,12 @@ export function developerSettings() {
       inspect wallet files:
     </div>
     ${files}
+    <div style=" margin-bottom: 7px">
+      send command to local regtest node (currently selected wallet receives
+      miner reward):
+    </div>
+    <div style="margin-bottom: 36px; margin-top: 12px">
+      <span id="regtestOneBlock">regtest one block</span>
+    </div>
   </div>`;
 }
