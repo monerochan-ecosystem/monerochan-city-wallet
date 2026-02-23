@@ -1,3 +1,4 @@
+import { setupFinishedYet } from "../wallet/sidebar/init";
 import {
   receiveChangeNodeUrlStartHeightEvent,
   receiveWalletWipeEvent,
@@ -31,6 +32,7 @@ let retryScheduled = false;
 let wallets = await initWallets();
 
 async function initWallets() {
+  if (!(await setupFinishedYet())) return;
   return await openWallets({
     notifyMasterChanged: (result) => {
       sendWalletChangedEvent(result);
