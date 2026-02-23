@@ -27,6 +27,7 @@ async function wipeWalletCallback() {
     sendWalletWipeEvent();
     await deleteAllfiles();
     router.navigate("/onboarding");
+    location.reload();
   }
 }
 async function exportWallet() {

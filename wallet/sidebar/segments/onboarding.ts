@@ -374,4 +374,5 @@ async function finishCB() {
   });
   sendWalletSetupFinishedEvent();
   router.navigate(walletRouteToString(WALLET_DEFAULT_ROUTE));
+  location.reload();
 }
