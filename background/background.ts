@@ -1,6 +1,7 @@
 import { setupFinishedYet } from "../wallet/sidebar/init";
 import {
   receiveChangeNodeUrlStartHeightEvent,
+  receiveWalletSetupFinishedEvent,
   receiveWalletWipeEvent,
   sendWalletChangedEvent,
   type ExtensionMessage,
@@ -23,17 +24,23 @@ if (browser.runtime) {
       );
     });
     receiveWalletWipeEvent(msg, () => {
+      console.log("wipe", wallets);
       wallets?.stopWorker();
       wallets = undefined;
+    });
+    receiveWalletSetupFinishedEvent(msg, async () => {
+      wallets = await initWallets();
     });
   });
 }
 let retryScheduled = false;
 let wallets = await initWallets();
-
+let initInProgress = false;
 async function initWallets() {
+  if (initInProgress) return;
+  initInProgress = true;
   if (!(await setupFinishedYet())) return;
-  return await openWallets({
+  const wallets = await openWallets({
     notifyMasterChanged: (result) => {
       sendWalletChangedEvent(result);
     },
@@ -52,7 +59,6 @@ async function initWallets() {
     },
     no_stats: true,
   });
+  initInProgress = false;
+  return wallets;
 }
-//TODO if scansettings.json is empty, nuke worker by calling pause and
-// check every second if we have scan settings again and then rerun openWallets
-// -> use events instead

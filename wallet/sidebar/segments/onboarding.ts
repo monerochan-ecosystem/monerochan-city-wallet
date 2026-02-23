@@ -16,6 +16,7 @@ import {
   writeWalletToScanSettings,
 } from "@spirobel/monero-wallet-api";
 import { router } from "../router";
+import { sendWalletSetupFinishedEvent } from "../../../background/messagebus";
 
 let seedphrase: string[] = []; //generateSeedphrase().split(" ");
 export function onboarding() {
@@ -371,5 +372,6 @@ async function finishCB() {
     primary_address,
     wallet_route: walletRouteToString(WALLET_DEFAULT_ROUTE),
   });
+  sendWalletSetupFinishedEvent();
   router.navigate(walletRouteToString(WALLET_DEFAULT_ROUTE));
 }

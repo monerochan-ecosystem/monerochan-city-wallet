@@ -3,8 +3,7 @@ export type ExtensionMessage =
   | ChangeNodeUrlStartHeightEvent
   | WalletCacheChangedEvent
   | WalletWipeEvent
-  | { type: "ping"; payload?: never }
-  | { type: "response"; payload: any };
+  | WalletSetupFinishedEvent;
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
   payload: CacheChangedCallbackParameters;
@@ -68,6 +67,27 @@ export function sendWalletWipeEvent() {
 
 export function receiveWalletWipeEvent(msg: ExtensionMessage, cb: () => void) {
   if (msg.type === "walletWipe") {
+    cb();
+  }
+}
+
+export type WalletSetupFinishedEvent = {
+  type: "walletSetupFinished";
+  payload: null;
+};
+export function sendWalletSetupFinishedEvent() {
+  const msg: WalletSetupFinishedEvent = {
+    type: "walletSetupFinished",
+    payload: null,
+  };
+  browser.runtime.sendMessage(msg).catch(() => {});
+}
+
+export function receiveWalletSetupFinishedEvent(
+  msg: ExtensionMessage,
+  cb: () => void,
+) {
+  if (msg.type === "walletSetupFinished") {
     cb();
   }
 }
