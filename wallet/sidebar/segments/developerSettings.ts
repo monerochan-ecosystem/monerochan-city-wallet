@@ -63,29 +63,43 @@ function openFile(e: MouseEvent) {
     }
   }
 }
+
 export function developerSettings() {
   if (!fileObjects.length)
     readFiles().then((files) => {
       fileObjects = files;
     });
 
-  const dirlist = fileObjects.map(
-    (file, i) =>
-      html`<div class="dir">
-        <div
-          class="filename ${file.opened ? "file-opened" : "file-closed"}"
-          id="${String(i)}"
-        >
-          ${file.filename}
-        </div>
-        <div
-          class="content ${file.opened ? "content-opened" : "content-closed"}"
-          id="${String(i)}-content"
-        >
-          ${file.opened ? file.content : ""}
-        </div>
-      </div>`,
-  );
+  const dirlist = fileObjects.map((file, i) => {
+    const filename = document.getElementById(String(i)) as HTMLElement | null;
+    if (filename) {
+      if (file.opened) {
+        filename.classList.add("file-opened");
+        filename.classList.remove("file-closed");
+      } else {
+        filename.classList.add("file-closed");
+        filename.classList.remove("file-opened");
+      }
+    }
+    const content = document.getElementById(
+      `${String(i)}-content`,
+    ) as HTMLElement | null;
+    if (content) {
+      if (file.opened) {
+        content.classList.add("content-opened");
+        content.classList.remove("content-closed");
+      } else {
+        content.classList.add("content-closed");
+        content.classList.remove("content-opened");
+      }
+    }
+    return html`<div class="dir">
+      <div class="filename" id="${String(i)}">${file.filename}</div>
+      <div class="content" id="${String(i)}-content">
+        ${file.opened ? file.content : ""}
+      </div>
+    </div>`;
+  });
   const dirElement = document.getElementsByClassName("filename");
   if (dirElement) {
     for (const element of dirElement) {
