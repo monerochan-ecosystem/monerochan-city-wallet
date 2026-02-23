@@ -61,7 +61,8 @@ export function convertAmountBigInt(amount_double: string): bigint {
   }
   return amount;
 }
-export function walletUnlocked() {
+export function walletUnlocked(): boolean {
+  if (window.unlocked === undefined) return false;
   return window.unlocked;
 }
 let addressInputValue = "";
