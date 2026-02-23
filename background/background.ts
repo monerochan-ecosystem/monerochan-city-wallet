@@ -1,5 +1,6 @@
 import {
   receiveChangeNodeUrlStartHeightEvent,
+  receiveWalletWipeEvent,
   sendWalletChangedEvent,
   type ExtensionMessage,
 } from "./messagebus";
@@ -20,25 +21,36 @@ if (browser.runtime) {
         payload.start_height,
       );
     });
+    receiveWalletWipeEvent(msg, () => {
+      wallets?.stopWorker();
+      wallets = undefined;
+    });
   });
 }
 let retryScheduled = false;
-const wallets = await openWallets({
-  notifyMasterChanged: (result) => {
-    sendWalletChangedEvent(result);
-  },
-  workerError: (err) => {
-    console.log(
-      "scan worker error, typically loss of network connection, retry in 1 second",
-      err,
-    );
-    if (retryScheduled) return;
+let wallets = await initWallets();
 
-    retryScheduled = true;
-    setTimeout(() => {
-      wallets?.retry();
-      retryScheduled = false;
-    }, 1000);
-  },
-  no_stats: true,
-});
+async function initWallets() {
+  return await openWallets({
+    notifyMasterChanged: (result) => {
+      sendWalletChangedEvent(result);
+    },
+    workerError: (err) => {
+      console.log(
+        "scan worker error, typically loss of network connection, retry in 1 second",
+        err,
+      );
+      if (retryScheduled) return;
+
+      retryScheduled = true;
+      setTimeout(() => {
+        wallets?.retry();
+        retryScheduled = false;
+      }, 1000);
+    },
+    no_stats: true,
+  });
+}
+//TODO if scansettings.json is empty, nuke worker by calling pause and
+// check every second if we have scan settings again and then rerun openWallets
+// -> use events instead

@@ -1,13 +1,15 @@
 import { type CacheChangedCallbackParameters } from "@spirobel/monero-wallet-api";
+export type ExtensionMessage =
+  | ChangeNodeUrlStartHeightEvent
+  | WalletCacheChangedEvent
+  | WalletWipeEvent
+  | { type: "ping"; payload?: never }
+  | { type: "response"; payload: any };
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
   payload: CacheChangedCallbackParameters;
 };
-export type ExtensionMessage =
-  | ChangeNodeUrlStartHeightEvent
-  | WalletCacheChangedEvent
-  | { type: "ping"; payload?: never }
-  | { type: "response"; payload: any };
+
 export function sendWalletChangedEvent(
   payload: CacheChangedCallbackParameters,
 ) {
@@ -49,5 +51,23 @@ export function receiveChangeNodeUrlStartHeightEvent(
 ) {
   if (msg.type === "changeNodeUrlStartHeight") {
     cb(msg.payload);
+  }
+}
+
+export type WalletWipeEvent = {
+  type: "walletWipe";
+  payload: null;
+};
+export function sendWalletWipeEvent() {
+  const msg: WalletWipeEvent = {
+    type: "walletWipe",
+    payload: null,
+  };
+  browser.runtime.sendMessage(msg).catch(() => {});
+}
+
+export function receiveWalletWipeEvent(msg: ExtensionMessage, cb: () => void) {
+  if (msg.type === "walletWipe") {
+    cb();
   }
 }
