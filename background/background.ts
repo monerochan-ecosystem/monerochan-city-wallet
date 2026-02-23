@@ -17,7 +17,8 @@ if (typeof chrome !== "undefined" && typeof browser === "undefined") {
 
 if (browser.runtime) {
   browser.runtime.onMessage.addListener((msg: ExtensionMessage, sender) => {
-    receiveChangeNodeUrlStartHeightEvent(msg, (payload) => {
+    receiveChangeNodeUrlStartHeightEvent(msg, async (payload) => {
+      if (!wallets) wallets = await initWallets();
       wallets?.changeNodeUrlAndStartHeight(
         payload.nodeUrl,
         payload.start_height,
@@ -35,16 +36,15 @@ if (browser.runtime) {
 }
 let retryScheduled = false;
 let wallets = await initWallets();
-let initInProgress = false;
 async function initWallets() {
-  if (initInProgress) return;
-  initInProgress = true;
   if (!(await setupFinishedYet())) return;
   const wallets = await openWallets({
     notifyMasterChanged: (result) => {
       sendWalletChangedEvent(result);
     },
-    workerError: (err) => {
+    workerError: async (err) => {
+      if (!(await setupFinishedYet())) return;
+
       console.log(
         "scan worker error, typically loss of network connection, retry in 1 second",
         err,
@@ -59,6 +59,5 @@ async function initWallets() {
     },
     no_stats: true,
   });
-  initInProgress = false;
   return wallets;
 }
