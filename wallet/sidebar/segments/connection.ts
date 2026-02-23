@@ -19,13 +19,17 @@ async function readNodeUrl() {
     nodeUrlInput.value = nodeUrlInputValue || "";
   }
 }
+function startheightToString(startHeight: number | null) {
+  if (startHeight === null) return "";
+  return String(startHeight);
+}
 function readStartHeight() {
   startHeightInputValue = currentStartingHeight() || null;
   const startHeightInput = document.getElementById(
     "startHeight",
   ) as HTMLInputElement | null;
   if (startHeightInput) {
-    startHeightInput.value = String(startHeightInputValue || "") || "";
+    startHeightInput.value = startheightToString(startHeightInputValue);
   }
 }
 const empty_status_message = html`<div></div>`;
@@ -102,14 +106,14 @@ async function sendTestRequestHandler() {
     const test = await get_info(nodeUrlInputValue);
     status_message = positiveStatusMessage(`get_info response success`);
     test_result = JSON.stringify(test, null, 2);
-    const new_height = test.height;
+    const new_height = test.height - 1;
     if (!startHeightInputValue) {
       startHeightInputValue = new_height;
       const startHeightInput = document.getElementById(
         "startHeight",
       ) as HTMLInputElement | null;
       if (startHeightInput) {
-        startHeightInput.value = String(startHeightInputValue || "") || "";
+        startHeightInput.value = startheightToString(startHeightInputValue);
       }
     }
   } catch (err) {
@@ -165,7 +169,7 @@ export function connectionPlate() {
       startHeightInput.value.length === 0 &&
       startHeightInputValue !== false
     ) {
-      startHeightInput.value = String(startHeightInputValue || "");
+      startHeightInput.value = startheightToString(startHeightInputValue);
     }
     if (startHeightInputValue === false) readStartHeight();
   }
