@@ -44,18 +44,21 @@ export function historyPlate() {
             grid-template-columns: 1fr 60px 124px 60px;
             font-weight: 700;
             font-size: 16px;
-            gap: 17px;
+            gap: 12px;
           }
           .timestamp {
           }
           .amount {
-            color: rgba(255 68 68 / 0.5);
+            color: #ff4444;
           }
           .details {
-            color: rgb(0, 0, 238);
             cursor: pointer;
             font-family: sans-serif;
             font-weight: 700;
+            user-select: none;
+          }
+          .details:hover {
+            color: white;
           }
         </style>
 
