@@ -6,7 +6,7 @@ export type ExtensionMessage =
   | WalletSetupFinishedEvent;
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
-  payload: CacheChangedCallbackParameters;
+  payload: string;
 };
 
 export function sendWalletChangedEvent(
@@ -14,7 +14,9 @@ export function sendWalletChangedEvent(
 ) {
   const msg: WalletCacheChangedEvent = {
     type: "walletCacheChanged",
-    payload,
+    payload: JSON.stringify(payload, (key, value) =>
+      typeof value === "bigint" ? value.toString() : value,
+    ),
   };
   browser.runtime.sendMessage(msg).catch(() => {});
 }
@@ -23,7 +25,12 @@ export function receiveWalletChangedEvent(
   cb: (payload: CacheChangedCallbackParameters) => void,
 ) {
   if (msg.type === "walletCacheChanged") {
-    cb(msg.payload);
+    cb(
+      JSON.parse(msg.payload, (key, value) => {
+        if (key === "amount") return BigInt(value);
+        return value;
+      }),
+    );
   }
 }
 export type ChangeNodeUrlStartHeightPayload = {
