@@ -1,3 +1,4 @@
+import type { FoundTransaction } from "@spirobel/monero-wallet-api/dist/scanning-syncing/scanresult/scanCacheOpened";
 import { flatten, html } from "../../../mininext/mininext";
 import { rightUpper, tactileContentPlate } from "../ui/content";
 import { currentlySelectedWallet } from "./walletRoute";
@@ -17,6 +18,47 @@ function setOpenDetails(tx_hash: string) {
       details.style.display = "none";
     }
   }
+}
+function txDetails(tx: FoundTransaction) {
+  //console.log(tx.outputs[0]);
+  const sub_index = tx.outputs[0]?.subaddress_index;
+  const sub_snippet = sub_index
+    ? html`<div class="tx-detail">
+        <div>subaddress index:</div>
+        <div style="color: white;">${sub_index}</div>
+      </div>`
+    : "";
+  return html`<div>
+    <style>
+      .tx-detail {
+        display: grid;
+        grid-template-columns: 50px 158px;
+        margin-top: 5px;
+        margin-bottom: 4px;
+        margin-left: 33px;
+        gap: 40px;
+      }
+      .tx-hash {
+        width: 162px;
+        word-wrap: break-word;
+        display: inline-block;
+        color: white;
+      }
+    </style>
+    <div class="tx-detail">
+      <div>tx_hash:</div>
+      <div class="tx-hash">${tx.tx_hash}</div>
+    </div>
+    <div class="tx-detail">
+      <div>block_height:</div>
+      <div>${tx.outputs[0]?.block_height!}</div>
+    </div>
+    <div class="tx-detail">
+      <div>payment_id:</div>
+      <div>${tx.outputs[0]?.payment_id!}</div>
+    </div>
+    ${sub_snippet}
+  </div>`;
 }
 function transactionsList() {
   const txs = currentlySelectedWallet()
@@ -39,7 +81,6 @@ function transactionsList() {
               details.style.display = "block";
               openDetails[tx_hash] = true;
             }
-            console.log("hiiiii", openDetails);
           }
         };
       }
@@ -67,7 +108,9 @@ function transactionsList() {
             ${openDetails[tx.tx_hash] ? "hide" : "show"} details
           </div>
         </div>
-        <div class="tx-details" id="${tx.tx_hash}-details">hide details</div>
+        <div class="tx-details" id="${tx.tx_hash}-details">
+          ${openDetails[tx_hash] ? txDetails(tx) : html`<div></div>`}
+        </div>
       </div> `;
     });
   if (!txs) return html`<div>no transactions found yet</div>`;
