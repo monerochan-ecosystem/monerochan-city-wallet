@@ -75,7 +75,7 @@ async function regTestOneBlock() {
     id: "0",
     method: "generateblocks",
     params: {
-      amount_of_blocks: 1,
+      amount_of_blocks: 61,
       wallet_address: wallet_address,
     },
   };
