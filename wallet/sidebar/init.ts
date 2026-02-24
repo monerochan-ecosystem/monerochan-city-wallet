@@ -26,8 +26,8 @@ export async function initSidebar() {
 
   if (browser.runtime) {
     browser.runtime.onMessage.addListener((msg: ExtensionMessage, sender) => {
-      receiveWalletChangedEvent(msg, (payload) => {
-        window.wallets?.feed(payload);
+      receiveWalletChangedEvent(msg, async (payload) => {
+        await window.wallets?.feed(payload);
       });
     });
   }
