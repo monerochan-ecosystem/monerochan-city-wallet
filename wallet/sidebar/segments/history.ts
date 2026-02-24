@@ -120,8 +120,11 @@ function transactionsList() {
         </div>
       </div> `;
     });
-  if (!txs) return html`<div>no transactions found yet</div>`;
-
+  if (!txs || txs.length === 0) {
+    return html`<div style="user-select: none;margin-left: 148px;">
+      no transactions found yet
+    </div>`;
+  }
   return flatten(txs);
 }
 export function historyPlate() {
