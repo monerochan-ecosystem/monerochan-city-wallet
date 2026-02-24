@@ -6,6 +6,7 @@ import {
   truncateDecimalString,
   convertBigIntAmount,
 } from "@spirobel/monero-wallet-api";
+import type { Pending } from "@spirobel/monero-wallet-api/dist/scanning-syncing/scanresult/scanResult";
 const openDetails: Record<string, boolean | undefined> = {};
 function setOpenDetails(tx_hash: string) {
   const details = document.getElementById(
@@ -35,6 +36,21 @@ function txDetails(tx: FoundTransaction) {
         <div style="color: white;">yes</div>
       </div>`
     : "";
+  const is_pending = tx.status.status === "pending";
+  const pending_snippet = is_pending
+    ? html`<div class="tx-detail">
+        <div>unlock height:</div>
+        <div style="color: white;">${(tx.status as Pending).unlock_height}</div>
+      </div>`
+    : "";
+  const is_confirmed = tx.status.status === "spendable";
+  const confirmed_snippet = is_confirmed
+    ? html`<div class="tx-detail">
+        <div>confirmed:</div>
+        <div style="color: white;">yes</div>
+      </div>`
+    : "";
+
   return html`<div>
     <style>
       .tx-detail {
@@ -64,7 +80,7 @@ function txDetails(tx: FoundTransaction) {
       <div>payment_id:</div>
       <div>${tx.outputs[0]?.payment_id!}</div>
     </div>
-    ${sub_snippet} ${miner_snippet}
+    ${sub_snippet} ${miner_snippet} ${pending_snippet} ${confirmed_snippet}
   </div>`;
 }
 function transactionsList() {
@@ -92,12 +108,13 @@ function transactionsList() {
         };
       }
       setOpenDetails(tx_hash);
+      const amount_class = tx.status.status === "pending" ? "" : "amount";
       return html`<div class="tx-container">
         <div class="transaction">
           <div></div>
           <div>
             <span class="sign">+</span>
-            <span class="amount">
+            <span class="${amount_class}">
               ${truncateDecimalString(convertBigIntAmount(tx.amount))}
             </span>
           </div>
@@ -110,6 +127,9 @@ function transactionsList() {
               minute: "2-digit",
               hour12: false,
             })}
+            ${tx.status.status === "pending"
+              ? html`<span class="pending">(pending)</span>`
+              : ""}
           </div>
           <div class="details" id="${tx.tx_hash}">
             ${openDetails[tx.tx_hash] ? "hide" : "show"} details
@@ -147,6 +167,9 @@ export function historyPlate() {
             margin-right: 4px;
           }
           .amount {
+            color: #ff4444;
+          }
+          .pending {
             color: #ff4444;
           }
           .details {
