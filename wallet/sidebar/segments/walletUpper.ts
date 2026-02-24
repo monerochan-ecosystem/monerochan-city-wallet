@@ -45,11 +45,19 @@ export const walletUpper = () => {
   const wallet = currentlySelectedWallet();
   const amount = convertBigIntAmount(wallet?.amount || 0n);
   const amountTrun = truncateDecimalString(amount, 3);
+  const pendingAmount = convertBigIntAmount(wallet?.pending_amount || 0n);
+  const pendingAmountTrun = truncateDecimalString(pendingAmount, 3);
+  const pendingEl = document.getElementById("pending-amount");
+  if (pendingEl && wallet?.pending_amount && wallet.pending_amount > 0n)
+    pendingEl.style.display = "block";
   return html` <div class="upper">
     <div class="labels">
       <div class="safe-label" id="safe-label">0</div>
       <div class="fire-label deselected-label" id="fire-label">
         ${amountTrun} XMR
+        <div class="pending-amount" id="pending-amount" style="display: none;">
+          ${pendingAmountTrun} (pending)
+        </div>
       </div>
     </div>
 
@@ -67,6 +75,11 @@ export const walletUpper = () => {
     <div id="safe"></div>
     <div id="fire"></div>
     <style>
+      .pending-amount {
+        font-size: 10px;
+        right: 53px;
+        position: absolute;
+      }
       #safe {
         position: absolute;
         width: 100px;
