@@ -28,6 +28,13 @@ function txDetails(tx: FoundTransaction) {
         <div style="color: white;">${sub_index}</div>
       </div>`
     : "";
+  const is_miner = tx.outputs[0]?.is_miner_tx;
+  const miner_snippet = is_miner
+    ? html`<div class="tx-detail">
+        <div>is miner tx:</div>
+        <div style="color: white;">yes</div>
+      </div>`
+    : "";
   return html`<div>
     <style>
       .tx-detail {
@@ -57,7 +64,7 @@ function txDetails(tx: FoundTransaction) {
       <div>payment_id:</div>
       <div>${tx.outputs[0]?.payment_id!}</div>
     </div>
-    ${sub_snippet}
+    ${sub_snippet} ${miner_snippet}
   </div>`;
 }
 function transactionsList() {
