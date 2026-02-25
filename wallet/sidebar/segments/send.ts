@@ -7,7 +7,8 @@ import { html, type MiniHtmlString } from "../../../mininext/mininext";
 import { actionButton } from "../ui/buttons";
 import { leftUpper, tactileContentPlate } from "../ui/content";
 import { sendButtonDotStyles } from "./walletLower";
-import { connectedToNode } from "./walletRoute";
+import { connectedToNode, currentlySelectedWallet } from "./walletRoute";
+import { sendSendTransactionEvent } from "../../../background/messagebus";
 
 let parsedAmount: bigint | null = null;
 let amountInputValue = "";
@@ -67,7 +68,24 @@ export function walletUnlocked(): boolean {
 }
 let addressInputValue = "";
 let parsedAddress: ParseAddressError | ParsedAddress | null = null;
-
+function sendCallback() {
+  if (
+    connectedToNode() &&
+    walletUnlocked() &&
+    parsedAddress &&
+    "address" in parsedAddress &&
+    parsedAmount
+  ) {
+    const wallet_to_send_from_pa = currentlySelectedWallet()?.primary_address;
+    if (!wallet_to_send_from_pa)
+      throw new Error("wallet_to_send_from_pa is undefined");
+    sendSendTransactionEvent(
+      parsedAddress.address,
+      parsedAmount.toString(),
+      wallet_to_send_from_pa,
+    );
+  }
+}
 export async function parseAddressCallback() {
   const addressInput = document.getElementById(
     "addressInput",
@@ -120,6 +138,10 @@ export function sendPlateContent() {
         </style>
       </div>
     </div>`;
+  }
+  const sendBtn = document.getElementById("send-action") as HTMLButtonElement;
+  if (sendBtn) {
+    sendBtn.onclick = sendCallback;
   }
 
   return html`<div class="send-plate-container">

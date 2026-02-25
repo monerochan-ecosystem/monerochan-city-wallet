@@ -3,6 +3,7 @@ export type ExtensionMessage =
   | ChangeNodeUrlStartHeightEvent
   | WalletCacheChangedEvent
   | WalletWipeEvent
+  | SendTransactionEvent
   | WalletSetupFinishedEvent;
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
@@ -96,5 +97,34 @@ export function receiveWalletSetupFinishedEvent(
 ) {
   if (msg.type === "walletSetupFinished") {
     cb();
+  }
+}
+export type SendTransactionPayload = {
+  address: string;
+  amount: string;
+  wallet_to_send_from_pa: string;
+};
+export type SendTransactionEvent = {
+  type: "sendTransaction";
+  payload: SendTransactionPayload;
+};
+export function sendSendTransactionEvent(
+  address: string,
+  amount: string,
+  wallet_to_send_from_pa: string,
+) {
+  const msg: SendTransactionEvent = {
+    type: "sendTransaction",
+    payload: { address, amount, wallet_to_send_from_pa },
+  };
+  browser.runtime.sendMessage(msg).catch(() => {});
+}
+
+export function receiveSendTransactionEvent(
+  msg: ExtensionMessage,
+  cb: (payload: SendTransactionPayload) => void,
+) {
+  if (msg.type === "sendTransaction") {
+    cb(msg.payload);
   }
 }

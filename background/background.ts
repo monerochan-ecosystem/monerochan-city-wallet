@@ -1,6 +1,7 @@
 import { setupFinishedYet } from "../wallet/sidebar/init";
 import {
   receiveChangeNodeUrlStartHeightEvent,
+  receiveSendTransactionEvent,
   receiveWalletSetupFinishedEvent,
   receiveWalletWipeEvent,
   sendWalletChangedEvent,
@@ -8,6 +9,7 @@ import {
 } from "./messagebus";
 
 import { openWallets } from "@spirobel/monero-wallet-api/dist";
+import { defaultHappyPathSend } from "./sendTransaction";
 declare global {
   var browser: typeof chrome;
 }
@@ -31,6 +33,10 @@ if (browser.runtime) {
     });
     receiveWalletSetupFinishedEvent(msg, async () => {
       wallets = await initWallets();
+    });
+    receiveSendTransactionEvent(msg, async (payload) => {
+      const result = await defaultHappyPathSend(payload, wallets);
+      console.log(result);
     });
   });
 }
