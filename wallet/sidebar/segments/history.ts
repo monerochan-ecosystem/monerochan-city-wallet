@@ -1,4 +1,4 @@
-import type { FoundTransaction } from "@spirobel/monero-wallet-api/dist/scanning-syncing/scanresult/scanCacheOpened";
+import type { FoundTransaction } from "@spirobel/monero-wallet-api";
 import { flatten, html } from "../../../mininext/mininext";
 import { rightUpper, tactileContentPlate } from "../ui/content";
 import { currentlySelectedWallet } from "./walletRoute";
@@ -108,12 +108,15 @@ function transactionsList() {
         };
       }
       setOpenDetails(tx_hash);
-      const amount_class = tx.status.status === "pending" ? "" : "amount";
+      const positive_or_negative = tx.amount > 0 ? "amount" : "amount-negative";
+      const amount_class =
+        tx.status.status === "pending" ? "" : positive_or_negative;
+      const sign = tx.amount > 0 ? "+" : "-";
       return html`<div class="tx-container">
         <div class="transaction">
           <div></div>
           <div>
-            <span class="sign">+</span>
+            <span class="sign">${sign}</span>
             <span class="${amount_class}">
               ${truncateDecimalString(convertBigIntAmount(tx.amount))}
             </span>
@@ -168,6 +171,9 @@ export function historyPlate() {
           }
           .amount {
             color: #ff4444;
+          }
+          .amount-negative {
+            color: white;
           }
           .pending {
             color: #ff4444;
