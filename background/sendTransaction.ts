@@ -14,11 +14,7 @@ export async function defaultHappyPathSend(
     throw new Error(
       "specified wallet not found, can't make & send transaction.",
     );
-  const tx = await wallet.makeStandardTransaction(
-    payload.address,
-    payload.amount,
-  );
-  const signed = await wallet.signTransaction(tx);
-  const result = await wallet.sendTransaction(signed);
-  return result;
+  return await wallet.makeSignSendTransaction({
+    payments: [{ address: payload.address, amount: payload.amount }],
+  });
 }
