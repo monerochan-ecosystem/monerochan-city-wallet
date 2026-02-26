@@ -1,4 +1,5 @@
 import {
+  atomicWrite,
   parseAddress,
   type ParseAddressError,
   type ParsedAddress,
@@ -9,6 +10,7 @@ import { leftUpper, tactileContentPlate } from "../ui/content";
 import { sendButtonDotStyles } from "./walletLower";
 import { connectedToNode, currentlySelectedWallet } from "./walletRoute";
 import { sendSendTransactionEvent } from "../../../background/messagebus";
+import type { TxLog } from "@spirobel/monero-wallet-api/dist/scanning-syncing/scanresult/scanCache";
 
 let parsedAmount: bigint | null = null;
 let amountInputValue = "";
@@ -69,10 +71,22 @@ export function walletUnlocked(): boolean {
 }
 let addressInputValue = "";
 let parsedAddress: ParseAddressError | ParsedAddress | null = null;
-function sendCallback() {
-  if (
+function sendButtonActive() {
+  const parsedAmountBiggerThanAvailable =
+    (parsedAmount || 0n) > (currentlySelectedWallet()?.amount || 1n);
+  return !!(
+    !parsedAmountBiggerThanAvailable &&
     connectedToNode() &&
     walletUnlocked() &&
+    parsedAddress &&
+    "address" in parsedAddress &&
+    parsedAmount &&
+    !justSentTx
+  );
+}
+function sendCallback() {
+  if (
+    sendButtonActive() &&
     parsedAddress &&
     "address" in parsedAddress &&
     parsedAmount
@@ -91,24 +105,77 @@ function sendCallback() {
       parsedAmount.toString(),
       wallet_to_send_from_pa,
     );
-    const amountInput = document.getElementById(
-      "amountInput",
-    ) as HTMLInputElement | null;
+    resetSendInputs();
+  }
+}
+async function resetCallback() {
+  resetSendInputs();
+  justSentTx = false;
+  const timestamp = Date.now();
+  await atomicWrite(
+    "last-send-reset.json",
+    JSON.stringify({ timestamp }, null, 2),
+  );
+  lastReset = timestamp;
+  readLastTxLog();
+}
+async function readLastSendReset() {
+  const jsonString = await Bun.file("last-send-reset.json")
+    .text()
+    .catch(() => undefined);
+  return jsonString
+    ? (JSON.parse(jsonString) as { timestamp: number })
+    : undefined;
+}
 
-    if (amountInput) {
-      amountInput.value = "";
-      amountInputValue = "";
-      parsedAmount = null;
-    }
-    const addressInput = document.getElementById(
-      "addressInput",
-    ) as HTMLInputElement | null;
+let lastReset: number | null = null;
+let last_tx_log: TxLog | null = null;
+async function readLastTxLog() {
+  if (lastReset === null)
+    lastReset = (await readLastSendReset())?.timestamp || 0;
+  const fetched_lastlog = currentlySelectedWallet()?.tx_logs.at(-1);
+  if (!fetched_lastlog) return;
+  if (fetched_lastlog.timestamp > lastReset) {
+    last_tx_log = fetched_lastlog;
+  } else {
+    last_tx_log = null;
+  }
+  setTXlogStatusMsg();
+}
+let lastTxLogMessage = "";
+let lastTxLogMessageClass = "";
+function setTXlogStatusMsg() {
+  lastTxLogMessage = "";
+  lastTxLogMessageClass = "";
+  if (last_tx_log && last_tx_log.sendResult?.status !== "OK") {
+    lastTxLogMessage =
+      "failed to send transaction " + formatTime(last_tx_log.timestamp);
+    lastTxLogMessageClass = "txlog-error";
+  }
+  if (last_tx_log && last_tx_log.sendResult?.status === "OK") {
+    lastTxLogMessage =
+      "successfully sent transaction " + formatTime(last_tx_log.timestamp);
+    lastTxLogMessageClass = "txlog-success";
+  }
+}
+function resetSendInputs() {
+  const amountInput = document.getElementById(
+    "amountInput",
+  ) as HTMLInputElement | null;
 
-    if (addressInput) {
-      addressInput.value = "";
-      addressInputValue = "";
-      parsedAddress = null;
-    }
+  if (amountInput) {
+    amountInput.value = "";
+    amountInputValue = "";
+    parsedAmount = null;
+  }
+  const addressInput = document.getElementById(
+    "addressInput",
+  ) as HTMLInputElement | null;
+
+  if (addressInput) {
+    addressInput.value = "";
+    addressInputValue = "";
+    parsedAddress = null;
   }
 }
 export async function parseAddressCallback() {
@@ -144,6 +211,10 @@ export function sendPlateContent() {
   const parsedAmountMessage: string = parsedAmount
     ? convertBigIntAmount(parsedAmount)
     : "0.00";
+  const parsedAmountBiggerThanAvailable =
+    (parsedAmount || 0n) > (currentlySelectedWallet()?.amount || 1n)
+      ? "exceeds unlocked funds"
+      : "";
   let parsedAddressMessage: MiniHtmlString | string = addressInputValue.length
     ? html`<div style="user-select: none;">invalid address</div>`
     : "";
@@ -168,6 +239,10 @@ export function sendPlateContent() {
   if (sendBtn) {
     sendBtn.onclick = sendCallback;
   }
+  const resetBtn = document.getElementById("reset-send") as HTMLButtonElement;
+  if (resetBtn) {
+    resetBtn.onclick = resetCallback;
+  }
 
   return html`<div class="send-plate-container">
     <div class="input-block">
@@ -181,6 +256,9 @@ export function sendPlateContent() {
       <div>
         <span style="user-select: none;"> selected amount: </span>
         <span style="color:white">${parsedAmountMessage}</span>
+        <span style="user-select: none; color: #e74c3c;"
+          >${parsedAmountBiggerThanAvailable}</span
+        >
       </div>
     </div>
     <div class="input-block">
@@ -256,20 +334,9 @@ export function formatTime(timestamp: number, block_timestamp = false) {
   });
 }
 export function sendPlate() {
+  readLastTxLog();
   const sendButtonClass = walletUnlocked() ? "red-dot" : "grey-dot";
-  const last_tx_log = currentlySelectedWallet()?.tx_logs.at(-1);
-  let lastTxLogMessage = "";
-  let lastTxLogMessageClass = "";
-  if (last_tx_log && last_tx_log.sendResult?.status !== "OK") {
-    lastTxLogMessage =
-      "failed to send transaction " + formatTime(last_tx_log.timestamp);
-    lastTxLogMessageClass = "txlog-error";
-  }
-  if (last_tx_log && last_tx_log.sendResult?.status === "OK") {
-    lastTxLogMessage =
-      "successfully sent transaction " + formatTime(last_tx_log.timestamp);
-    lastTxLogMessageClass = "txlog-success";
-  }
+
   return html`<div class="plate">
     <style>
       .plate {
@@ -306,7 +373,7 @@ export function sendPlate() {
         html`<span class="send-button-content">
           ${sendButtonDotStyles}<span class="${sendButtonClass}"></span> SEND
         </span>`,
-        connectedToNode() && walletUnlocked() && !justSentTx,
+        sendButtonActive(),
       )}
       <div></div>
       ${actionButton("reset-send", "RESET")}
