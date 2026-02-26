@@ -91,6 +91,31 @@ async function regTestOneBlock() {
     console.error("Error:", e);
   }
 }
+async function regTest1000Block() {
+  const wallet_address =
+    "47cYSGSjzWPX3KFEN9PaxT5zpWKgRtx568bazbGzt57ffBbUAQevjMk19sfZCrMB1RWHNJLbz1eKU63B77HpHwUVA6JGudr";
+  const node_url = currentlySelectedWallet()?.node_url;
+  const payload = {
+    jsonrpc: "2.0",
+    id: "0",
+    method: "generateblocks",
+    params: {
+      amount_of_blocks: 1000,
+      wallet_address: wallet_address,
+    },
+  };
+  try {
+    const response = await fetch(`${node_url}/json_rpc`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    console.log(JSON.stringify(result, null, 2));
+  } catch (e) {
+    console.error("Error:", e);
+  }
+}
 export function developerSettings() {
   if (!fileObjects.length)
     readFiles().then((files) => {
@@ -152,6 +177,12 @@ export function developerSettings() {
   ) as HTMLElement | null;
   if (regTestOneBlockBtn) {
     regTestOneBlockBtn.onclick = regTestOneBlock;
+  }
+  const regTest1000BlockBtn = document.getElementById(
+    "regtest1000Block",
+  ) as HTMLElement | null;
+  if (regTest1000BlockBtn) {
+    regTest1000BlockBtn.onclick = regTest1000Block;
   }
   return html`<div>
     <style>
@@ -225,6 +256,22 @@ export function developerSettings() {
       #regtestOneBlock:hover {
         color: white;
       }
+      #regtest1000Block {
+        box-shadow:
+          inset 0 4px 12px rgba(0, 0, 0, 0.45),
+          0 5px 8px rgba(0, 0, 0, 0.4);
+        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        padding: 2px 4px;
+        user-select: none;
+      }
+      #regtest1000Block:hover {
+        color: white;
+      }
     </style>
     <div style="margin-top: 12px">
       Sharing the content of these files will result in the loss of your funds &
@@ -243,10 +290,12 @@ export function developerSettings() {
     ${files}
     <div style=" margin-bottom: 7px">
       send command to local regtest node (currently selected wallet receives
-      miner reward):
+      miner reward for one block. 1000 blocks to random address. Useful to make
+      sure the chain is long enough for decoys to be sampled):
     </div>
     <div style="margin-bottom: 36px; margin-top: 12px">
       <span id="regtestOneBlock">regtest one block</span>
+      <span id="regtest1000Block">regtest 1000 block</span>
     </div>
   </div>`;
 }
