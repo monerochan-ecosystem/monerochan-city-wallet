@@ -217,9 +217,32 @@ export function sendPlateContent() {
       : ""}
   </div>`;
 }
+export function formatTime(timestamp: number) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString(undefined, {
+    year: "2-digit",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
 export function sendPlate() {
   const sendButtonClass = walletUnlocked() ? "red-dot" : "grey-dot";
-
+  const last_tx_log = currentlySelectedWallet()?.tx_logs.at(-1);
+  let lastTxLogMessage = "";
+  let lastTxLogMessageClass = "";
+  if (last_tx_log && last_tx_log.sendResult?.status !== "OK") {
+    lastTxLogMessage =
+      "failed to send transaction " + formatTime(last_tx_log.timestamp);
+    lastTxLogMessageClass = "txlog-error";
+  }
+  if (last_tx_log && last_tx_log.sendResult?.status === "OK") {
+    lastTxLogMessage =
+      "successfully sent transaction " + formatTime(last_tx_log.timestamp);
+    lastTxLogMessageClass = "txlog-success";
+  }
   return html`<div class="plate">
     <style>
       .plate {
@@ -230,10 +253,23 @@ export function sendPlate() {
       .actions {
         display: grid;
         grid-template-columns: 140px 1fr 140px;
+        grid-template-areas:
+          "action action action"
+          "result result result";
         margin-left: 8px;
       }
       .send-button-content {
         margin-left: 14px;
+      }
+      .txlog-success {
+        grid-area: result;
+        margin-left: 39px;
+        color: #00ff00;
+      }
+      .txlog-error {
+        grid-area: result;
+        margin-left: 39px;
+        color: #ff0000;
       }
     </style>
     ${tactileContentPlate(sendPlateContent(), leftUpper)}
@@ -247,6 +283,7 @@ export function sendPlate() {
       )}
       <div></div>
       ${actionButton("reset-send", "RESET")}
+      <div class="${lastTxLogMessageClass}">${lastTxLogMessage}</div>
     </div>
   </div>`;
 }
