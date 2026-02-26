@@ -12,6 +12,7 @@ import { sendSendTransactionEvent } from "../../../background/messagebus";
 
 let parsedAmount: bigint | null = null;
 let amountInputValue = "";
+let justSentTx = false;
 export function parseAmountCallback() {
   const amountInput = document.getElementById(
     "amountInput",
@@ -79,11 +80,35 @@ function sendCallback() {
     const wallet_to_send_from_pa = currentlySelectedWallet()?.primary_address;
     if (!wallet_to_send_from_pa)
       throw new Error("wallet_to_send_from_pa is undefined");
+
+    justSentTx = true;
+    setTimeout(() => {
+      justSentTx = false;
+    }, 2000);
+
     sendSendTransactionEvent(
       parsedAddress.address,
       parsedAmount.toString(),
       wallet_to_send_from_pa,
     );
+    const amountInput = document.getElementById(
+      "amountInput",
+    ) as HTMLInputElement | null;
+
+    if (amountInput) {
+      amountInput.value = "";
+      amountInputValue = "";
+      parsedAmount = null;
+    }
+    const addressInput = document.getElementById(
+      "addressInput",
+    ) as HTMLInputElement | null;
+
+    if (addressInput) {
+      addressInput.value = "";
+      addressInputValue = "";
+      parsedAddress = null;
+    }
   }
 }
 export async function parseAddressCallback() {
@@ -279,7 +304,7 @@ export function sendPlate() {
         html`<span class="send-button-content">
           ${sendButtonDotStyles}<span class="${sendButtonClass}"></span> SEND
         </span>`,
-        connectedToNode() && walletUnlocked(),
+        connectedToNode() && walletUnlocked() && !justSentTx,
       )}
       <div></div>
       ${actionButton("reset-send", "RESET")}
