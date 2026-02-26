@@ -242,8 +242,10 @@ export function sendPlateContent() {
       : ""}
   </div>`;
 }
-export function formatTime(timestamp: number) {
-  const date = new Date(timestamp * 1000);
+export function formatTime(timestamp: number, block_timestamp = false) {
+  const date = block_timestamp
+    ? new Date(timestamp * 1000)
+    : new Date(timestamp);
   return date.toLocaleString(undefined, {
     year: "2-digit",
     month: "2-digit",
