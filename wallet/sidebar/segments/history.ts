@@ -89,6 +89,10 @@ function txDetails(tx: FoundTransaction) {
       <div>payment_id:</div>
       <div>${tx.outputs[0]?.payment_id!}</div>
     </div>
+    <div class="tx-detail">
+      <div>exact amount:</div>
+      <div style="color: white;">${convertBigIntAmount(tx.amount)}</div>
+    </div>
     ${sub_snippet} ${miner_snippet} ${pending_snippet} ${confirmed_snippet}
     ${destination_snippet}
   </div>`;
