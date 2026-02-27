@@ -6,7 +6,7 @@ import {
   truncateDecimalString,
   convertBigIntAmount,
 } from "@spirobel/monero-wallet-api";
-import type { Pending } from "@spirobel/monero-wallet-api/dist/scanning-syncing/scanresult/scanResult";
+import type { Pending, PrePendingTx } from "@spirobel/monero-wallet-api/";
 const openDetails: Record<string, boolean | undefined> = {};
 function setOpenDetails(tx_hash: string) {
   const details = document.getElementById(
@@ -21,7 +21,6 @@ function setOpenDetails(tx_hash: string) {
   }
 }
 function txDetails(tx: FoundTransaction) {
-  //console.log(tx.outputs[0]);
   const sub_index = tx.outputs[0]?.subaddress_index;
   const sub_snippet = sub_index
     ? html`<div class="tx-detail">
@@ -48,6 +47,16 @@ function txDetails(tx: FoundTransaction) {
     ? html`<div class="tx-detail">
         <div>confirmed:</div>
         <div style="color: white;">yes</div>
+      </div>`
+    : "";
+
+  const has_destination = tx.txlog?.payments?.length || 0 > 0;
+  const destination_snippet = has_destination
+    ? html`<div class="tx-detail">
+        <div>destination:</div>
+        <div style="color: white;" class="destination-address">
+          ${tx.txlog?.payments[0]?.address || ""}
+        </div>
       </div>`
     : "";
 
@@ -81,7 +90,103 @@ function txDetails(tx: FoundTransaction) {
       <div>${tx.outputs[0]?.payment_id!}</div>
     </div>
     ${sub_snippet} ${miner_snippet} ${pending_snippet} ${confirmed_snippet}
+    ${destination_snippet}
   </div>`;
+}
+
+function preTxDetails(tx: PrePendingTx) {
+  const has_destination = tx.txlog?.payments?.length || 0 > 0;
+  const destination_snippet = has_destination
+    ? html`<div class="tx-detail">
+        <div>destination:</div>
+        <div style="color: white;" class="destination-address">
+          ${tx.txlog?.payments[0]?.address || ""}
+        </div>
+      </div>`
+    : "";
+
+  return html`<div>
+    <style>
+      .tx-detail {
+        display: grid;
+        grid-template-columns: 50px 158px;
+        margin-top: 5px;
+        margin-bottom: 4px;
+        margin-left: 33px;
+        gap: 40px;
+      }
+      .tx-hash {
+        width: 162px;
+        word-wrap: break-word;
+        display: inline-block;
+        color: white;
+      }
+    </style>
+    <div class="tx-detail">
+      <div>self spent:</div>
+      <div class="tx-hash">${tx.self_spent ? "yes" : "no"}</div>
+    </div>
+
+    ${destination_snippet}
+  </div>`;
+}
+function PrependingTxsList() {
+  const pretxs = currentlySelectedWallet()
+    ?.prepending_txs.toReversed()
+    .map((tx) => {
+      const detailsId = `inputId0-${tx.inputs[0]?.index_on_blockchain!}`;
+      const date = new Date(tx.txlog.timestamp);
+      const showDetailsBtn = document.getElementById(detailsId);
+      if (showDetailsBtn) {
+        showDetailsBtn.onclick = () => {
+          const details = document.getElementById(
+            `${detailsId}-details`,
+          ) as HTMLElement | null;
+          if (details) {
+            if (openDetails[detailsId]) {
+              details.style.display = "none";
+              openDetails[detailsId] = false;
+            } else {
+              details.style.display = "block";
+              openDetails[detailsId] = true;
+            }
+          }
+        };
+      }
+      setOpenDetails(detailsId);
+      return html`<div class="tx-container">
+        <div class="transaction">
+          <div></div>
+          <div>
+            <span class="sign">-</span>
+            <span class="pending">
+              ${truncateDecimalString(convertBigIntAmount(tx.amount))}
+            </span>
+          </div>
+          <div class="timestamp">
+            ${date.toLocaleString(undefined, {
+              year: "2-digit",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            })}
+            <span class="pending">(pending)</span>
+          </div>
+          <div class="details" id="${detailsId}">
+            ${openDetails[detailsId] ? "hide" : "show"} details
+          </div>
+        </div>
+        <div class="tx-details" id="${detailsId}-details">
+          ${openDetails[detailsId] ? preTxDetails(tx) : html`<div></div>`}
+        </div>
+      </div> `;
+    });
+  if (!pretxs || pretxs.length === 0) {
+    return html`<div></div>`;
+  }
+  return flatten(pretxs);
 }
 function transactionsList() {
   const txs = currentlySelectedWallet()
@@ -187,9 +292,14 @@ export function historyPlate() {
           .details:hover {
             color: white;
           }
+          .destination-address {
+            width: 150px;
+            word-wrap: break-word;
+            display: inline-block;
+            margin-bottom: 20px;
+          }
         </style>
-
-        ${transactionsList()}
+        ${PrependingTxsList()} ${transactionsList()}
       </div>
     `,
     rightUpper,
