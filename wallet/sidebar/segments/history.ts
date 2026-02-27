@@ -159,7 +159,7 @@ function PrependingTxsList() {
           <div></div>
           <div>
             <span class="sign">-</span>
-            <span class="pending">
+            <span class="amount-negative">
               ${truncateDecimalString(convertBigIntAmount(tx.amount))}
             </span>
           </div>
