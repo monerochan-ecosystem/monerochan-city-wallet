@@ -45,9 +45,11 @@ export function truncateDecimalString(str: string, decimals = 3): string {
 let interval: null | number | NodeJS.Timeout = null;
 let catastropic_reorg = false;
 
-export function connectedToNode(): boolean {
-  if (!interval) interval = setInterval(checkConnection, 500);
-  return catastropic_reorg;
+export function startCatReorgCheck() {
+  if (!interval) {
+    interval = setInterval(checkConnection, 500);
+    checkConnection();
+  }
 }
 
 async function checkConnection() {
@@ -60,6 +62,7 @@ async function checkConnection() {
 }
 
 export const walletUpper = () => {
+  startCatReorgCheck();
   if (catastropic_reorg) return catReorgWarningUpper();
   const wallet = currentlySelectedWallet();
   const amount = convertBigIntAmount(wallet?.amount || 0n);
