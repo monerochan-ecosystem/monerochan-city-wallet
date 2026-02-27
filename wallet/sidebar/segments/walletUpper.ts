@@ -72,6 +72,12 @@ export const walletUpper = () => {
   const pendingEl = document.getElementById("pending-amount");
   if (pendingEl && wallet?.pending_amount && wallet.pending_amount > 0n)
     pendingEl.style.display = "block";
+  if (
+    pendingEl &&
+    ((wallet?.pending_amount && wallet.pending_amount <= 0n) ||
+      !wallet?.pending_amount)
+  )
+    pendingEl.style.display = "none";
   return html` <div class="upper">
     <div class="labels">
       <div class="safe-label" id="safe-label">0</div>
