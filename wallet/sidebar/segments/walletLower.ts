@@ -3,7 +3,7 @@ import { addActive, tactileSwitch } from "../ui/buttons";
 import { removeActive } from "../ui/buttons";
 import { plate } from "../ui/content";
 import { walletUnlocked } from "./send";
-import { connectedToNode } from "./walletRoute";
+import { connectedToNode, currentlySelectedWallet } from "./walletRoute";
 
 export const walletLower = () => {
   return html` <div class="lower">
@@ -116,16 +116,42 @@ export function lowerBottomMenu() {
     ></span>`,
   );
   return html`<div class="bottom-menu">
-    ${connectionButton}
-    <div></div>
-    ${walletsButton}
+    ${connectionButton} ${connectionProgress()} ${walletsButton}
     <style>
       .bottom-menu {
         display: grid;
-        grid-template-columns: 140px 1fr 140px;
+        grid-template-columns: 135px 1fr 135px;
 
         margin-left: 8px;
       }
     </style>
   </div> `;
+}
+
+function connectionProgress() {
+  if (!connectedToNode()) return html`<div></div>`;
+  return html`<div class="connection-progress">
+    <style>
+      .connection-progress {
+        place-items: center;
+        margin-left: -4px;
+      }
+      .mini-divider {
+        width: 50px;
+        height: 4px;
+        background: #666;
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+      }
+      .heights {
+        color: #888;
+      }
+      .eta {
+        color: #aaa;
+      }
+    </style>
+    <div class="heights">${currentlySelectedWallet()?.current_height || 0}</div>
+    <div class="mini-divider"></div>
+    <div class="heights">${currentlySelectedWallet()?.daemon_height || 0}</div>
+  </div>`;
 }
