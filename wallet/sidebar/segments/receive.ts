@@ -1,3 +1,7 @@
+import {
+  convertBigIntAmount,
+  truncateDecimalString,
+} from "@spirobel/monero-wallet-api";
 import { flatten, html } from "../../../mininext/mininext";
 import { actionButton, attachHandlers } from "../ui/buttons";
 import { middleUpper, tactileContentPlate } from "../ui/content";
@@ -16,7 +20,17 @@ export function receivePlate() {
   if (subaddresses?.length) {
     plateContent = flatten(
       subaddresses.map((subaddress) => {
-        return html`<div class="subaddress">${subaddress.address}</div>`;
+        const colorclass =
+          subaddress.amount || 0n > 0 ? "amount-positive" : "amount-zero";
+        const amount = convertBigIntAmount(subaddress.amount || 0n);
+        const amountTrun = truncateDecimalString(amount, 3);
+        return html`<div class="subaddress-container">
+          <div class="subaddress">${subaddress.address}</div>
+          <div>
+            <div class="amount ${colorclass}">${amountTrun}</div>
+            <div class="show-info">show details</div>
+          </div>
+        </div>`;
       }),
     );
   } else {
@@ -36,10 +50,27 @@ export function receivePlate() {
         margin-left: 8px;
       }
       .subaddress {
-        width: 245px;
+        width: 210px;
         word-wrap: break-word;
         display: inline-block;
         margin-bottom: 20px;
+        user-select: all;
+      }
+      .subaddress-container {
+        display: grid;
+        grid-template-columns: 230px 1fr;
+      }
+      .show-info {
+        width: 36px;
+        margin-top: 7px;
+      }
+      .amount {
+      }
+      .amount-positive {
+        color: #ff4444;
+      }
+      .amount-zero {
+        color: white;
       }
     </style>
     ${tactileContentPlate(plateContent, middleUpper)}
