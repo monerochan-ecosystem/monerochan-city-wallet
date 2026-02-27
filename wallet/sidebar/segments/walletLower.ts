@@ -128,7 +128,7 @@ export function lowerBottomMenu() {
   </div> `;
 }
 
-function connectionProgress() {
+export function connectionProgress() {
   if (!connectedToNode()) return html`<div></div>`;
   return html`<div class="connection-progress">
     <style>

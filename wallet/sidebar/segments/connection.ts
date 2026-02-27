@@ -8,7 +8,12 @@ import { leftLower, tactileContentPlate } from "../ui/content";
 import { integerInput, textInput } from "../ui/input";
 import { sendChangeNodeUrlStartHeightEvent } from "../../../background/messagebus";
 import { developerSettings } from "./developerSettings";
-import { currentStartingHeight, setCurrentStartingHeight } from "./walletRoute";
+import {
+  connectedToNode,
+  currentlySelectedWallet,
+  currentStartingHeight,
+  setCurrentStartingHeight,
+} from "./walletRoute";
 
 async function readNodeUrl() {
   nodeUrlInputValue = (await readNodeUrlFromScanSettings()) || null;
@@ -280,7 +285,8 @@ export function connectionPlate() {
         </div>
         <pre class="test-result">        ${test_result}</pre>
       </div>
-      <div style="margin-top: 27px">
+      <div style="margin-top: 15px; user-select: none;">
+        ${detailedConnectionProgress()}
         <span id="openDevSettingsButton">developer settings </span>
       </div>
       <div id="devSettings">${openDevSettings ? developerSettings() : ""}</div>
@@ -289,4 +295,50 @@ export function connectionPlate() {
     "top",
     "calc(100vh - 398px)",
   );
+}
+
+export function detailedConnectionProgress() {
+  if (!connectedToNode()) return html`<div></div>`;
+  return html`<div class="connection-progress-description">
+    <div>
+      <div class="detailed-heights">wallet sync height:</div>
+      <div class="detailed-mini-divider" style="width: 77px;"></div>
+      <div class="detailed-heights">daemon height:</div>
+    </div>
+    <div class="detailed-connection-progress">
+      <style>
+        .connection-progress-description {
+          display: grid;
+          grid-template-columns: 129px 58px 1fr;
+          margin-bottom: 10px;
+        }
+        .detailed-connection-progress {
+          place-items: center;
+        }
+        .detailed-mini-divider {
+          width: 50px;
+          height: 4px;
+          background: #666;
+          border-radius: 12px;
+          box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+        }
+        .detailed-heights {
+          color: #888;
+        }
+        .detailed-eta {
+          padding: 9px;
+          margin-left: 14px;
+          color: #aaa;
+        }
+      </style>
+      <div class="detailed-heights">
+        ${currentlySelectedWallet()?.current_height || 0}
+      </div>
+      <div class="detailed-mini-divider"></div>
+      <div class="detailed-heights">
+        ${currentlySelectedWallet()?.daemon_height || 0}
+      </div>
+    </div>
+    <div class="detailed-eta">12:12 ETA</div>
+  </div>`;
 }
