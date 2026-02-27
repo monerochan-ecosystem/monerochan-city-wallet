@@ -1,4 +1,5 @@
 import {
+  get_info,
   readConnectionStatusDefaultLocation,
   type ManyScanCachesOpened,
 } from "@spirobel/monero-wallet-api";
@@ -65,24 +66,61 @@ export async function setCurrentStartingHeight(start_height: number | null) {
 }
 let interval: null | number | NodeJS.Timeout = null;
 let connected_to_node = false;
+let etaString: string | null = null;
+
+export function eta(): string | null {
+  return etaString;
+}
 
 export function connectedToNode(): boolean {
-  if (!interval) interval = setInterval(checkConnection, 500);
+  if (!interval) interval = setInterval(checkConnection, 2500);
   return connected_to_node;
 }
 
 async function checkConnection() {
+  const jsonString = await Bun.file("eta.json")
+    .text()
+    .catch(() => null);
+  if (jsonString) {
+    const etaJSON = JSON.parse(jsonString);
+    if (etaJSON.eta) {
+      etaString = etaJSON.eta;
+    }
+  }
   const connectionStatus = await readConnectionStatusDefaultLocation();
   if (
     connectionStatus?.last_packet.status === "OK" &&
     isWithinLast10Seconds(connectionStatus?.last_packet.timestamp)
   ) {
     connected_to_node = true;
+  } else if (connectionStatus?.last_packet.status !== "OK") {
+    connected_to_node = false; // if connection status is not OK, we assume no connection
+    activeConnectionCheck(); // still tx processing, takes time, so we do an active check
   } else {
-    connected_to_node = false;
+    connected_to_node = true;
+    activeConnectionCheck();
   }
 }
-
+async function activeConnectionCheck() {
+  if (!window.wallets?.wallets) {
+    connected_to_node = false;
+    return;
+  }
+  const wallet = window.wallets.wallets[0];
+  const node_url = wallet?.node_url;
+  if (!node_url) {
+    connected_to_node = false;
+    return;
+  }
+  try {
+    await get_info(wallet?.node_url);
+    connected_to_node = true;
+    return;
+  } catch (error) {
+    connected_to_node = false;
+    return;
+  }
+}
 function isWithinLast10Seconds(timestamp?: string): boolean {
   if (!timestamp) return false;
   const date = new Date(timestamp);

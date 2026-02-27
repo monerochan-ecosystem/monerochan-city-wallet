@@ -12,6 +12,7 @@ import {
   connectedToNode,
   currentlySelectedWallet,
   currentStartingHeight,
+  eta,
   setCurrentStartingHeight,
 } from "./walletRoute";
 
@@ -339,6 +340,6 @@ export function detailedConnectionProgress() {
         ${currentlySelectedWallet()?.daemon_height || 0}
       </div>
     </div>
-    <div class="detailed-eta">12:12 ETA</div>
+    <div class="detailed-eta">${eta() ? eta() + " ETA" : ""}</div>
   </div>`;
 }
