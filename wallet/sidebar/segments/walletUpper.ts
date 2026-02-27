@@ -1,3 +1,4 @@
+import { readConnectionStatusDefaultLocation } from "@spirobel/monero-wallet-api";
 import { html } from "../../../mininext/mininext";
 import { convertBigIntAmount } from "./send";
 import { currentlySelectedWallet } from "./walletRoute";
@@ -41,7 +42,25 @@ export function truncateDecimalString(str: string, decimals = 3): string {
   const truncatedFraction = fraction.slice(0, decimals);
   return truncatedFraction ? `${integer}.${truncatedFraction}` : integer!;
 }
+let interval: null | number | NodeJS.Timeout = null;
+let catastropic_reorg = false;
+
+export function connectedToNode(): boolean {
+  if (!interval) interval = setInterval(checkConnection, 500);
+  return catastropic_reorg;
+}
+
+async function checkConnection() {
+  const connectionStatus = await readConnectionStatusDefaultLocation();
+  if (connectionStatus?.last_packet.status === "catastrophic_reorg") {
+    catastropic_reorg = true;
+  } else {
+    catastropic_reorg = false;
+  }
+}
+
 export const walletUpper = () => {
+  if (catastropic_reorg) return catReorgWarningUpper();
   const wallet = currentlySelectedWallet();
   const amount = convertBigIntAmount(wallet?.amount || 0n);
   const amountTrun = truncateDecimalString(amount, 3);
@@ -207,3 +226,47 @@ export const walletUpper = () => {
     </style>
   </div>`;
 };
+
+function catReorgWarningUpper() {
+  return html` <div class="upper">
+    <div class="cat-reorg">
+      catastrophic reorg occured, <br />
+
+    </div>
+    <div class="hint">
+      reset your wallet, <br />
+      connect to a non faulty node (preferably local) &
+      recover from seedphrase 
+      </div>
+      <style>
+        .upper {
+          height: 199px;
+          background: linear-gradient(145deg, #444 0%, #2a2a2a 100%);
+          border-radius: 12px;
+          border: 4px solid #666;
+          box-shadow:
+            inset 0 4px 12px rgba(0, 0, 0, 0.6),
+            0 15px 25px rgba(0, 0, 0, 0.4);
+          display: grid;
+
+          padding: 20px 30px;
+          box-sizing: border-box;
+          gap: 10px 0;
+          user-select: none;
+        }
+        .cat-reorg {
+          font-size: 20px;
+          font-weight: bold;
+          color: #ff4444;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        .hint{
+          font-size: 16px;
+          font-weight: bold;
+          color: #ff4444;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+      </style>
+    </div>
+  </div>`;
+}
