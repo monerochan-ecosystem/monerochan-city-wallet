@@ -12,23 +12,49 @@ export const receiveActionButtonIds = {
   newAddress: "new-address",
   copyAddress: "copy-address",
 } as const;
+
+const openDetails: Record<string, boolean | undefined> = {};
+
 export function receivePlate() {
   attachHandlers(receiveActionButtonIds, receiveClickHandler);
-  //console.log(document.getElementById(receiveActionButtonIds.newAddress));
   const subaddresses = currentlySelectedWallet()?.subaddresses;
   let plateContent = html`<div></div>`;
   if (subaddresses?.length) {
     plateContent = flatten(
       subaddresses.map((subaddress) => {
+        const showDetailsBtn = document.getElementById(subaddress.address);
+        if (showDetailsBtn) {
+          showDetailsBtn.onclick = () => {
+            const details = document.getElementById(
+              `details-${subaddress.address}`,
+            ) as HTMLElement | null;
+            if (details) {
+              if (openDetails[subaddress.address]) {
+                details.style.display = "none";
+                openDetails[subaddress.address] = false;
+              } else {
+                details.style.display = "block";
+                openDetails[subaddress.address] = true;
+              }
+            }
+          };
+        }
         const colorclass =
-          subaddress.amount || 0n > 0 ? "amount-positive" : "amount-zero";
-        const amount = convertBigIntAmount(subaddress.amount || 0n);
+          subaddress.received_amount || 0n > 0
+            ? "amount-positive"
+            : "amount-zero";
+        const amount = convertBigIntAmount(subaddress.received_amount || 0n);
         const amountTrun = truncateDecimalString(amount, 3);
         return html`<div class="subaddress-container">
           <div class="subaddress">${subaddress.address}</div>
           <div>
             <div class="amount ${colorclass}">${amountTrun}</div>
-            <div class="show-info">show details</div>
+            <div class="show-info" id="${subaddress.address}">
+              ${openDetails[subaddress.address] ? "hide" : "show"} details
+            </div>
+          </div>
+          <div class="subaddress-details" id="details-${subaddress.address}">
+            subadddress minor index: ${subaddress.minor}
           </div>
         </div>`;
       }),
@@ -59,10 +85,20 @@ export function receivePlate() {
       .subaddress-container {
         display: grid;
         grid-template-columns: 230px 1fr;
+        grid-template-areas:
+          "subaddress amount"
+          "details details";
       }
       .show-info {
         width: 36px;
         margin-top: 7px;
+        cursor: pointer;
+        font-family: sans-serif;
+        font-weight: 700;
+        user-select: none;
+      }
+      .show-info:hover {
+        color: white;
       }
       .amount {
       }
@@ -71,6 +107,10 @@ export function receivePlate() {
       }
       .amount-zero {
         color: white;
+      }
+      .subaddress-details {
+        grid-area: details;
+        display: none;
       }
     </style>
     ${tactileContentPlate(plateContent, middleUpper)}
