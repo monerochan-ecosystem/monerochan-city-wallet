@@ -366,7 +366,7 @@ export function sendPlate() {
         color: #ff0000;
       }
     </style>
-    ${tactileContentPlate(sendPlateContent(), leftUpper)}
+    ${tactileContentPlate(sendPlateContent(), leftUpper, undefined, "425px")}
     <div class="actions">
       ${actionButton(
         "send-action",

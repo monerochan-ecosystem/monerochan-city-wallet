@@ -53,5 +53,6 @@ export function walletsPlate() {
     </div>`,
     rightLower,
     "top",
+    "468px",
   );
 }

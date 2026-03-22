@@ -165,7 +165,7 @@ export function receivePlate() {
         margin-right: 4px;
       }
     </style>
-    ${tactileContentPlate(plateContent, middleUpper)}
+    ${tactileContentPlate(plateContent, middleUpper, undefined, "425px")}
     <div class="actions">
       ${actionButton(receiveActionButtonIds.newAddress, "NEW ADDRESS")}
       <div></div>

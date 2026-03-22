@@ -308,6 +308,6 @@ export function historyPlate() {
     `,
     rightUpper,
     undefined,
-    "500px",
+    "468px",
   );
 }
