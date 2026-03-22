@@ -2,11 +2,11 @@ import { createRouter, type Mini, type Params } from "../../mininext/mininext";
 import { onboarding } from "./segments/onboarding";
 import { walletRoute } from "./segments/walletRoute";
 export type WalletRouteParams =
-  Params<"/:identity/:domain/:wallet_type/:wallet_id">;
+  Params<"/:identity/:domain/:wallet_type/:wallet_slot">;
 const routes = {
   "/onboarding": ({}, mini: Mini) => onboarding(),
-  "/:identity/:domain/:wallet_type/:wallet_id": (
-    params: Params<"/:identity/:domain/:wallet_type/:wallet_id">,
+  "/:identity/:domain/:wallet_type/:wallet_slot": (
+    params: Params<"/:identity/:domain/:wallet_type/:wallet_slot">,
     mini: Mini,
   ) => walletRoute(mini, params),
 } as const;
