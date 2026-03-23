@@ -8,7 +8,7 @@ import {
   type ExtensionMessage,
 } from "./messagebus";
 
-import { atomicWrite, openWallets } from "@spirobel/monero-wallet-api/";
+import { atomicWrite, openWallets } from "@spirobel/monero-wallet-api";
 import { defaultHappyPathSend } from "./sendTransaction";
 declare global {
   var browser: typeof chrome;
