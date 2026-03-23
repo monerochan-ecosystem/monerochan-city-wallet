@@ -10,7 +10,7 @@ import { leftUpper, tactileContentPlate } from "../ui/content";
 import { sendButtonDotStyles } from "./walletLower";
 import { connectedToNode, currentlySelectedWallet } from "./walletRoute";
 import { sendSendTransactionEvent } from "../../../background/messagebus";
-import type { TxLog } from "@spirobel/monero-wallet-api/dist/scanning-syncing/scanresult/scanCache";
+import type { TxLog } from "@spirobel/monero-wallet-api";
 
 let parsedAmount: bigint | null = null;
 let amountInputValue = "";
