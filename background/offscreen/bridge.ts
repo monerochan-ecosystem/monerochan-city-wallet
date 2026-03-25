@@ -1,3 +1,5 @@
+import { receiveOpenSideBarEvent, type ExtensionMessage } from "../messagebus";
+
 //necessary for chrome because of its MV3 charade. Basically the same outcome as firefox with the background script
 let creating: null | Promise<void> = null;
 async function setupOffscreenDocument() {
@@ -27,3 +29,13 @@ chrome.runtime.onInstalled.addListener(setupOffscreenDocument);
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((error) => console.error(error));
+
+chrome.runtime.onMessage.addListener((msg: ExtensionMessage, sender) => {
+  receiveOpenSideBarEvent(msg, async () => {
+    const windowId = sender.tab?.windowId;
+    if (!windowId) return;
+    chrome.sidePanel.open({
+      windowId,
+    });
+  });
+});
