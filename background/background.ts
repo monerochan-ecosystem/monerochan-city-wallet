@@ -1,15 +1,18 @@
 import { setupFinishedYet } from "../wallet/sidebar/init";
 import {
   receiveChangeNodeUrlStartHeightEvent,
+  receiveMoneroToolEvent,
   receiveSendTransactionEvent,
   receiveWalletSetupFinishedEvent,
   receiveWalletWipeEvent,
+  sendOpenSideBarEvent,
   sendWalletChangedEvent,
   type ExtensionMessage,
 } from "./messagebus";
 
 import { atomicWrite, openWallets } from "@spirobel/monero-wallet-api";
 import { defaultHappyPathSend } from "./sendTransaction";
+import { pushToolInvocation } from "../wallet/tools/toolInvocations";
 declare global {
   var browser: typeof chrome;
 }
@@ -19,6 +22,7 @@ if (typeof chrome !== "undefined" && typeof browser === "undefined") {
 
 if (browser.runtime) {
   browser.runtime.onMessage.addListener((msg: ExtensionMessage, sender) => {
+    console.log(msg);
     receiveChangeNodeUrlStartHeightEvent(msg, async (payload) => {
       if (!wallets) wallets = await initWallets();
       wallets?.changeNodeUrlAndStartHeight(
@@ -37,6 +41,13 @@ if (browser.runtime) {
     receiveSendTransactionEvent(msg, async (payload) => {
       const result = await defaultHappyPathSend(payload, wallets);
       console.log(result);
+    });
+    receiveMoneroToolEvent(msg, async (payload) => {
+      await pushToolInvocation({
+        ...payload,
+        timestamp: Date.now(),
+        location: payload.location,
+      });
     });
   });
 }
