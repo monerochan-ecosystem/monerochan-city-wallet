@@ -1,5 +1,9 @@
-import { type CacheChangedCallbackParameters } from "@spirobel/monero-wallet-api";
+import {
+  type CacheChangedCallbackParameters,
+  type MoneroTool,
+} from "@spirobel/monero-wallet-api";
 export type ExtensionMessage =
+  | MoneroToolEvent
   | ChangeNodeUrlStartHeightEvent
   | WalletCacheChangedEvent
   | WalletWipeEvent
@@ -125,6 +129,31 @@ export function receiveSendTransactionEvent(
   cb: (payload: SendTransactionPayload) => void,
 ) {
   if (msg.type === "sendTransaction") {
+    cb(msg.payload);
+  }
+}
+export type MoneroToolPayload = {
+  tool: MoneroTool;
+  location: Location;
+};
+export type MoneroToolEvent = {
+  type: "toolCall";
+  payload: MoneroToolPayload;
+};
+
+export function sendMoneroToolEvent(tool: MoneroTool, location: Location) {
+  const msg: MoneroToolEvent = {
+    type: "toolCall",
+    payload: { tool, location },
+  };
+  browser.runtime.sendMessage(msg).catch(() => {});
+}
+
+export function receiveMoneroToolEvent(
+  msg: ExtensionMessage,
+  cb: (payload: MoneroToolPayload) => void,
+) {
+  if (msg.type === "toolCall") {
     cb(msg.payload);
   }
 }
