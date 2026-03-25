@@ -3,6 +3,7 @@ import {
   type MoneroTool,
 } from "@spirobel/monero-wallet-api";
 export type ExtensionMessage =
+  | OpenSideBarEvent
   | MoneroToolEvent
   | ChangeNodeUrlStartHeightEvent
   | WalletCacheChangedEvent
@@ -154,6 +155,28 @@ export function receiveMoneroToolEvent(
   cb: (payload: MoneroToolPayload) => void,
 ) {
   if (msg.type === "toolCall") {
+    cb(msg.payload);
+  }
+}
+export type OpenSideBarPayload = null;
+export type OpenSideBarEvent = {
+  type: "openSidebar";
+  payload: OpenSideBarPayload;
+};
+
+export function sendOpenSideBarEvent() {
+  const msg: OpenSideBarEvent = {
+    type: "openSidebar",
+    payload: null,
+  };
+  browser.runtime.sendMessage(msg).catch(() => {});
+}
+
+export function receiveOpenSideBarEvent(
+  msg: ExtensionMessage,
+  cb: (payload: OpenSideBarPayload) => void,
+) {
+  if (msg.type === "openSidebar") {
     cb(msg.payload);
   }
 }
