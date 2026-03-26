@@ -1,21 +1,12 @@
-import { atomicWrite, type MoneroTool } from "@spirobel/monero-wallet-api";
+import {
+  atomicWrite,
+  type ParsedMoneroToolInvocation,
+} from "@spirobel/monero-wallet-api";
 export const TOOL_INVOCATION_LOG_PATH = "toolInvocations.json";
-export type LocationInfo = {
-  //ancestorOrigins: Record<string, never>; // empty object in practice
-  href: string;
-  origin: string;
-  protocol: string;
-  host: string;
-  hostname: string;
-  port: string;
-  pathname: string;
-  search: string;
-  hash: string;
-};
 export type ToolInvocation = {
-  tool: MoneroTool;
-  timestamp: number;
-  location: LocationInfo;
+  tool: ParsedMoneroToolInvocation;
+  disnavigated: boolean;
+  dismissed: boolean;
 };
 async function readToolInvocationLog() {
   const jsonString = await Bun.file(TOOL_INVOCATION_LOG_PATH)
@@ -34,8 +25,14 @@ export async function writeToolInvocationLog(
   );
 }
 
-export async function pushToolInvocation(toolInvocation: ToolInvocation) {
+export async function pushToolInvocation(
+  toolInvocation: ParsedMoneroToolInvocation,
+) {
   return await writeToolInvocationLog((toolInvocationLog) => {
-    toolInvocationLog.push(toolInvocation);
+    toolInvocationLog.push({
+      tool: toolInvocation,
+      disnavigated: false,
+      dismissed: false,
+    });
   });
 }

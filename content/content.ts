@@ -1,4 +1,4 @@
-import { parseToolLink } from "@spirobel/monero-wallet-api/tools";
+import { parseToolInvocation } from "@spirobel/monero-wallet-api/tools";
 import {
   sendMoneroToolEvent,
   sendOpenSideBarEvent,
@@ -16,7 +16,7 @@ function processTargetLink(element: HTMLAnchorElement | null) {
   const text = element.textContent || element.innerText || "";
 
   // matches if EITHER the href OR the visible text contains the tool link
-  return parseToolLink(href, text);
+  return parseToolInvocation(href, text, location);
 }
 
 function handleEvent(e: Event) {
@@ -32,7 +32,7 @@ function handleEvent(e: Event) {
 
   e.preventDefault();
   e.stopImmediatePropagation();
-  sendMoneroToolEvent(monerotoolLink, location);
+  sendMoneroToolEvent(monerotoolLink);
   sendOpenSideBarEvent();
 
   console.log(

@@ -43,11 +43,7 @@ if (browser.runtime) {
       console.log(result);
     });
     receiveMoneroToolEvent(msg, async (payload) => {
-      await pushToolInvocation({
-        ...payload,
-        timestamp: Date.now(),
-        location: payload.location,
-      });
+      await pushToolInvocation(payload);
     });
   });
 }

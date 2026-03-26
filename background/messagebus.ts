@@ -1,6 +1,6 @@
 import {
   type CacheChangedCallbackParameters,
-  type MoneroTool,
+  type ParsedMoneroToolInvocation,
 } from "@spirobel/monero-wallet-api";
 export type ExtensionMessage =
   | OpenSideBarEvent
@@ -133,26 +133,23 @@ export function receiveSendTransactionEvent(
     cb(msg.payload);
   }
 }
-export type MoneroToolPayload = {
-  tool: MoneroTool;
-  location: Location;
-};
+
 export type MoneroToolEvent = {
   type: "toolCall";
-  payload: MoneroToolPayload;
+  payload: ParsedMoneroToolInvocation;
 };
 
-export function sendMoneroToolEvent(tool: MoneroTool, location: Location) {
+export function sendMoneroToolEvent(payload: ParsedMoneroToolInvocation) {
   const msg: MoneroToolEvent = {
     type: "toolCall",
-    payload: { tool, location },
+    payload,
   };
   browser.runtime.sendMessage(msg).catch(() => {});
 }
 
 export function receiveMoneroToolEvent(
   msg: ExtensionMessage,
-  cb: (payload: MoneroToolPayload) => void,
+  cb: (payload: ParsedMoneroToolInvocation) => void,
 ) {
   if (msg.type === "toolCall") {
     cb(msg.payload);
