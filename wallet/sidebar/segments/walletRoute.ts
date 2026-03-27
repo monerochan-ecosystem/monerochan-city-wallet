@@ -2,6 +2,7 @@ import {
   get_info,
   readConnectionStatusDefaultLocation,
   type ManyScanCachesOpened,
+  type MoneroTool,
 } from "@spirobel/monero-wallet-api";
 import type { Mini } from "../../../mininext/mininext";
 import type { WalletRouteParams } from "../router";
@@ -17,6 +18,10 @@ import {
   safetyClickHandler,
   walletUpper,
 } from "./walletUpper";
+import {
+  readToolInvocationLog,
+  type ToolInvocation,
+} from "../../tools/toolInvocations";
 declare global {
   interface Window {
     walletRouteParams?: WalletRouteParams | null;
@@ -131,4 +136,36 @@ function isWithinLast10Seconds(timestamp?: string): boolean {
   const tsTime = date.getTime();
   const ageInMs = now - tsTime;
   return ageInMs >= 0 && ageInMs <= 10_000;
+}
+
+let toolInvocationCheckInterval: null | number | NodeJS.Timeout = null;
+
+export function latestToolInvocations() {
+  if (!toolInvocationCheckInterval) {
+    setToolInvocationStatus();
+    toolInvocationCheckInterval = setInterval(setToolInvocationStatus, 100);
+  }
+  return activeToolInvocations;
+}
+export type ActiveToolInvocations = Record<
+  MoneroTool["tool_id"],
+  ToolInvocation | undefined | null
+>;
+let activeToolInvocations: ActiveToolInvocations;
+const tool_ids: MoneroTool["tool_id"][] = ["001", "002"];
+export async function setToolInvocationStatus() {
+  if (!activeToolInvocations)
+    activeToolInvocations = {} as ActiveToolInvocations;
+  const toolInvocationLog = await readToolInvocationLog();
+  for (const tool_id of tool_ids) {
+    const invo =
+      toolInvocationLog
+        .filter((v) => {
+          return v.tool.tool.tool_id === tool_id && !v.dismissed;
+        })
+        .at(-1) || null;
+    if (invo) {
+      activeToolInvocations[tool_id] = invo;
+    }
+  }
 }
