@@ -8,7 +8,7 @@ export type ToolInvocation = {
   disnavigated: boolean;
   dismissed: boolean;
 };
-async function readToolInvocationLog() {
+export async function readToolInvocationLog() {
   const jsonString = await Bun.file(TOOL_INVOCATION_LOG_PATH)
     .text()
     .catch(() => undefined);

@@ -3,10 +3,13 @@ import {
   SCAN_SETTINGS_STORE_NAME_DEFAULT,
 } from "@spirobel/monero-wallet-api";
 import {
+  receiveMoneroToolEvent,
   receiveWalletChangedEvent,
   type ExtensionMessage,
 } from "../../background/messagebus";
 import { router } from "./router";
+import { readToolInvocationLog } from "../tools/toolInvocations";
+import { lowerButtonIds } from "./segments/walletLower";
 
 if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
@@ -14,6 +17,7 @@ if (typeof chrome !== "undefined" && typeof browser === "undefined") {
 export async function initSidebar() {
   if (await setupFinishedYet()) {
     router.navigate("/main/no_domain/single/0");
+    await initToolInvocation();
   } else {
     router.navigate("/onboarding");
     return;
@@ -29,6 +33,9 @@ export async function initSidebar() {
       receiveWalletChangedEvent(msg, async (payload) => {
         await window.wallets?.feed(payload);
       });
+      receiveMoneroToolEvent(msg, async (payload) => {
+        await initToolInvocation();
+      });
     });
   }
 }
@@ -43,5 +50,17 @@ export async function setupFinishedYet() {
     return true;
   } else {
     return false;
+  }
+}
+
+export async function initToolInvocation() {
+  const toolInvocationLog = await readToolInvocationLog();
+  const lastInvocation = toolInvocationLog.at(-1);
+  if (
+    lastInvocation &&
+    !lastInvocation.disnavigated &&
+    !lastInvocation.dismissed
+  ) {
+    window.activeWalletPlate = lowerButtonIds.send;
   }
 }
