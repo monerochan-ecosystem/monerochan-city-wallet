@@ -8,7 +8,11 @@ import { html, type MiniHtmlString } from "../../../mininext/mininext";
 import { actionButton } from "../ui/buttons";
 import { leftUpper, tactileContentPlate } from "../ui/content";
 import { sendButtonDotStyles } from "./walletLower";
-import { connectedToNode, currentlySelectedWallet } from "./walletRoute";
+import {
+  connectedToNode,
+  currentlySelectedWallet,
+  latestToolInvocations,
+} from "./walletRoute";
 import { sendSendTransactionEvent } from "../../../background/messagebus";
 import type { TxLog } from "@spirobel/monero-wallet-api";
 
@@ -188,6 +192,13 @@ export async function parseAddressCallback() {
 }
 
 export function sendPlateContent() {
+  const activeToolInvocations = latestToolInvocations();
+  const sendToolInvocation = activeToolInvocations["001"];
+  const toolPayload = sendToolInvocation?.tool.tool.payload;
+  const toolAmount =
+    toolPayload && "amount" in toolPayload
+      ? convertAmountBigInt(toolPayload.amount)
+      : null;
   const amountInput = document.getElementById(
     "amountInput",
   ) as HTMLInputElement | null;
@@ -196,6 +207,13 @@ export function sendPlateContent() {
     amountInput.oninput = parseAmountCallback;
     if (amountInput.value.length === 0 && amountInputValue.length > 0) {
       amountInput.value = amountInputValue;
+      parseAmountCallback();
+    }
+    if (toolAmount) {
+      amountInputValue = convertBigIntAmount(toolAmount);
+      amountInput.value = amountInputValue;
+      parseAmountCallback();
+      amountInput.disabled = true;
     }
   }
   const addressInput = document.getElementById(
