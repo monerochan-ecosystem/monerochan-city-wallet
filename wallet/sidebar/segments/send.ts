@@ -11,6 +11,7 @@ import { sendButtonDotStyles } from "./walletLower";
 import {
   connectedToNode,
   currentlySelectedWallet,
+  dismissToolInvocation,
   latestToolInvocations,
 } from "./walletRoute";
 import { sendSendTransactionEvent } from "../../../background/messagebus";
@@ -113,6 +114,11 @@ function sendCallback() {
   }
 }
 async function resetCallback() {
+  const activeToolInvocations = latestToolInvocations();
+  const sendToolInvocation = activeToolInvocations["001"];
+  const sendToolInvoId = sendToolInvocation?.tool.invocation_id;
+
+  if (sendToolInvoId) await dismissToolInvocation(sendToolInvoId);
   resetSendInputs();
   justSentTx = false;
   const timestamp = Date.now();
@@ -171,6 +177,7 @@ function resetSendInputs() {
     amountInput.value = "";
     amountInputValue = "";
     parsedAmount = null;
+    amountInput.disabled = false;
   }
   const addressInput = document.getElementById(
     "addressInput",
@@ -180,6 +187,7 @@ function resetSendInputs() {
     addressInput.value = "";
     addressInputValue = "";
     parsedAddress = null;
+    addressInput.disabled = false;
   }
 }
 export async function parseAddressCallback() {

@@ -167,6 +167,8 @@ export async function setToolInvocationStatus() {
         .at(-1) || null;
     if (invo) {
       activeToolInvocations[tool_id] = invo;
+    } else {
+      activeToolInvocations[tool_id] = null;
     }
   }
 }
@@ -177,4 +179,15 @@ export function disnavigate() {
       v.disnavigated = true;
     });
   });
+}
+
+export async function dismissToolInvocation(invocation_id: string) {
+  await writeToolInvocationLog((toolInvocationLog) => {
+    toolInvocationLog.forEach((v) => {
+      if (v.tool.invocation_id === invocation_id) {
+        v.dismissed = true;
+      }
+    });
+  });
+  await setToolInvocationStatus();
 }
