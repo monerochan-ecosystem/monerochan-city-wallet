@@ -225,6 +225,11 @@ export function sendPlateContent() {
     if (addressInput.value.length === 0 && addressInputValue.length > 0) {
       addressInput.value = addressInputValue;
     }
+    if (toolPayload && "address" in toolPayload) {
+      addressInputValue = toolPayload.address;
+      addressInput.value = addressInputValue;
+      addressInput.disabled = true;
+    }
   }
   const parsedAmountMessage: string = parsedAmount
     ? convertBigIntAmount(parsedAmount)
