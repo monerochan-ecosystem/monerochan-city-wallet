@@ -3,7 +3,11 @@ import { addActive, tactileSwitch } from "../ui/buttons";
 import { removeActive } from "../ui/buttons";
 import { plate } from "../ui/content";
 import { walletUnlocked } from "./send";
-import { connectedToNode, currentlySelectedWallet } from "./walletRoute";
+import {
+  connectedToNode,
+  currentlySelectedWallet,
+  disnavigate,
+} from "./walletRoute";
 
 export const walletLower = () => {
   return html` <div class="lower">
@@ -29,6 +33,7 @@ export function lowerClickHandler(e: MouseEvent) {
     return;
   }
   window.activeWalletPlate = id;
+  disnavigate();
 }
 
 export type LowerButtonId =

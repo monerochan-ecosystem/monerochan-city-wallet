@@ -20,6 +20,7 @@ import {
 } from "./walletUpper";
 import {
   readToolInvocationLog,
+  writeToolInvocationLog,
   type ToolInvocation,
 } from "../../tools/toolInvocations";
 declare global {
@@ -168,4 +169,12 @@ export async function setToolInvocationStatus() {
       activeToolInvocations[tool_id] = invo;
     }
   }
+}
+
+export function disnavigate() {
+  writeToolInvocationLog((toolInvocationLog) => {
+    toolInvocationLog.forEach((v) => {
+      v.disnavigated = true;
+    });
+  });
 }
