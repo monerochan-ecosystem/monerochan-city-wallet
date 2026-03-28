@@ -33,7 +33,7 @@ export function lowerClickHandler(e: MouseEvent) {
     return;
   }
   window.activeWalletPlate = id;
-  disnavigate();
+  //disnavigate();
 }
 
 export type LowerButtonId =
