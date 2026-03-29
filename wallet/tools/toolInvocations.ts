@@ -29,6 +29,11 @@ export async function pushToolInvocation(
   toolInvocation: ParsedMoneroToolInvocation,
 ) {
   return await writeToolInvocationLog((toolInvocationLog) => {
+    toolInvocationLog.forEach((v) => {
+      if (v.tool.tool.tool_id === toolInvocation.tool.tool_id) {
+        v.dismissed = true;
+      }
+    });
     toolInvocationLog.push({
       tool: toolInvocation,
       disnavigated: false,
