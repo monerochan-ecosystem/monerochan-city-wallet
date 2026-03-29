@@ -78,12 +78,7 @@ function sendCallback() {
   }
 }
 async function resetCallback() {
-  const activeToolInvocations = latestToolInvocations();
-  const sendToolInvocation = activeToolInvocations["001"];
-  const sendToolInvoId = sendToolInvocation?.tool.invocation_id;
-
-  if (sendToolInvoId) await dismissToolInvocation(sendToolInvoId);
-  resetSendInputs();
+  await resetSendInputs();
   justSentTx = false;
   const timestamp = Date.now();
   await atomicWrite(
@@ -132,7 +127,12 @@ function setTXlogStatusMsg() {
     lastTxLogMessageClass = "txlog-success";
   }
 }
-function resetSendInputs() {
+async function resetSendInputs() {
+  const activeToolInvocations = latestToolInvocations();
+  const sendToolInvocation = activeToolInvocations["001"];
+  const sendToolInvoId = sendToolInvocation?.tool.invocation_id;
+
+  if (sendToolInvoId) await dismissToolInvocation(sendToolInvoId);
   const amountInput = document.getElementById(
     "amountInput",
   ) as HTMLInputElement | null;
