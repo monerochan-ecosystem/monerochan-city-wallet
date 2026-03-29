@@ -17,7 +17,10 @@ import {
   latestToolInvocations,
 } from "./walletRoute";
 import { sendSendTransactionEvent } from "../../../background/messagebus";
-import type { TxLog } from "@spirobel/monero-wallet-api";
+import type {
+  ParsedMoneroToolInvocation,
+  TxLog,
+} from "@spirobel/monero-wallet-api";
 
 let parsedAmount: bigint | null = null;
 let amountInputValue = "";
@@ -159,6 +162,71 @@ export async function parseAddressCallback() {
   parsedAddress = await parseAddress(addressInput.value.trim());
   addressInputValue = addressInput.value;
 }
+export function toolInfo(t?: ParsedMoneroToolInvocation) {
+  if (!t) return "";
+  const destinationLink = t[t.found_in];
+
+  return html`<div class="tool-info">
+    <style>
+      .tool-info {
+        display: flex;
+        flex-direction: column;
+        box-shadow:
+          inset 0 4px 12px rgba(0, 0, 0, 0.45),
+          0 5px 8px rgba(0, 0, 0, 0.4);
+        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        padding: 8px 7px;
+        margin-right: 12px;
+        margin-left: 17px;
+        margin-top: 12px;
+      }
+      .context-href {
+        width: 130px;
+        word-wrap: break-word;
+      }
+      .destination-link {
+        width: 130px;
+        word-wrap: break-word;
+      }
+      .grey-link {
+        margin-top: 3px;
+        text-decoration: underline;
+        font-size: 10px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.3);
+      }
+      .grey-link:hover {
+        color: white;
+      }
+    </style>
+    <span class="tool-context"
+      >context:
+      <span style="color: greenyellow;">${t.context_domain}</span></span
+    >
+    <a class="context-href grey-link" href=${t.context_href} target="_blank">
+      ${t.context_href}
+    </a>
+    <span class="destination"
+      >destination:
+      <span style="color: greenyellow;">${t.destination_domain}</span></span
+    >
+
+    <a
+      class="destination-link grey-link"
+      style="cursor: not-allowed"
+      href=${destinationLink}
+    >
+      ${destinationLink}
+    </a>
+    <span class="timestamp">timestamp: ${formatTime(t.timestamp)}</span>
+  </div> `;
+}
 
 export function sendPlateContent() {
   const activeToolInvocations = latestToolInvocations();
@@ -168,6 +236,8 @@ export function sendPlateContent() {
     toolPayload && "amount" in toolPayload
       ? convertAmountBigInt(toolPayload.amount)
       : null;
+
+  const toolInfoSnippet = toolInfo(sendToolInvocation?.tool);
   const amountInput = document.getElementById(
     "amountInput",
   ) as HTMLInputElement | null;
@@ -291,6 +361,7 @@ export function sendPlateContent() {
         placeholder="Enter address"
       />
       <div class="parsed-address-message">${parsedAddressMessage}</div>
+      ${toolInfoSnippet}
     </div>
     ${!connectedToNode()
       ? html`
