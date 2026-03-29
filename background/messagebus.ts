@@ -1,6 +1,7 @@
 import {
   type CacheChangedCallbackParameters,
   type ParsedMoneroToolInvocation,
+  type ToolInvocationValidity,
 } from "@spirobel/monero-wallet-api";
 export type ExtensionMessage =
   | OpenSideBarEvent
@@ -181,7 +182,7 @@ export function receiveOpenSideBarEvent(
 
 export type MoneroTool001AddressValidityCheckPayload = {
   invocation_id: string;
-  valid: boolean;
+  valid: ToolInvocationValidity;
 };
 export type MoneroTool001AddressValidityCheckEvent = {
   type: "toolInvocation001AddressValidityCheck";
@@ -190,7 +191,7 @@ export type MoneroTool001AddressValidityCheckEvent = {
 
 export function sendMoneroTool001AddressValidityCheckEvent(
   invocation_id: string,
-  valid: boolean,
+  valid: ToolInvocationValidity,
 ) {
   const msg: MoneroTool001AddressValidityCheckEvent = {
     type: "toolInvocation001AddressValidityCheck",

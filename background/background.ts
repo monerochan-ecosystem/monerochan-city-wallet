@@ -52,7 +52,7 @@ if (browser.runtime) {
       await writeToolInvocationLog((toolInvocationLog) => {
         toolInvocationLog.forEach((v) => {
           if (v.tool.invocation_id === payload.invocation_id) {
-            v.tool.valid = payload.valid ? "valid" : "invalid";
+            v.tool.valid = payload.valid;
           }
         });
       });
