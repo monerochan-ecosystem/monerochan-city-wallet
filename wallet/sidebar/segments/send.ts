@@ -204,18 +204,26 @@ export function toolInfo(t?: ParsedMoneroToolInvocation) {
       .grey-link:hover {
         color: white;
       }
+      .valid {
+        color: greenyellow;
+      }
+      .invalid {
+        color: red;
+      }
+      .unverified {
+        color: rgba(255, 255, 255, 0.3);
+      }
     </style>
     <span class="tool-context"
-      >context:
-      <span style="color: greenyellow;">${t.context_domain}</span></span
+      >context: <span class="valid">${t.context_domain}</span></span
     >
     <a class="context-href grey-link" href=${t.context_href} target="_blank">
       ${t.context_href}
     </a>
-    <span class="destination"
-      >destination:
-      <span style="color: greenyellow;">${t.destination_domain}</span></span
-    >
+    <span class="destination">
+      destination:
+      <span class="${t.valid}">${t.destination_domain}</span>
+    </span>
 
     <a
       class="destination-link grey-link"

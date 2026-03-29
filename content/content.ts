@@ -1,5 +1,9 @@
-import { parseToolInvocation } from "@spirobel/monero-wallet-api/tools";
 import {
+  checkToolInvocationValidity,
+  parseToolInvocation,
+} from "@spirobel/monero-wallet-api/tools";
+import {
+  sendMoneroTool001AddressValidityCheckEvent,
   sendMoneroToolEvent,
   sendOpenSideBarEvent,
 } from "../background/messagebus";
@@ -41,6 +45,12 @@ function handleEvent(e: Event) {
     "parse result:",
     monerotoolLink,
   );
+  checkToolInvocationValidity(monerotoolLink).then((result) => {
+    sendMoneroTool001AddressValidityCheckEvent(
+      monerotoolLink.invocation_id,
+      result,
+    );
+  });
 }
 
 function init() {
