@@ -162,6 +162,34 @@ export async function parseAddressCallback() {
   parsedAddress = await parseAddress(addressInput.value.trim());
   addressInputValue = addressInput.value;
 }
+export function validityMessage(t?: ParsedMoneroToolInvocation) {
+  if (!t) return "";
+
+  if (t.valid === "invalid")
+    return html`<div class="invalidity-message">
+      <style>
+        .invalidity-warning {
+          color: #e74c3c;
+          margin-top: 8px;
+          margin-bottom: 8px;
+          user-select: none;
+        }
+      </style>
+      <span class="invalidity-warning ">the payment link is invalid</span><br />
+      <span class="invalidity-hint">
+        the payment destination server responded that it does not recognize this
+        address <br />
+      </span>
+    </div>`;
+  if (t.valid === "unverified")
+    return html`<div class="unverified-message">
+      <span
+        >this is an open destination payment link, make sure you got it from a
+        trusted source</span
+      >
+    </div>`;
+  return "";
+}
 export function toolInfo(t?: ParsedMoneroToolInvocation) {
   if (!t) return "";
   const destinationLink = t[t.found_in];
@@ -208,15 +236,13 @@ export function toolInfo(t?: ParsedMoneroToolInvocation) {
         color: greenyellow;
       }
       .invalid {
-        color: red;
+        color: #e74c3c;
       }
       .unverified {
         color: rgba(255, 255, 255, 0.3);
       }
     </style>
-    <span class="tool-context"
-      >context: <span class="valid">${t.context_domain}</span></span
-    >
+    <span class="tool-context">context: <span>${t.context_domain}</span></span>
     <a class="context-href grey-link" href=${t.context_href} target="_blank">
       ${t.context_href}
     </a>
@@ -246,6 +272,7 @@ export function sendPlateContent() {
       : null;
 
   const toolInfoSnippet = toolInfo(sendToolInvocation?.tool);
+  const validitySnippet = validityMessage(sendToolInvocation?.tool);
   const amountInput = document.getElementById(
     "amountInput",
   ) as HTMLInputElement | null;
@@ -369,7 +396,7 @@ export function sendPlateContent() {
         placeholder="Enter address"
       />
       <div class="parsed-address-message">${parsedAddressMessage}</div>
-      ${toolInfoSnippet}
+      ${toolInfoSnippet} ${validitySnippet}
     </div>
     ${!connectedToNode()
       ? html`
