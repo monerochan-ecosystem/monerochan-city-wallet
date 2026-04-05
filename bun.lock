@@ -11,7 +11,7 @@
         "@types/chrome": "0.1.32",
       },
       "peerDependencies": {
-        "typescript": "^5",
+        "typescript": "5.9.3",
       },
     },
   },
