@@ -41,6 +41,8 @@ export function walletUnlocked(): boolean {
 let addressInputValue = "";
 let parsedAddress: ParseAddressError | ParsedAddress | null = null;
 function sendButtonActive() {
+  const activeToolInvocations = latestToolInvocations();
+  const sendToolInvocation = activeToolInvocations["001"];
   const parsedAmountBiggerThanAvailable =
     (parsedAmount || 0n) > (currentlySelectedWallet()?.amount || 1n);
   return !!(
@@ -50,7 +52,8 @@ function sendButtonActive() {
     parsedAddress &&
     "address" in parsedAddress &&
     parsedAmount &&
-    !justSentTx
+    !justSentTx &&
+    sendToolInvocation?.tool.valid !== "invalid"
   );
 }
 function sendCallback() {
