@@ -1,7 +1,7 @@
 import { setupFinishedYet } from "../wallet/sidebar/init";
 import {
   receiveChangeNodeUrlStartHeightEvent,
-  receiveMoneroTool001AddressValidityCheckEvent,
+  receiveMoneroToolInvocationValidityCheckEvent,
   receiveMoneroToolEvent,
   receiveSendTransactionEvent,
   receiveWalletSetupFinishedEvent,
@@ -48,7 +48,7 @@ if (browser.runtime) {
     receiveMoneroToolEvent(msg, async (payload) => {
       await pushToolInvocation(payload);
     });
-    receiveMoneroTool001AddressValidityCheckEvent(msg, async (payload) => {
+    receiveMoneroToolInvocationValidityCheckEvent(msg, async (payload) => {
       await writeToolInvocationLog((toolInvocationLog) => {
         toolInvocationLog.forEach((v) => {
           if (v.tool.invocation_id === payload.invocation_id) {

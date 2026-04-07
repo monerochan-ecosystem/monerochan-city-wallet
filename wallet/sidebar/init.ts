@@ -61,6 +61,12 @@ export async function initToolInvocation() {
     !lastInvocation.disnavigated &&
     !lastInvocation.dismissed
   ) {
-    window.activeWalletPlate = lowerButtonIds.send;
+    // open activity according to tool id
+    if (lastInvocation.tool.tool.tool_id === "001") {
+      window.activeWalletPlate = lowerButtonIds.send;
+    }
+    if (lastInvocation.tool.tool.tool_id === "002") {
+      window.activeWalletPlate = lowerButtonIds.wallets;
+    }
   }
 }

@@ -10,7 +10,7 @@ export type ExtensionMessage =
   | WalletCacheChangedEvent
   | WalletWipeEvent
   | SendTransactionEvent
-  | MoneroTool001AddressValidityCheckEvent
+  | MoneroToolInvocationValidityCheckEvent
   | WalletSetupFinishedEvent;
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
@@ -180,31 +180,31 @@ export function receiveOpenSideBarEvent(
   }
 }
 
-export type MoneroTool001AddressValidityCheckPayload = {
+export type MoneroToolInvocationValidityCheckPayload = {
   invocation_id: string;
   valid: ToolInvocationValidity;
 };
-export type MoneroTool001AddressValidityCheckEvent = {
-  type: "toolInvocation001AddressValidityCheck";
-  payload: MoneroTool001AddressValidityCheckPayload;
+export type MoneroToolInvocationValidityCheckEvent = {
+  type: "toolInvocationValidityCheck";
+  payload: MoneroToolInvocationValidityCheckPayload;
 };
 
-export function sendMoneroTool001AddressValidityCheckEvent(
+export function sendMoneroToolInvocationValidityCheckEvent(
   invocation_id: string,
   valid: ToolInvocationValidity,
 ) {
-  const msg: MoneroTool001AddressValidityCheckEvent = {
-    type: "toolInvocation001AddressValidityCheck",
+  const msg: MoneroToolInvocationValidityCheckEvent = {
+    type: "toolInvocationValidityCheck",
     payload: { invocation_id, valid },
   };
   browser.runtime.sendMessage(msg).catch(() => {});
 }
 
-export function receiveMoneroTool001AddressValidityCheckEvent(
+export function receiveMoneroToolInvocationValidityCheckEvent(
   msg: ExtensionMessage,
-  cb: (payload: MoneroTool001AddressValidityCheckPayload) => void,
+  cb: (payload: MoneroToolInvocationValidityCheckPayload) => void,
 ) {
-  if (msg.type === "toolInvocation001AddressValidityCheck") {
+  if (msg.type === "toolInvocationValidityCheck") {
     cb(msg.payload);
   }
 }
