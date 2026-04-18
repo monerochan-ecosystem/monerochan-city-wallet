@@ -217,11 +217,11 @@ export function toolInfo(t?: ParsedMoneroToolInvocation) {
         margin-top: 12px;
       }
       .context-href {
-        width: 130px;
+        width: 236px;
         word-wrap: break-word;
       }
       .destination-link {
-        width: 130px;
+        width: 236px;
         word-wrap: break-word;
       }
       .grey-link {
