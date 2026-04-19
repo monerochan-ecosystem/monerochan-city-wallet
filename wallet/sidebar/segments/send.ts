@@ -261,7 +261,7 @@ export function toolInfo(t?: ParsedMoneroToolInvocation) {
     >
       ${destinationLink}
     </a>
-    <span class="timestamp">timestamp: ${formatTime(t.timestamp)}</span>
+    <span class="timestamp">clicked: ${formatTime(t.timestamp)}</span>
   </div> `;
 }
 
@@ -305,6 +305,7 @@ export function sendPlateContent() {
     if (toolPayload && "address" in toolPayload) {
       addressInputValue = toolPayload.address;
       addressInput.value = addressInputValue;
+      parseAddressCallback();
       addressInput.disabled = true;
     }
   }
@@ -319,7 +320,12 @@ export function sendPlateContent() {
     ? html`<div style="user-select: none;">invalid address</div>`
     : "";
   if (parsedAddress && "address" in parsedAddress) {
-    parsedAddressMessage = html`<div>
+    if (toolInfoSnippet !== "") {
+      parsedAddressMessage = html`<div style="user-select: none;color: white;">
+        payment link invocation
+      </div>`;
+    } else {
+      parsedAddressMessage = html`<div>
       <div style="user-select: none;">
         destination address (${parsedAddress.network}):</div>
         <div class="parsed-address">${parsedAddress.address}</div>
@@ -334,6 +340,7 @@ export function sendPlateContent() {
         </style>
       </div>
     </div>`;
+    }
   }
   const sendBtn = document.getElementById("send-action") as HTMLButtonElement;
   if (sendBtn) {
