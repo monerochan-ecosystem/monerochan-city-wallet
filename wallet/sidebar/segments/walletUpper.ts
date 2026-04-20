@@ -80,6 +80,13 @@ export const walletUpper = () => {
       !wallet?.pending_amount)
   )
     pendingEl.style.display = "none";
+
+  const domain = window.walletRouteParams?.domain ?? "no_domain";
+  const wallet_index = Number(window.walletRouteParams?.wallet_slot) ?? 0;
+  const wallet_index_string = wallet_index > 0 ? ` ${wallet_index} ` : "";
+  const display_domain = domain === "no_domain" ? "" : domain;
+  const identity = window.walletRouteParams?.identity ?? "main";
+
   return html` <div class="upper">
     <div class="labels">
       <div class="safe-label" id="safe-label">0</div>
@@ -101,7 +108,9 @@ export const walletUpper = () => {
 
     <div class="multi"></div>
     <div class="divider"></div>
-    <div class="wallet-name">main</div>
+    <div class="wallet-domain">${display_domain} ${wallet_index_string}</div>
+
+    <div class="wallet-name">${identity}</div>
     <div id="safe"></div>
     <div id="fire"></div>
     <style>
@@ -223,6 +232,14 @@ export const walletUpper = () => {
         background: #666;
         border-radius: 12px;
         box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+      }
+      .wallet-domain {
+        grid-area: wallet;
+        margin-left: 5px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #bbb;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
       }
 
       .wallet-name {

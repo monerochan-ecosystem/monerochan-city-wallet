@@ -18,11 +18,8 @@ import {
   safetyClickHandler,
   walletUpper,
 } from "./walletUpper";
-import {
-  readToolInvocationLog,
-  writeToolInvocationLog,
-  type ToolInvocation,
-} from "../../tools/toolInvocations";
+import { writeToolInvocationLog } from "../../tools/toolInvocations";
+import { walletRouteToString, type WalletRoute } from "@spirobel/seedphrase";
 declare global {
   interface Window {
     walletRouteParams?: WalletRouteParams | null;
@@ -60,7 +57,15 @@ export function allWallets() {
 }
 export function currentlySelectedWallet() {
   if (!window.wallets?.wallets) return undefined;
-  return window.wallets?.wallets[0];
+  if (!window.walletRouteParams) return undefined;
+  const wallet_route = walletRouteToString(
+    window.walletRouteParams as WalletRoute,
+  );
+  return (
+    window.wallets?.wallets.find(
+      (wallet) => wallet.wallet_route === wallet_route,
+    ) || window.wallets?.wallets[0]
+  );
 }
 export function currentStartingHeight() {
   if (!window.wallets?.wallets) return undefined;
