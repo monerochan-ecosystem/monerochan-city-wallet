@@ -2,6 +2,8 @@ import {
   convertBigIntAmount,
   truncateDecimalString,
   type ParsedMoneroToolInvocation,
+  writeWalletToScanSettings,
+  writeWalletSecretsToDotEnv,
 } from "@spirobel/monero-wallet-api";
 import { flatten, html, type MiniHtmlString } from "../../../mininext/mininext";
 import { router } from "../router";
@@ -11,6 +13,13 @@ import {
   latestToolInvocations,
   type ToolInvocation,
 } from "../../tools/toolInvocations";
+import {
+  getWalletSecret,
+  walletRouteToString,
+  type WalletRoute,
+} from "@spirobel/seedphrase";
+import { initWallets } from "../init";
+import { sendWalletSetupFinishedEvent } from "../../../background/messagebus";
 let shareWalletToolInvocation: ToolInvocation | null | undefined = null;
 export function walletsPlate() {
   const activeToolInvocations = latestToolInvocations();
@@ -227,8 +236,36 @@ async function dismissShareViewWalletTool() {
 }
 
 async function acceptShareViewWalletTool() {
-  if (shareWalletToolInvocation?.tool.invocation_id)
-    return await dismissToolInvocation(
-      shareWalletToolInvocation.tool.invocation_id!,
-    );
+  if (!shareWalletToolInvocation?.tool.invocation_id) return;
+  if ("wallet_slot" in shareWalletToolInvocation.tool.tool.payload === false)
+    return;
+  const wallet_slot = String(
+    shareWalletToolInvocation.tool.tool.payload["wallet_slot"],
+  );
+
+  const t = shareWalletToolInvocation.tool;
+  const walletRoute: WalletRoute = {
+    identity: "main",
+    domain: t.context_domain,
+    wallet_type: "single" as const,
+    wallet_slot,
+  };
+  const seedphrase = Bun.env["SEEDPHRASE"];
+  if (!seedphrase) return;
+  const passphrase = Bun.env["PASSPHRASE"];
+  const spendkeySecretSeed = getWalletSecret(
+    walletRoute,
+    seedphrase,
+    passphrase,
+  );
+  let primary_address = await writeWalletSecretsToDotEnv(spendkeySecretSeed);
+
+  await writeWalletToScanSettings({
+    primary_address,
+    wallet_route: walletRouteToString(walletRoute),
+  });
+
+  await dismissToolInvocation(t.invocation_id!);
+  await initWallets();
+  sendWalletSetupFinishedEvent();
 }

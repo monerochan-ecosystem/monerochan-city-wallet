@@ -16,14 +16,7 @@ import { removeActive } from "./ui/buttons";
 if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
 }
-export async function initSidebar() {
-  if (await setupFinishedYet()) {
-    router.navigate("/main/no_domain/single/0");
-    await initToolInvocation();
-  } else {
-    router.navigate("/onboarding");
-    return;
-  }
+export async function initWallets() {
   window.wallets = await openWallets({
     no_worker: true,
   });
@@ -40,6 +33,16 @@ export async function initSidebar() {
       });
     });
   }
+}
+export async function initSidebar() {
+  if (await setupFinishedYet()) {
+    router.navigate("/main/no_domain/single/0");
+    await initToolInvocation();
+  } else {
+    router.navigate("/onboarding");
+    return;
+  }
+  await initWallets();
 }
 
 export async function setupFinishedYet() {
