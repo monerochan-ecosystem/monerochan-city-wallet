@@ -6,12 +6,15 @@ import {
 import { flatten, html, type MiniHtmlString } from "../../../mininext/mininext";
 import { router } from "../router";
 import { rightLower, tactileContentPlate } from "../ui/content";
-import { allWallets } from "./walletRoute";
-import { latestToolInvocations } from "../../tools/toolInvocations";
-
+import { allWallets, dismissToolInvocation } from "./walletRoute";
+import {
+  latestToolInvocations,
+  type ToolInvocation,
+} from "../../tools/toolInvocations";
+let shareWalletToolInvocation: ToolInvocation | null | undefined = null;
 export function walletsPlate() {
   const activeToolInvocations = latestToolInvocations();
-  const shareWalletToolInvocation = activeToolInvocations["002"];
+  shareWalletToolInvocation = activeToolInvocations["002"];
 
   function shareWalletToolInfo(t?: ParsedMoneroToolInvocation) {
     if (!t || t.tool.tool_id !== "002") return "";
@@ -144,6 +147,17 @@ export function walletsPlate() {
 
   const toolInfoSnippet = shareWalletToolInfo(shareWalletToolInvocation?.tool);
 
+  if (shareWalletToolInvocation?.tool.invocation_id) {
+    const dismissBtn = document.getElementById("dismissShareWallet");
+    if (dismissBtn) {
+      dismissBtn.onclick = dismissShareViewWalletTool;
+    }
+    const acceptBtn = document.getElementById("acceptShareWallet");
+    if (acceptBtn) {
+      acceptBtn.onclick = acceptShareViewWalletTool;
+    }
+  }
+
   const walletsList: () => MiniHtmlString = () => {
     const wl = allWallets().map((wallet) => {
       const colorclass =
@@ -203,4 +217,18 @@ function formatTime(timestamp: number) {
     minute: "2-digit",
     hour12: false,
   });
+}
+
+async function dismissShareViewWalletTool() {
+  if (shareWalletToolInvocation?.tool.invocation_id)
+    return await dismissToolInvocation(
+      shareWalletToolInvocation.tool.invocation_id!,
+    );
+}
+
+async function acceptShareViewWalletTool() {
+  if (shareWalletToolInvocation?.tool.invocation_id)
+    return await dismissToolInvocation(
+      shareWalletToolInvocation.tool.invocation_id!,
+    );
 }
