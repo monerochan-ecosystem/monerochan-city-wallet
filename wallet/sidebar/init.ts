@@ -1,6 +1,7 @@
 import {
   openWallets,
   SCAN_SETTINGS_STORE_NAME_DEFAULT,
+  type ParsedMoneroToolInvocation,
 } from "@spirobel/monero-wallet-api";
 import {
   receiveMoneroToolEvent,
@@ -34,7 +35,7 @@ export async function initSidebar() {
         await window.wallets?.feed(payload);
       });
       receiveMoneroToolEvent(msg, async (payload) => {
-        await initToolInvocation();
+        syncUItoToolInvocation(payload);
       });
     });
   }
@@ -56,17 +57,20 @@ export async function setupFinishedYet() {
 export async function initToolInvocation() {
   const toolInvocationLog = await readToolInvocationLog();
   const lastInvocation = toolInvocationLog.at(-1);
-  if (
-    lastInvocation &&
-    !lastInvocation.disnavigated &&
-    !lastInvocation.dismissed
-  ) {
-    // open activity according to tool id
-    if (lastInvocation.tool.tool.tool_id === "001") {
-      window.activeWalletPlate = lowerButtonIds.send;
-    }
-    if (lastInvocation.tool.tool.tool_id === "002") {
-      window.activeWalletPlate = lowerButtonIds.wallets;
-    }
+
+  if (lastInvocation && !lastInvocation.dismissed) {
+    syncUItoToolInvocation(lastInvocation.tool);
+  }
+}
+
+export function syncUItoToolInvocation(
+  lastInvocation: ParsedMoneroToolInvocation,
+) {
+  // open activity according to tool id
+  if (lastInvocation.tool.tool_id === "001") {
+    window.activeWalletPlate = lowerButtonIds.send;
+  }
+  if (lastInvocation.tool.tool_id === "002") {
+    window.activeWalletPlate = lowerButtonIds.wallets;
   }
 }

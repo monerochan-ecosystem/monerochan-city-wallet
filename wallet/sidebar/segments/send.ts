@@ -14,13 +14,13 @@ import {
   connectedToNode,
   currentlySelectedWallet,
   dismissToolInvocation,
-  latestToolInvocations,
 } from "./walletRoute";
 import { sendSendTransactionEvent } from "../../../background/messagebus";
 import type {
   ParsedMoneroToolInvocation,
   TxLog,
 } from "@spirobel/monero-wallet-api";
+import { latestToolInvocations } from "../../tools/toolInvocations";
 
 let parsedAmount: bigint | null = null;
 let amountInputValue = "";

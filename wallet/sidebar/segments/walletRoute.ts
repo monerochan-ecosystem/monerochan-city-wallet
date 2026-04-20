@@ -139,40 +139,6 @@ function isWithinLast10Seconds(timestamp?: string): boolean {
   return ageInMs >= 0 && ageInMs <= 10_000;
 }
 
-let toolInvocationCheckInterval: null | number | NodeJS.Timeout = null;
-
-export function latestToolInvocations() {
-  if (!toolInvocationCheckInterval) {
-    setToolInvocationStatus();
-    toolInvocationCheckInterval = setInterval(setToolInvocationStatus, 100);
-  }
-  return activeToolInvocations;
-}
-export type ActiveToolInvocations = Record<
-  MoneroTool["tool_id"],
-  ToolInvocation | undefined | null
->;
-let activeToolInvocations: ActiveToolInvocations;
-const tool_ids: MoneroTool["tool_id"][] = ["001", "002"];
-export async function setToolInvocationStatus() {
-  if (!activeToolInvocations)
-    activeToolInvocations = {} as ActiveToolInvocations;
-  const toolInvocationLog = await readToolInvocationLog();
-  for (const tool_id of tool_ids) {
-    const invo =
-      toolInvocationLog
-        .filter((v) => {
-          return v.tool.tool.tool_id === tool_id && !v.dismissed;
-        })
-        .at(-1) || null;
-    if (invo) {
-      activeToolInvocations[tool_id] = invo;
-    } else {
-      activeToolInvocations[tool_id] = null;
-    }
-  }
-}
-
 export function disnavigate() {
   writeToolInvocationLog((toolInvocationLog) => {
     toolInvocationLog.forEach((v) => {
@@ -189,5 +155,4 @@ export async function dismissToolInvocation(invocation_id: string) {
       }
     });
   });
-  await setToolInvocationStatus();
 }

@@ -1,7 +1,6 @@
 import { setupFinishedYet } from "../wallet/sidebar/init";
 import {
   receiveChangeNodeUrlStartHeightEvent,
-  receiveMoneroToolInvocationValidityCheckEvent,
   receiveMoneroToolEvent,
   receiveSendTransactionEvent,
   receiveWalletSetupFinishedEvent,
@@ -12,10 +11,7 @@ import {
 
 import { atomicWrite, openWallets } from "@spirobel/monero-wallet-api";
 import { defaultHappyPathSend } from "./sendTransaction";
-import {
-  pushToolInvocation,
-  writeToolInvocationLog,
-} from "../wallet/tools/toolInvocations";
+import { pushToolInvocation } from "../wallet/tools/toolInvocations";
 declare global {
   var browser: typeof chrome;
 }
@@ -47,15 +43,6 @@ if (browser.runtime) {
     });
     receiveMoneroToolEvent(msg, async (payload) => {
       await pushToolInvocation(payload);
-    });
-    receiveMoneroToolInvocationValidityCheckEvent(msg, async (payload) => {
-      await writeToolInvocationLog((toolInvocationLog) => {
-        toolInvocationLog.forEach((v) => {
-          if (v.tool.invocation_id === payload.invocation_id) {
-            v.tool.valid = payload.valid;
-          }
-        });
-      });
     });
   });
 }

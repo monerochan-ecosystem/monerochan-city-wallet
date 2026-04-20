@@ -10,7 +10,6 @@ export type ExtensionMessage =
   | WalletCacheChangedEvent
   | WalletWipeEvent
   | SendTransactionEvent
-  | MoneroToolInvocationValidityCheckEvent
   | WalletSetupFinishedEvent;
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
@@ -176,35 +175,6 @@ export function receiveOpenSideBarEvent(
   cb: (payload: OpenSideBarPayload) => void,
 ) {
   if (msg.type === "openSidebar") {
-    cb(msg.payload);
-  }
-}
-
-export type MoneroToolInvocationValidityCheckPayload = {
-  invocation_id: string;
-  valid: ToolInvocationValidity;
-};
-export type MoneroToolInvocationValidityCheckEvent = {
-  type: "toolInvocationValidityCheck";
-  payload: MoneroToolInvocationValidityCheckPayload;
-};
-
-export function sendMoneroToolInvocationValidityCheckEvent(
-  invocation_id: string,
-  valid: ToolInvocationValidity,
-) {
-  const msg: MoneroToolInvocationValidityCheckEvent = {
-    type: "toolInvocationValidityCheck",
-    payload: { invocation_id, valid },
-  };
-  browser.runtime.sendMessage(msg).catch(() => {});
-}
-
-export function receiveMoneroToolInvocationValidityCheckEvent(
-  msg: ExtensionMessage,
-  cb: (payload: MoneroToolInvocationValidityCheckPayload) => void,
-) {
-  if (msg.type === "toolInvocationValidityCheck") {
     cb(msg.payload);
   }
 }

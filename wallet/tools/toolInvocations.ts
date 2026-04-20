@@ -1,5 +1,6 @@
 import {
   atomicWrite,
+  type MoneroTool,
   type ParsedMoneroToolInvocation,
 } from "@spirobel/monero-wallet-api";
 export const TOOL_INVOCATION_LOG_PATH = "toolInvocations.json";
@@ -19,10 +20,11 @@ export async function writeToolInvocationLog(
 ) {
   const toolInvocationLog = await readToolInvocationLog();
   await writeCallback(toolInvocationLog);
-  return await atomicWrite(
+  await atomicWrite(
     TOOL_INVOCATION_LOG_PATH,
     JSON.stringify(toolInvocationLog, null, 2),
   );
+  return await setToolInvocationStatus();
 }
 
 export async function pushToolInvocation(
@@ -40,4 +42,38 @@ export async function pushToolInvocation(
       dismissed: false,
     });
   });
+}
+
+let toolInvocationCheckInterval: null | number | NodeJS.Timeout = null;
+
+export function latestToolInvocations() {
+  if (!toolInvocationCheckInterval) {
+    setToolInvocationStatus();
+    toolInvocationCheckInterval = setInterval(setToolInvocationStatus, 100);
+  }
+  return activeToolInvocations;
+}
+export type ActiveToolInvocations = Record<
+  MoneroTool["tool_id"],
+  ToolInvocation | undefined | null
+>;
+let activeToolInvocations: ActiveToolInvocations;
+const tool_ids: MoneroTool["tool_id"][] = ["001", "002"];
+export async function setToolInvocationStatus() {
+  if (!activeToolInvocations)
+    activeToolInvocations = {} as ActiveToolInvocations;
+  const toolInvocationLog = await readToolInvocationLog();
+  for (const tool_id of tool_ids) {
+    const invo =
+      toolInvocationLog
+        .filter((v) => {
+          return v.tool.tool.tool_id === tool_id && !v.dismissed;
+        })
+        .at(-1) || null;
+    if (invo) {
+      activeToolInvocations[tool_id] = invo;
+    } else {
+      activeToolInvocations[tool_id] = null;
+    }
+  }
 }

@@ -3,7 +3,6 @@ import {
   parseToolInvocation,
 } from "@spirobel/monero-wallet-api/tools";
 import {
-  sendMoneroToolInvocationValidityCheckEvent,
   sendMoneroToolEvent,
   sendOpenSideBarEvent,
 } from "../background/messagebus";
@@ -46,10 +45,8 @@ function handleEvent(e: Event) {
     monerotoolLink,
   );
   checkToolInvocationValidity(monerotoolLink).then((result) => {
-    sendMoneroToolInvocationValidityCheckEvent(
-      monerotoolLink.invocation_id,
-      result,
-    );
+    monerotoolLink.valid = result;
+    sendMoneroToolEvent(monerotoolLink);
   });
 }
 
