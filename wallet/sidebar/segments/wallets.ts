@@ -18,7 +18,7 @@ export function walletsPlate() {
 
     const walletSlot = t.tool.payload.wallet_slot;
 
-    return html`<div class="tool-info">
+    return html`<div>
       <style>
         .tool-info {
           display: flex;
@@ -80,26 +80,64 @@ export function walletsPlate() {
           align-items: center;
           margin-bottom: 4px;
         }
+        .tool-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 8px;
+          margin-bottom: 4px;
+        }
+        .tool-action {
+          box-shadow:
+            inset 0 4px 12px rgba(0, 0, 0, 0.45),
+            0 5px 8px rgba(0, 0, 0, 0.4);
+          margin-left: 12px;
+          margin-top: 4px;
+          font-size: 14px;
+          margin-bottom: 12px;
+          cursor: pointer;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          padding: 2px 4px;
+        }
+        .tool-action:hover {
+          color: white;
+        }
+        .tool-action-accept {
+          color: #00ff00;
+        }
+        .tool-action-dismiss {
+          color: #ff4444;
+        }
       </style>
-      <span class="tool-label">view-only wallet share</span>
-      <div class="tool-row">
-        <span class="tool-context">context:</span>
-        <span class="tool-value">${t.context_domain}</span>
-      </div>
-      <a class="context-href grey-link" href=${t.context_href} target="_blank">
-        ${t.context_href}
-      </a>
-      <div class="tool-row">
-        <span class="tool-context">wallet slot:</span>
-        <span class="tool-value">${walletSlot}</span>
-      </div>
-      <div class="tool-row">
-        <span class="tool-context">domain:</span>
-        <span class="tool-value">${t.context_domain}</span>
-      </div>
-      <div class="tool-row">
-        <span class="tool-context">clicked:</span>
-        <span class="tool-value">${formatTime(t.timestamp)}</span>
+      <div class="tool-info">
+        <span class="tool-label">view-only wallet share</span>
+        <div class="tool-row">
+          <span class="tool-context">context:</span>
+          <span class="tool-value">${t.context_domain}</span>
+        </div>
+        <a
+          class="context-href grey-link"
+          href=${t.context_href}
+          target="_blank"
+        >
+          ${t.context_href}
+        </a>
+        <div class="tool-row">
+          <span class="tool-context">wallet slot:</span>
+          <span class="tool-value">${walletSlot}</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-context">domain:</span>
+          <span class="tool-value">${t.context_domain}</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-context">clicked:</span>
+          <span class="tool-value">${formatTime(t.timestamp)}</span>
+        </div>
+        <div class="tool-actions">
+          <span class="tool-action" id="acceptShareWallet">ACCEPT</span>
+          <span class="tool-action" id="dismissShareWallet">DISMISS</span>
+        </div>
       </div>
     </div>`;
   }
