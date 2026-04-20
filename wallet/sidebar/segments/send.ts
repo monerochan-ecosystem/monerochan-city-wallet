@@ -214,7 +214,7 @@ export function toolInfo(t?: ParsedMoneroToolInvocation) {
         padding: 8px 7px;
         margin-right: 12px;
         margin-left: 17px;
-        margin-top: 12px;
+        margin-top: -5px;
       }
       .context-href {
         width: 236px;
@@ -236,24 +236,46 @@ export function toolInfo(t?: ParsedMoneroToolInvocation) {
         color: white;
       }
       .valid {
-        color: greenyellow;
+        color: greenyellow !important;
       }
       .invalid {
-        color: #e74c3c;
+        color: #e74c3c !important;
       }
       .unverified {
         color: rgba(255, 255, 255, 0.3);
       }
+      .tool-context {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .tool-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .tool-value {
+        color: white;
+        font-weight: 600;
+      }
+      .tool-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
     </style>
-    <span class="tool-context">context: <span>${t.context_domain}</span></span>
+    <span class="tool-label">payment link</span>
+    <div class="tool-row">
+      <span class="tool-context">context:</span>
+      <span class="tool-value">${t.context_domain}</span>
+    </div>
     <a class="context-href grey-link" href=${t.context_href} target="_blank">
       ${t.context_href}
     </a>
-    <span class="destination">
-      destination:
-      <span class="${t.valid}">${t.destination_domain}</span>
-    </span>
-
+    <div class="tool-row">
+      <span class="tool-context">destination:</span>
+      <span class="tool-value ${t.valid}">${t.destination_domain}</span>
+    </div>
     <a
       class="destination-link grey-link"
       style="cursor: not-allowed"
@@ -261,7 +283,10 @@ export function toolInfo(t?: ParsedMoneroToolInvocation) {
     >
       ${destinationLink}
     </a>
-    <span class="timestamp">clicked: ${formatTime(t.timestamp)}</span>
+    <div class="tool-row">
+      <span class="tool-context">clicked:</span>
+      <span class="tool-value">${formatTime(t.timestamp)}</span>
+    </div>
   </div> `;
 }
 
@@ -321,9 +346,7 @@ export function sendPlateContent() {
     : "";
   if (parsedAddress && "address" in parsedAddress) {
     if (toolInfoSnippet !== "") {
-      parsedAddressMessage = html`<div style="user-select: none;color: white;">
-        payment link invocation
-      </div>`;
+      parsedAddressMessage = html`<div style="display: none;"></div>`;
     } else {
       parsedAddressMessage = html`<div>
       <div style="user-select: none;">
