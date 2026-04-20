@@ -11,6 +11,7 @@ import {
 import { router } from "./router";
 import { readToolInvocationLog } from "../tools/toolInvocations";
 import { lowerButtonIds } from "./segments/walletLower";
+import { removeActive } from "./ui/buttons";
 
 if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
@@ -66,6 +67,7 @@ export async function initToolInvocation() {
 export function syncUItoToolInvocation(
   lastInvocation: ParsedMoneroToolInvocation,
 ) {
+  removeActive(lowerButtonIds);
   // open activity according to tool id
   if (lastInvocation.tool.tool_id === "001") {
     window.activeWalletPlate = lowerButtonIds.send;
@@ -73,4 +75,7 @@ export function syncUItoToolInvocation(
   if (lastInvocation.tool.tool_id === "002") {
     window.activeWalletPlate = lowerButtonIds.wallets;
   }
+  if (!window.activeWalletPlate) return;
+  const button = document.getElementById(window.activeWalletPlate);
+  if (button) button.classList.add("active-switch");
 }
