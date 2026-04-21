@@ -12,6 +12,7 @@ import {
 import { atomicWrite, openWallets } from "@spirobel/monero-wallet-api";
 import { defaultHappyPathSend } from "./sendTransaction";
 import { pushToolInvocation } from "../wallet/tools/toolInvocations";
+import { dismissToolInvocationByType } from "../wallet/sidebar/segments/walletRoute";
 declare global {
   var browser: typeof chrome;
 }
@@ -43,6 +44,12 @@ if (browser.runtime) {
     });
     receiveMoneroToolEvent(msg, async (payload) => {
       await pushToolInvocation(payload);
+    });
+  });
+  browser.runtime.onConnect.addListener((port) => {
+    port.onDisconnect.addListener(async () => {
+      console.log("002 tab closed");
+      await dismissToolInvocationByType("002");
     });
   });
 }

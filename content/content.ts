@@ -47,6 +47,9 @@ function handleEvent(e: Event) {
   checkToolInvocationValidity(monerotoolLink).then((result) => {
     monerotoolLink.valid = result;
     sendMoneroToolEvent(monerotoolLink);
+    if (monerotoolLink.tool.tool_id === "002") {
+      const port = chrome.runtime.connect({ name: "keepalive" });
+    }
   });
 }
 

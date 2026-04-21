@@ -167,3 +167,13 @@ export async function dismissToolInvocation(invocation_id: string) {
     });
   });
 }
+
+export async function dismissToolInvocationByType(tool_id: "001" | "002") {
+  await writeToolInvocationLog((toolInvocationLog) => {
+    toolInvocationLog.forEach((v) => {
+      if (v.tool.tool.tool_id === tool_id) {
+        v.dismissed = true;
+      }
+    });
+  });
+}
