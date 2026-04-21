@@ -18,8 +18,7 @@ export function textInput(id: string, placeholder: string) {
         padding: 2px;
       }
       .text-input-element:focus {
-        outline: none;
-        border: 2px solid #007bff;
+        outline: 2px solid #007bff;
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
       }
       .text-input-element::selection {
