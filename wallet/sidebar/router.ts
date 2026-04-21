@@ -1,6 +1,6 @@
 import { createRouter, type Mini, type Params } from "../../mininext/mininext";
 import { onboarding } from "./segments/onboarding";
-import { walletRoute } from "./segments/walletRoute";
+import { navigateToFirstWallet, walletRoute } from "./segments/walletRoute";
 export type WalletRouteParams =
   Params<"/:identity/:domain/:wallet_type/:wallet_slot">;
 const routes = {
@@ -13,4 +13,6 @@ const routes = {
 
 export const router = createRouter(routes);
 
-router.navigate("/main/no_domain/single/0");
+//TODO navigate to last selected wallet
+
+navigateToFirstWallet();

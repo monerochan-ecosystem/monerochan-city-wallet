@@ -2,10 +2,9 @@ import {
   get_info,
   readConnectionStatusDefaultLocation,
   type ManyScanCachesOpened,
-  type MoneroTool,
 } from "@spirobel/monero-wallet-api";
 import type { Mini } from "../../../mininext/mininext";
-import type { WalletRouteParams } from "../router";
+import { router, type WalletRouteParams } from "../router";
 import { attachHandlers } from "../ui/buttons";
 import {
   lowerButtonIds,
@@ -66,6 +65,13 @@ export function currentlySelectedWallet() {
       (wallet) => wallet.wallet_route === wallet_route,
     ) || window.wallets?.wallets[0]
   );
+}
+export function firstWallet() {
+  if (!window.wallets?.wallets) return undefined;
+  return window.wallets.wallets[0];
+}
+export function navigateToFirstWallet() {
+  router.navigate(firstWallet()?.wallet_route || "/main/no_domain/single/0");
 }
 export function currentStartingHeight() {
   if (!window.wallets?.wallets) return undefined;

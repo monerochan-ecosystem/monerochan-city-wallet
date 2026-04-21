@@ -12,6 +12,7 @@ import { router } from "./router";
 import { readToolInvocationLog } from "../tools/toolInvocations";
 import { lowerButtonIds } from "./segments/walletLower";
 import { removeActive } from "./ui/buttons";
+import { navigateToFirstWallet } from "./segments/walletRoute";
 
 if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
@@ -36,7 +37,7 @@ export async function initWallets() {
 }
 export async function initSidebar() {
   if (await setupFinishedYet()) {
-    router.navigate("/main/no_domain/single/0");
+    navigateToFirstWallet();
     await initToolInvocation();
   } else {
     router.navigate("/onboarding");
