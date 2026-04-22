@@ -3,8 +3,10 @@ import {
   receiveChangeNodeUrlStartHeightEvent,
   receiveMoneroToolEvent,
   receiveSendTransactionEvent,
+  receiveShareViewkeyEvent,
   receiveWalletSetupFinishedEvent,
   receiveWalletWipeEvent,
+  sendShareViewkeyEvent,
   sendWalletChangedEvent,
   type ExtensionMessage,
 } from "./messagebus";
@@ -21,6 +23,8 @@ if (typeof chrome !== "undefined" && typeof browser === "undefined") {
 }
 
 if (browser.runtime) {
+  let port002: null | chrome.runtime.Port = null;
+  let port002_invo_id: null | string = null;
   browser.runtime.onMessage.addListener((msg: ExtensionMessage, sender) => {
     console.log(msg);
     receiveChangeNodeUrlStartHeightEvent(msg, async (payload) => {
@@ -45,11 +49,21 @@ if (browser.runtime) {
     receiveMoneroToolEvent(msg, async (payload) => {
       await pushToolInvocation(payload);
     });
+    receiveShareViewkeyEvent(msg, async (payload) => {
+      if (!port002) return;
+      if (payload.tool_invo.invocation_id !== port002_invo_id) return;
+      sendShareViewkeyEvent(payload, port002);
+    });
   });
   browser.runtime.onConnect.addListener((port) => {
-    port.onDisconnect.addListener(async () => {
+    if (port002) port002.disconnect();
+    port002 = port;
+    port002_invo_id = port.name;
+    port002.onDisconnect.addListener(async () => {
       console.log("002 tab closed");
       await dismissToolInvocationByType("002");
+      port002_invo_id = null;
+      port002 = null;
     });
   });
 }

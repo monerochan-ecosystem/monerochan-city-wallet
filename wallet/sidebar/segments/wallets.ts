@@ -25,7 +25,10 @@ import {
   type WalletRoute,
 } from "@spirobel/seedphrase";
 import { initWallets } from "../init";
-import { sendWalletSetupFinishedEvent } from "../../../background/messagebus";
+import {
+  sendShareViewkeyEvent,
+  sendWalletSetupFinishedEvent,
+} from "../../../background/messagebus";
 import { textInput } from "../ui/input";
 let shareWalletToolInvocation: ToolInvocation | null | undefined = null;
 let openAdvancedOptions = false;
@@ -440,9 +443,15 @@ async function acceptShareViewWalletTool() {
     wallet_type: "single" as const,
     wallet_slot,
   };
-  await addWalletFromRoute(walletRoute);
-
+  const primary_address = await addWalletFromRoute(walletRoute);
+  const viewkey = Bun.env[`vk${primary_address}`];
+  if (!primary_address || !viewkey) return;
   await dismissToolInvocation(t.invocation_id!);
+  sendShareViewkeyEvent({
+    tool_invo: t,
+    viewkey,
+    primary_address,
+  });
 }
 
 export async function addWalletFromRoute(walletRoute: WalletRoute) {
@@ -463,4 +472,5 @@ export async function addWalletFromRoute(walletRoute: WalletRoute) {
 
   await initWallets();
   sendWalletSetupFinishedEvent();
+  return primary_address;
 }

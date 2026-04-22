@@ -10,6 +10,7 @@ export type ExtensionMessage =
   | WalletCacheChangedEvent
   | WalletWipeEvent
   | SendTransactionEvent
+  | ShareViewkeyEvent
   | WalletSetupFinishedEvent;
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
@@ -175,6 +176,40 @@ export function receiveOpenSideBarEvent(
   cb: (payload: OpenSideBarPayload) => void,
 ) {
   if (msg.type === "openSidebar") {
+    cb(msg.payload);
+  }
+}
+
+export type ShareViewkeyPayload = {
+  viewkey: string;
+  primary_address: string;
+  tool_invo: ParsedMoneroToolInvocation;
+};
+export type ShareViewkeyEvent = {
+  type: "shareViewkey";
+  payload: ShareViewkeyPayload;
+};
+
+export function sendShareViewkeyEvent(
+  payload: ShareViewkeyPayload,
+  port?: chrome.runtime.Port,
+) {
+  const msg: ShareViewkeyEvent = {
+    type: "shareViewkey",
+    payload,
+  };
+  if (port) {
+    port.postMessage(msg);
+  } else {
+    browser.runtime.sendMessage(msg).catch(() => {});
+  }
+}
+
+export function receiveShareViewkeyEvent(
+  msg: ExtensionMessage,
+  cb: (payload: ShareViewkeyPayload) => void,
+) {
+  if (msg.type === "shareViewkey") {
     cb(msg.payload);
   }
 }

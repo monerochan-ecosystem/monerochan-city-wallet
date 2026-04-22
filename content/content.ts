@@ -1,10 +1,13 @@
 import {
   checkToolInvocationValidity,
   parseToolInvocation,
+  potentialSuccessRedirect002,
 } from "@spirobel/monero-wallet-api/tools";
 import {
+  receiveShareViewkeyEvent,
   sendMoneroToolEvent,
   sendOpenSideBarEvent,
+  type ExtensionMessage,
 } from "../background/messagebus";
 declare global {
   var browser: typeof chrome;
@@ -12,6 +15,7 @@ declare global {
 if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
 }
+
 function processTargetLink(element: HTMLAnchorElement | null) {
   if (!element || element.tagName !== "A") return false;
 
@@ -48,7 +52,15 @@ function handleEvent(e: Event) {
     monerotoolLink.valid = result;
     sendMoneroToolEvent(monerotoolLink);
     if (monerotoolLink.tool.tool_id === "002") {
-      const port = chrome.runtime.connect({ name: "keepalive" });
+      const port = chrome.runtime.connect({
+        name: monerotoolLink.invocation_id,
+      });
+
+      port.onMessage.addListener((msg: ExtensionMessage, sender) => {
+        receiveShareViewkeyEvent(msg, async (payload) => {
+          await potentialSuccessRedirect002(payload);
+        });
+      });
     }
   });
 }
