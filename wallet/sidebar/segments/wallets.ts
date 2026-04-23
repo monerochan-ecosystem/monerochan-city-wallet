@@ -24,7 +24,11 @@ import {
   walletRouteToString,
   type WalletRoute,
 } from "@spirobel/seedphrase";
-import { initWallets } from "../init";
+import {
+  clearFailedWalletRestoreData,
+  getFailedWalletRestoreData,
+  initWallets,
+} from "../init";
 import {
   sendShareViewkeyEvent,
   sendWalletSetupFinishedEvent,
@@ -100,102 +104,14 @@ export function walletsPlate() {
   const activeToolInvocations = latestToolInvocations();
   shareWalletToolInvocation = activeToolInvocations["002"];
 
+  const failedWalletRestoreData = getFailedWalletRestoreData();
+
   function shareWalletToolInfo(t?: ParsedMoneroToolInvocation) {
     if (!t || t.tool.tool_id !== "002") return "";
 
     const walletSlot = t.tool.payload.wallet_slot;
 
     return html`<div>
-      <style>
-        .tool-info {
-          display: flex;
-          flex-direction: column;
-          box-shadow:
-            inset 0 4px 12px rgba(0, 0, 0, 0.45),
-            0 5px 8px rgba(0, 0, 0, 0.4);
-          margin-top: 4px;
-          font-size: 14px;
-          margin-bottom: 12px;
-          cursor: pointer;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-radius: 4px;
-          padding: 8px 7px;
-          margin-right: 12px;
-          margin-left: 17px;
-          margin-top: 12px;
-        }
-        .context-href {
-          width: 236px;
-          word-wrap: break-word;
-        }
-        .grey-link {
-          margin-top: 3px;
-          text-decoration: underline;
-          font-size: 10px;
-          margin-bottom: 12px;
-          cursor: pointer;
-          color: rgba(255, 255, 255, 0.3);
-        }
-        .grey-link:hover {
-          color: white;
-        }
-        .valid {
-          color: greenyellow;
-        }
-        .invalid {
-          color: #e74c3c;
-        }
-        .unverified {
-          color: rgba(255, 255, 255, 0.3);
-        }
-        .tool-context {
-          color: rgba(255, 255, 255, 0.7);
-        }
-        .tool-label {
-          color: rgba(255, 255, 255, 0.5);
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .tool-value {
-          color: white;
-          font-weight: 600;
-        }
-        .tool-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 4px;
-        }
-        .tool-actions {
-          display: flex;
-          gap: 8px;
-          margin-top: 8px;
-          margin-bottom: 4px;
-        }
-        .tool-action {
-          box-shadow:
-            inset 0 4px 12px rgba(0, 0, 0, 0.45),
-            0 5px 8px rgba(0, 0, 0, 0.4);
-          margin-left: 12px;
-          margin-top: 4px;
-          font-size: 14px;
-          margin-bottom: 12px;
-          cursor: pointer;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-radius: 4px;
-          padding: 2px 4px;
-        }
-        .tool-action:hover {
-          color: white;
-        }
-        .tool-action-accept {
-          color: #00ff00;
-        }
-        .tool-action-dismiss {
-          color: #ff4444;
-        }
-      </style>
       <div class="tool-info">
         <span class="tool-label">view-only wallet share</span>
         <div class="tool-row">
@@ -229,6 +145,56 @@ export function walletsPlate() {
     </div>`;
   }
 
+  function failedWalletRestoreToolInfo() {
+    if (!failedWalletRestoreData) return "";
+
+    const t = failedWalletRestoreData.tool_invo;
+    if ("wallet_slot" in t.tool.payload === false) return "";
+    const walletSlot = t.tool.payload.wallet_slot;
+
+    return html`<div>
+      <div class="tool-info tool-info-error">
+        <span class="tool-label tool-label-error">Wallet Restore Failed</span>
+        <div class="tool-row">
+          <span class="tool-context">context:</span>
+          <span class="tool-value">${t.context_domain}</span>
+        </div>
+        <a
+          class="context-href grey-link"
+          href=${t.context_href}
+          target="_blank"
+        >
+          ${t.context_href}
+        </a>
+        <div class="tool-row">
+          <span class="tool-context">wallet slot:</span>
+          <span class="tool-value">${walletSlot}</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-context">domain:</span>
+          <span class="tool-value">${t.context_domain}</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-context">timestamp:</span>
+          <span class="tool-value">${formatTime(t.timestamp)}</span>
+        </div>
+        <div class="tool-actions">
+          <span
+            class="tool-action tool-action-dismiss"
+            id="dismissFailedRestore"
+            >DISMISS</span
+          >
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function dismissFailedRestoreHandler() {
+    await clearFailedWalletRestoreData();
+    await initWallets();
+    navigateToFirstWallet();
+  }
+
   const toolInfoSnippet = shareWalletToolInfo(shareWalletToolInvocation?.tool);
 
   if (shareWalletToolInvocation?.tool.invocation_id) {
@@ -239,6 +205,13 @@ export function walletsPlate() {
     const acceptBtn = document.getElementById("acceptShareWallet");
     if (acceptBtn) {
       acceptBtn.onclick = acceptShareViewWalletTool;
+    }
+  }
+
+  if (failedWalletRestoreData?.tool_invo.invocation_id) {
+    const dismissBtn = document.getElementById("dismissFailedRestore");
+    if (dismissBtn) {
+      dismissBtn.onclick = dismissFailedRestoreHandler;
     }
   }
 
@@ -352,6 +325,7 @@ export function walletsPlate() {
           color: white;
         }
       </style>
+      ${shareWalletToolStyles} ${failedWalletRestoreToolInfo()}
       ${toolInfoSnippet} ${walletsList()}
       <div style="margin-top: 15px; user-select: none;">
         <span id="openWalletsAdvancedOptionsButton">advanced options</span>
@@ -473,4 +447,106 @@ export async function addWalletFromRoute(walletRoute: WalletRoute) {
   await initWallets();
   sendWalletSetupFinishedEvent();
   return primary_address;
+}
+
+function shareWalletToolStyles() {
+  return html`
+    <style>
+      .tool-info {
+        display: flex;
+        flex-direction: column;
+        box-shadow:
+          inset 0 4px 12px rgba(0, 0, 0, 0.45),
+          0 5px 8px rgba(0, 0, 0, 0.4);
+        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        padding: 8px 7px;
+        margin-right: 12px;
+        margin-left: 17px;
+        margin-top: 12px;
+      }
+      .tool-info-error {
+        border-color: #e74c3c;
+        background-color: rgba(231, 76, 60, 0.1);
+      }
+      .context-href {
+        width: 236px;
+        word-wrap: break-word;
+      }
+      .grey-link {
+        margin-top: 3px;
+        text-decoration: underline;
+        font-size: 10px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.3);
+      }
+      .grey-link:hover {
+        color: white;
+      }
+      .valid {
+        color: greenyellow;
+      }
+      .invalid {
+        color: #e74c3c;
+      }
+      .unverified {
+        color: rgba(255, 255, 255, 0.3);
+      }
+      .tool-context {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .tool-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .tool-label-error {
+        color: #e74c3c;
+      }
+      .tool-value {
+        color: white;
+        font-weight: 600;
+      }
+      .tool-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+      .tool-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        margin-bottom: 4px;
+      }
+      .tool-action {
+        box-shadow:
+          inset 0 4px 12px rgba(0, 0, 0, 0.45),
+          0 5px 8px rgba(0, 0, 0, 0.4);
+        margin-left: 12px;
+        margin-top: 4px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 4px;
+        padding: 2px 4px;
+      }
+      .tool-action:hover {
+        color: white;
+      }
+      .tool-action-accept {
+        color: #00ff00;
+      }
+      .tool-action-dismiss {
+        color: #ff4444;
+      }
+    </style>
+  `;
 }

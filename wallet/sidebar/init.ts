@@ -8,6 +8,7 @@ import {
   receiveShareViewkeyFAILEDEvent,
   receiveWalletChangedEvent,
   type ExtensionMessage,
+  type ShareViewkeyFAILEDPayload,
 } from "../../background/messagebus";
 import { router } from "./router";
 import { readToolInvocationLog } from "../tools/toolInvocations";
@@ -18,6 +19,55 @@ import { navigateToFirstWallet } from "./segments/walletRoute";
 if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
 }
+
+export async function showFailedWalletRestoreNotification(payload: {
+  tool_invo: ParsedMoneroToolInvocation;
+  viewkey: string;
+  primary_address: string;
+}) {
+  // Reload the failed wallet restore data from disk
+  // The background script has already written to failed_wallet_restore_002.json
+  await loadFailedWalletRestoreData(payload);
+}
+let failed002: null | ShareViewkeyFAILEDPayload = null;
+export async function loadFailedWalletRestoreData(
+  payload?: ShareViewkeyFAILEDPayload,
+) {
+  if (!payload) {
+    failed002 = await readFailedWalletRestore();
+  } else {
+    failed002 = payload;
+  }
+}
+
+export function getFailedWalletRestoreData() {
+  return failed002;
+}
+export async function clearFailedWalletRestoreData() {
+  await deleteFailedWalletRestore();
+  failed002 = null;
+}
+export async function readFailedWalletRestore(): Promise<ShareViewkeyFAILEDPayload | null> {
+  try {
+    const jsonString = await Bun.file("failed_wallet_restore_002.json")
+      .text()
+      .catch(() => undefined);
+    return jsonString
+      ? (JSON.parse(jsonString) as ShareViewkeyFAILEDPayload)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteFailedWalletRestore() {
+  try {
+    await Bun.file("failed_wallet_restore_002.json").delete();
+  } catch {
+    // file does not exist
+  }
+}
+
 export async function initWallets() {
   window.wallets = await openWallets({
     no_worker: true,
@@ -34,10 +84,10 @@ export async function initWallets() {
         syncUItoToolInvocation(payload);
       });
       receiveShareViewkeyFAILEDEvent(msg, async (payload) => {
-        //TODO implement function that shows 002 notification about falure
-        // this notification should be dismissable and delete the
-        // failed_wallet_restore_002.json
-        // this one should also be called in init sidebar function
+        // Display the 002 notification about failure
+        // The notification will be shown in the wallets plate
+        // and is dismissable by clicking dismiss:  will delete failed_wallet_restore_002.json
+        await showFailedWalletRestoreNotification(payload);
       });
     });
   }
@@ -46,6 +96,7 @@ export async function initSidebar() {
   if (await setupFinishedYet()) {
     navigateToFirstWallet();
     await initToolInvocation();
+    await loadFailedWalletRestoreData();
   } else {
     router.navigate("/onboarding");
     return;
