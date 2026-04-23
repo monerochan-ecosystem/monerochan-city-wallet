@@ -10,13 +10,13 @@ import { actionButton, tactileSwitch } from "../ui/buttons";
 import { middleUpper, rightUpper, tactileContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
 import {
-  SCAN_SETTINGS_STORE_NAME_DEFAULT,
   writeEnvLineToDotEnvRefresh,
   writeWalletSecretsToDotEnv,
   writeWalletToScanSettings,
 } from "@spirobel/monero-wallet-api";
 import { router } from "../router";
 import { sendWalletSetupFinishedEvent } from "../../../background/messagebus";
+import { navigateToFirstWallet } from "./walletRoute";
 
 let seedphrase: string[] = []; //generateSeedphrase().split(" ");
 export function onboarding() {
@@ -206,12 +206,41 @@ function updateRecoverySeedphraseCB() {
   }
 }
 
+async function importWalletFileCB() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.onchange = async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.files || !Array.isArray(data.files)) {
+      alert("Invalid wallet file format.");
+      return;
+    }
+    for (const f of data.files) {
+      await Bun.write(f.filename, f.content);
+    }
+    navigateToFirstWallet();
+
+    location.reload();
+  };
+  input.click();
+}
+
 function recoveryPlate() {
   const recoverySeedphraseInput = document.getElementById(
     "recoverySeedphrase",
   ) as HTMLInputElement | null;
   if (recoverySeedphraseInput) {
     recoverySeedphraseInput.oninput = updateRecoverySeedphraseCB;
+  }
+  const importWalletEl = document.getElementById(
+    "importWallet",
+  ) as HTMLElement | null;
+  if (importWalletEl) {
+    importWalletEl.onclick = importWalletFileCB;
   }
   return html` <div style="height:233px">
     ${recoverPlateOpened
