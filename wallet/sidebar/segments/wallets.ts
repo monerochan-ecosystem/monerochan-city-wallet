@@ -178,6 +178,12 @@ export function walletsPlate() {
           <span class="tool-context">timestamp:</span>
           <span class="tool-value">${formatTime(t.timestamp)}</span>
         </div>
+        <div class="tool-hint">
+          Local primary address is not the same as the one stored in the
+          backend. This means seedphrase, offset passphrase or wallet route is
+          not the same as the wallet that first created and shared the viewkey
+          with the backend.
+        </div>
         <div class="tool-actions">
           <span
             class="tool-action tool-action-dismiss"
@@ -195,7 +201,10 @@ export function walletsPlate() {
     navigateToFirstWallet();
   }
 
-  const toolInfoSnippet = shareWalletToolInfo(shareWalletToolInvocation?.tool);
+  // dont show the 002 tool invocation info if there is an undismissed restore warning
+  const toolInfoSnippet = failedWalletRestoreData
+    ? ""
+    : shareWalletToolInfo(shareWalletToolInvocation?.tool);
 
   if (shareWalletToolInvocation?.tool.invocation_id) {
     const dismissBtn = document.getElementById("dismissShareWallet");
@@ -518,6 +527,14 @@ function shareWalletToolStyles() {
         justify-content: space-between;
         align-items: center;
         margin-bottom: 4px;
+      }
+      .tool-hint {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 11px;
+        font-style: italic;
+        margin-top: 4px;
+        margin-bottom: 4px;
+        line-height: 1.4;
       }
       .tool-actions {
         display: flex;
