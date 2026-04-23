@@ -5,6 +5,7 @@ import {
 } from "@spirobel/monero-wallet-api";
 import {
   receiveMoneroToolEvent,
+  receiveShareViewkeyFAILEDEvent,
   receiveWalletChangedEvent,
   type ExtensionMessage,
 } from "../../background/messagebus";
@@ -31,6 +32,12 @@ export async function initWallets() {
       });
       receiveMoneroToolEvent(msg, async (payload) => {
         syncUItoToolInvocation(payload);
+      });
+      receiveShareViewkeyFAILEDEvent(msg, async (payload) => {
+        //TODO implement function that shows 002 notification about falure
+        // this notification should be dismissable and delete the
+        // failed_wallet_restore_002.json
+        // this one should also be called in init sidebar function
       });
     });
   }

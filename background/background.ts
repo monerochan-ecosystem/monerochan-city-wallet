@@ -4,6 +4,7 @@ import {
   receiveMoneroToolEvent,
   receiveSendTransactionEvent,
   receiveShareViewkeyEvent,
+  receiveShareViewkeyFAILEDEvent,
   receiveWalletSetupFinishedEvent,
   receiveWalletWipeEvent,
   sendShareViewkeyEvent,
@@ -11,7 +12,11 @@ import {
   type ExtensionMessage,
 } from "./messagebus";
 
-import { atomicWrite, openWallets } from "@spirobel/monero-wallet-api";
+import {
+  atomicWrite,
+  openWallets,
+  writeScanSettingsFileDefaultLocation,
+} from "@spirobel/monero-wallet-api";
 import { defaultHappyPathSend } from "./sendTransaction";
 import { pushToolInvocation } from "../wallet/tools/toolInvocations";
 import { dismissToolInvocationByType } from "../wallet/sidebar/segments/walletRoute";
@@ -53,6 +58,30 @@ if (browser.runtime) {
       if (!port002) return;
       if (payload.tool_invo.invocation_id !== port002_invo_id) return;
       sendShareViewkeyEvent(payload, port002);
+    });
+    receiveShareViewkeyFAILEDEvent(msg, async (payload) => {
+      const primary_address = payload.primary_address;
+
+      await writeScanSettingsFileDefaultLocation({
+        async writeCallback(settings) {
+          // Find matching wallet first so we can delete its files
+          const matching = settings.wallets.find(
+            (w) => w.primary_address === primary_address,
+          );
+          if (matching) {
+            await Bun.file(`${matching.primary_address}_cache.json`).delete();
+            await Bun.file(`${matching.primary_address}_stats.json`).delete();
+          }
+          settings.wallets = settings.wallets.filter(
+            (w) => w.primary_address !== primary_address,
+          );
+        },
+      });
+      wallets = await initWallets();
+      await atomicWrite(
+        "failed_wallet_restore_002.json",
+        JSON.stringify(payload, null, 2),
+      );
     });
   });
   browser.runtime.onConnect.addListener((port) => {

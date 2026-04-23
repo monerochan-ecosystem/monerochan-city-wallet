@@ -11,6 +11,7 @@ export type ExtensionMessage =
   | WalletWipeEvent
   | SendTransactionEvent
   | ShareViewkeyEvent
+  | ShareViewkeyFAILEDEvent
   | WalletSetupFinishedEvent;
 export type WalletCacheChangedEvent = {
   type: "walletCacheChanged";
@@ -210,6 +211,40 @@ export function receiveShareViewkeyEvent(
   cb: (payload: ShareViewkeyPayload) => void,
 ) {
   if (msg.type === "shareViewkey") {
+    cb(msg.payload);
+  }
+}
+
+export type ShareViewkeyFAILEDPayload = {
+  viewkey: string;
+  primary_address: string;
+  tool_invo: ParsedMoneroToolInvocation;
+};
+export type ShareViewkeyFAILEDEvent = {
+  type: "shareViewkeyFAILED";
+  payload: ShareViewkeyFAILEDPayload;
+};
+
+export function sendShareViewkeyFAILEDEvent(
+  payload: ShareViewkeyPayload,
+  port?: chrome.runtime.Port,
+) {
+  const msg: ShareViewkeyFAILEDEvent = {
+    type: "shareViewkeyFAILED",
+    payload,
+  };
+  if (port) {
+    port.postMessage(msg);
+  } else {
+    browser.runtime.sendMessage(msg).catch(() => {});
+  }
+}
+
+export function receiveShareViewkeyFAILEDEvent(
+  msg: ExtensionMessage,
+  cb: (payload: ShareViewkeyFAILEDPayload) => void,
+) {
+  if (msg.type === "shareViewkeyFAILED") {
     cb(msg.payload);
   }
 }

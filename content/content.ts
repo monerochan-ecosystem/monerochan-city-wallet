@@ -7,6 +7,7 @@ import {
   receiveShareViewkeyEvent,
   sendMoneroToolEvent,
   sendOpenSideBarEvent,
+  sendShareViewkeyFAILEDEvent,
   type ExtensionMessage,
 } from "../background/messagebus";
 declare global {
@@ -58,7 +59,10 @@ function handleEvent(e: Event) {
 
       port.onMessage.addListener((msg: ExtensionMessage, sender) => {
         receiveShareViewkeyEvent(msg, async (payload) => {
-          await potentialSuccessRedirect002(payload);
+          const result = await potentialSuccessRedirect002(payload);
+          if (result) {
+            sendShareViewkeyFAILEDEvent(payload);
+          }
         });
       });
     }
