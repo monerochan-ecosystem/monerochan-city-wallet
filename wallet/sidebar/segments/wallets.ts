@@ -244,7 +244,7 @@ export function walletsPlate() {
   const walletsList: () => MiniHtmlString = () => {
     const wl = allWallets().map((wallet) => {
       const colorclass =
-        wallet.amount || 0n > 0 ? "amount-positive" : "amount-zero";
+        (wallet.amount || 0n) > 0 ? "amount-positive" : "amount-zero";
       const amount = convertBigIntAmount(wallet.amount || 0n);
       const amountTrun = truncateDecimalString(amount, 3);
       return html`<div class="wallet-route">

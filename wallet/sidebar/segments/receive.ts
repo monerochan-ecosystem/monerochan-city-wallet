@@ -56,7 +56,7 @@ export function receivePlate() {
           };
         }
         const colorclass =
-          subaddress.received_amount || 0n > 0
+          (subaddress.received_amount || 0n) > 0
             ? "amount-positive"
             : "amount-zero";
         const amount = convertBigIntAmount(subaddress.received_amount || 0n);
