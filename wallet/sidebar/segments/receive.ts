@@ -64,7 +64,9 @@ export function receivePlate() {
         setOpenSubaddressDetails(subaddress.address);
 
         return html`<div class="subaddress-container">
-          <div class="subaddress">${subaddress.address}</div>
+          <div class="subaddress" id="subaddress-${subaddress.address}">
+            ${subaddress.address}
+          </div>
           <div>
             <div class="amount ${colorclass}">${amountTrun}</div>
             <div class="show-info" id="${subaddress.address}">
@@ -174,6 +176,20 @@ export function receivePlate() {
   </div>`;
 }
 
+function selectTextAndCopy(address: string) {
+  const el = document.getElementById(`subaddress-${address}`);
+  if (!el) return false;
+
+  // programmatically select the text like a mouse would
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+
+  return true;
+}
+
 export function receiveClickHandler(e: MouseEvent) {
   console.log("receiveClickHandler");
   console.log(e);
@@ -181,10 +197,19 @@ export function receiveClickHandler(e: MouseEvent) {
   const id = (e.currentTarget as HTMLElement | null)
     ?.id as ReceiveActionButtonIds;
   if (!id || !target) return;
-  console.log(id, target);
   if (id === receiveActionButtonIds.newAddress) {
     const subaddress = currentlySelectedWallet()?.makeSubaddress();
-    console.log(subaddress);
+  }
+  if (id === receiveActionButtonIds.copyAddress) {
+    const subaddresses = currentlySelectedWallet()?.subaddresses.toReversed();
+    if (subaddresses?.length) {
+      const firstAddress = subaddresses[0]?.address;
+      if (firstAddress) {
+        if (selectTextAndCopy(firstAddress)) {
+          navigator.clipboard.writeText(firstAddress);
+        }
+      }
+    }
   }
 }
 
