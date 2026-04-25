@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "monerochan",
+  "description": "Monerochan City Wallet",
+  "version": "0.1.1",
+  "sidebar_action": {
+    "default_panel": "sidebar.html",
+    "default_title": "monerochan"
+  },
+  "permissions": ["<all_urls>", "unlimitedStorage"],
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module",
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval' blob:; worker-src 'self' blob: 'unsafe-eval'; object-src 'self'"
+}

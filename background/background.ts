@@ -2,6 +2,7 @@ import { setupFinishedYet } from "../wallet/sidebar/init";
 import {
   receiveChangeNodeUrlStartHeightEvent,
   receiveMoneroToolEvent,
+  receiveOpenSideBarEvent,
   receiveSendTransactionEvent,
   receiveShareViewkeyEvent,
   receiveShareViewkeyFAILEDEvent,
@@ -32,6 +33,9 @@ if (browser.runtime) {
   let port002_invo_id: null | string = null;
   browser.runtime.onMessage.addListener((msg: ExtensionMessage, sender) => {
     console.log(msg);
+    receiveOpenSideBarEvent(msg, () => {
+      (browser as any).sidebarAction?.open().catch(() => {});
+    });
     receiveChangeNodeUrlStartHeightEvent(msg, async (payload) => {
       if (!wallets) wallets = await initWallets();
       wallets?.changeNodeUrlAndStartHeight(

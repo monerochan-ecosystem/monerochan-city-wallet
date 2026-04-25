@@ -53,7 +53,7 @@ function handleEvent(e: Event) {
     monerotoolLink.valid = result;
     sendMoneroToolEvent(monerotoolLink);
     if (monerotoolLink.tool.tool_id === "002") {
-      const port = chrome.runtime.connect({
+      const port = browser.runtime.connect({
         name: monerotoolLink.invocation_id,
       });
 
