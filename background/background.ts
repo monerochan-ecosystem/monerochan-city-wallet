@@ -103,8 +103,9 @@ if (browser.runtime) {
 let retryScheduled = false;
 let wallets = await initWallets();
 async function initWallets() {
+  wallets?.stopWorker(); // kills all old worker threads
   if (!(await setupFinishedYet())) return;
-  const wallets = await openWallets({
+  const local_wallets = await openWallets({
     notifyMasterChanged: (result) => {
       doETA();
       sendWalletChangedEvent(result);
@@ -120,13 +121,13 @@ async function initWallets() {
 
       retryScheduled = true;
       setTimeout(() => {
-        wallets?.retry();
+        local_wallets?.retry();
         retryScheduled = false;
       }, 1000);
     },
     no_stats: true,
   });
-  return wallets;
+  return local_wallets;
 }
 let blocks_till_tip = null;
 let last_height: null | number = null;

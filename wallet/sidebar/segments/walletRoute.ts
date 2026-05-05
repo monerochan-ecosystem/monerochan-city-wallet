@@ -106,11 +106,15 @@ async function checkConnection() {
   }
   const connectionStatus = await readConnectionStatusDefaultLocation();
   if (
-    connectionStatus?.last_packet.status === "OK" &&
+    (connectionStatus?.last_packet.status === "OK" ||
+      connectionStatus?.last_packet.status === "blocks_buffer_full") &&
     isWithinLast10Seconds(connectionStatus?.last_packet.timestamp)
   ) {
     connected_to_node = true;
-  } else if (connectionStatus?.last_packet.status !== "OK") {
+  } else if (
+    connectionStatus?.last_packet.status !== "OK" &&
+    connectionStatus?.last_packet.status !== "blocks_buffer_full"
+  ) {
     connected_to_node = false; // if connection status is not OK, we assume no connection
     activeConnectionCheck(); // still tx processing, takes time, so we do an active check
   } else {
