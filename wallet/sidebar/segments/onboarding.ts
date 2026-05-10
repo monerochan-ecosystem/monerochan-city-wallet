@@ -390,12 +390,14 @@ async function finishCB() {
   if (!finishPossible()) return;
   await writeEnvLineToDotEnvRefresh("SEEDPHRASE", seedphrase.join(" "));
   await writeEnvLineToDotEnvRefresh("PASSPHRASE", seedOffsetInputValue);
+  const spendkeySecretSeed = getWalletSecret({
+    route: WALLET_DEFAULT_ROUTE,
+    seedphrase: seedphrase.join(" "),
+    password: seedOffsetInputValue,
+    coin_name: "monero",
+    key_type: "spend",
+  });
 
-  const spendkeySecretSeed = getWalletSecret(
-    WALLET_DEFAULT_ROUTE,
-    seedphrase.join(" "),
-    seedOffsetInputValue, //passphrase
-  );
   let primary_address = await writeWalletSecretsToDotEnv(spendkeySecretSeed);
   await writeWalletToScanSettings({
     primary_address,
