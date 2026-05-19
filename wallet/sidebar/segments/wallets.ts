@@ -441,11 +441,14 @@ export async function addWalletFromRoute(walletRoute: WalletRoute) {
   const seedphrase = Bun.env["SEEDPHRASE"];
   if (!seedphrase) return;
   const passphrase = Bun.env["PASSPHRASE"];
-  const spendkeySecretSeed = getWalletSecret(
-    walletRoute,
-    seedphrase,
-    passphrase,
-  );
+  const spendkeySecretSeed = getWalletSecret({
+    route: walletRoute,
+    password: passphrase,
+    seedphrase: seedphrase,
+    coin_name: "monero",
+    key_type: "spend",
+  });
+
   let primary_address = await writeWalletSecretsToDotEnv(spendkeySecretSeed);
 
   await writeWalletToScanSettings({
