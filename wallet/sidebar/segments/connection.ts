@@ -10,8 +10,9 @@ import { sendChangeNodeUrlStartHeightEvent } from "../../../background/messagebu
 import { developerSettings } from "./developerSettings";
 import {
   connectedToNode,
-  currentlySelectedWallet,
+  currentScanHeight,
   currentStartingHeight,
+  daemonHeight,
   eta,
   setCurrentStartingHeight,
 } from "./walletRoute";
@@ -333,11 +334,11 @@ export function detailedConnectionProgress() {
         }
       </style>
       <div class="detailed-heights">
-        ${currentlySelectedWallet()?.current_height || 0}
+        ${currentScanHeight()}
       </div>
       <div class="detailed-mini-divider"></div>
       <div class="detailed-heights">
-        ${currentlySelectedWallet()?.daemon_height || 0}
+        ${daemonHeight()}
       </div>
     </div>
     <div class="detailed-eta">${eta() ? eta() + " ETA" : ""}</div>

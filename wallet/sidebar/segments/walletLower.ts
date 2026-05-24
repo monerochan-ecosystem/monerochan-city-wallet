@@ -5,7 +5,8 @@ import { plate } from "../ui/content";
 import { walletUnlocked } from "./send";
 import {
   connectedToNode,
-  currentlySelectedWallet,
+  currentScanHeight,
+  daemonHeight,
   disnavigate,
 } from "./walletRoute";
 
@@ -155,8 +156,8 @@ export function connectionProgress() {
         color: #aaa;
       }
     </style>
-    <div class="heights">${currentlySelectedWallet()?.current_height || 0}</div>
+    <div class="heights">${currentScanHeight()}</div>
     <div class="mini-divider"></div>
-    <div class="heights">${currentlySelectedWallet()?.daemon_height || 0}</div>
+    <div class="heights">${daemonHeight()}</div>
   </div>`;
 }

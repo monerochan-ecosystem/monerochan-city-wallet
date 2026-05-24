@@ -77,6 +77,13 @@ export async function setCurrentStartingHeight(start_height: number | null) {
   if (!window.wallets?.wallets) throw new Error("no wallets");
   await window.wallets.changeStartHeight(start_height);
 }
+export function daemonHeight(): number {
+  return window.wallets?.daemonHeight || currentlySelectedWallet()?.daemon_height || window.wallets?.start_height || 0;
+}
+export function currentScanHeight(): number {
+  return window.wallets?.connectionStatusOpened?.connectionStatus?.sync
+    ?.current_scan_height || currentlySelectedWallet()?.current_height || window.wallets?.start_height || 0;
+}
 export function eta(): string | null {
   return (
     window.wallets?.connectionStatusOpened?.connectionStatus?.sync?.eta ?? null
