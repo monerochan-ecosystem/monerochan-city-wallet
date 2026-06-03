@@ -108,13 +108,7 @@ async function initWallets() {
     notifyMasterChanged: (result) => {
       sendWalletChangedEvent(result);
     },
-    workerError: async (err) => {
-      if (!(await setupFinishedYet())) return;
-      console.log(
-        "scan worker error, typically loss of network connection, retry in 1 second",
-        err,
-      );
-    },
+
     autoRetry: true,
     retryDelayMs: 1000,
     no_stats: true,
