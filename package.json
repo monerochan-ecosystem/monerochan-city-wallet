@@ -1,5 +1,5 @@
 {
-  "name": "monerochan-city-wallet",
+  "name": "monerochan-wallet",
   "scripts": {
     "zipchrome": "(cd dist/chrome && zip -r ../chrome.zip .)",
     "copyfirefoxmanifest": "cp manifest/firefox.json dist/firefox/manifest.json",

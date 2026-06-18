@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "monerochan-city-wallet",
+      "name": "monerochan-wallet",
       "devDependencies": {
         "@spirobel/monero-wallet-api": "../monero-wallet-api/typescript/",
         "@spirobel/seedphrase": "../monero-wallet-api/seedphrase/",

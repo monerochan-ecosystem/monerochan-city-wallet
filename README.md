@@ -1,4 +1,4 @@
-# monerochan-city-wallet
+# monerochan-wallet
 
 To install dependencies:
 

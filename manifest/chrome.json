@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "monerochan",
-  "description": "Monerochan City Wallet",
+  "description": "Monerochan Wallet",
   "version": "0.1.1",
     "side_panel": {
     "default_path": "sidebar.html"
