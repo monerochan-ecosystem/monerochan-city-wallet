@@ -10,6 +10,7 @@ import { actionButton, tactileSwitch } from "../ui/buttons";
 import { middleUpper, rightUpper, tactileContentPlate } from "../ui/content";
 import { textInput } from "../ui/input";
 import {
+  atomicWrite,
   writeEnvLineToDotEnvRefresh,
   writeWalletSecretsToDotEnv,
   writeWalletToScanSettings,
@@ -220,7 +221,7 @@ async function importWalletFileCB() {
       return;
     }
     for (const f of data.files) {
-      await Bun.write(f.filename, f.content);
+      await atomicWrite(f.filename, f.content);
     }
     navigateToFirstWallet();
 
@@ -402,6 +403,12 @@ async function finishCB() {
   await writeWalletToScanSettings({
     primary_address,
     wallet_route: walletRouteToString(WALLET_DEFAULT_ROUTE),
+    logs: "console",
+    logs_include: [
+      "handleCpuboundScan",
+      "atomicWrite",
+      "blocksBufferFetchLoop",
+    ],
   });
   sendWalletSetupFinishedEvent();
   router.navigate(walletRouteToString(WALLET_DEFAULT_ROUTE));
