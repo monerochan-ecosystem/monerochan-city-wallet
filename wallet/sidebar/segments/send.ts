@@ -497,7 +497,13 @@ export function sendPlate() {
         color: #ff0000;
       }
     </style>
-    ${tactileContentPlate(sendPlateContent(), leftUpper, undefined, "425px")}
+    ${tactileContentPlate(
+      sendPlateContent(),
+      leftUpper,
+      undefined,
+      // floor 425. +80 for action row under the plate on top of the 400 surroundings.
+      "max(425px, calc(100vh - 480px))",
+    )}
     <div class="actions">
       ${actionButton(
         "send-action",

@@ -308,6 +308,7 @@ export function historyPlate() {
     `,
     rightUpper,
     undefined,
-    "468px",
+    // floor 468 so tiny sidebars dont collapse. grow with window when taller.
+    "max(468px, calc(100vh - 400px))",
   );
 }

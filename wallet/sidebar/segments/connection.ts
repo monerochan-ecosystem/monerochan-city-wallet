@@ -295,7 +295,8 @@ export function connectionPlate() {
     </div>`,
     leftLower,
     "top",
-    "468px",
+    // floor 468 so tiny sidebars dont collapse. (like on handhelds like gpd win mini) grow with window when taller.
+    "max(468px, calc(100vh - 400px))",
   );
 }
 
