@@ -1,4 +1,7 @@
-import { type ManyScanCachesOpened } from "@spirobel/monero-wallet-api";
+import {
+  type ConnectionStatus,
+  type ManyScanCachesOpened,
+} from "@spirobel/monero-wallet-api";
 import type { Mini } from "../../../mininext/mininext";
 import { router, type WalletRouteParams } from "../router";
 import { attachHandlers } from "../ui/buttons";
@@ -15,13 +18,19 @@ import {
 } from "./walletUpper";
 import { writeToolInvocationLog } from "../../tools/toolInvocations";
 import { walletRouteToString, type WalletRoute } from "@spirobel/seedphrase";
+
 declare global {
   interface Window {
     walletRouteParams?: WalletRouteParams | null;
     activeWalletPlate?: LowerButtonId | null;
     wallets?: ManyScanCachesOpened;
     unlocked?: boolean;
+    connectionStatus?: ConnectionStatus | null;
   }
+}
+
+export function setConnectionStatus(status: ConnectionStatus | null) {
+  window.connectionStatus = status;
 }
 
 export const walletRoute = (mini: Mini, params: WalletRouteParams) => {
@@ -78,29 +87,24 @@ export async function setCurrentStartingHeight(start_height: number | null) {
   await window.wallets.changeStartHeight(start_height);
 }
 export function daemonHeight(): number {
-  return window.wallets?.daemonHeight || currentlySelectedWallet()?.daemon_height || window.wallets?.start_height || 0;
+  const s = window.connectionStatus;
+  return (
+    s?.sync?.daemon_height ??
+    s?.last_packet?.daemon_height ??
+    0
+  );
 }
 export function currentScanHeight(): number {
-  return window.wallets?.connectionStatusOpened?.connectionStatus?.sync
-    ?.current_scan_height || currentlySelectedWallet()?.current_height || window.wallets?.start_height || 0;
+  return window.connectionStatus?.sync?.current_scan_height ?? 0;
 }
 export function eta(): string | null {
-  return (
-    window.wallets?.connectionStatusOpened?.connectionStatus?.sync?.eta ?? null
-  );
+  return window.connectionStatus?.sync?.eta ?? null;
 }
 
 export function connectedToNode(): boolean {
   return window.wallets?.connectionStatusOpened?.isConnected ?? false;
 }
 
-export function disnavigate() {
-  writeToolInvocationLog((toolInvocationLog) => {
-    toolInvocationLog.forEach((v) => {
-      v.disnavigated = true;
-    });
-  });
-}
 
 export async function dismissToolInvocation(invocation_id: string) {
   await writeToolInvocationLog((toolInvocationLog) => {

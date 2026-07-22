@@ -14,7 +14,10 @@ import { router } from "./router";
 import { readToolInvocationLog } from "../tools/toolInvocations";
 import { lowerButtonIds } from "./segments/walletLower";
 import { removeActive } from "./ui/buttons";
-import { navigateToFirstWallet } from "./segments/walletRoute";
+import {
+  navigateToFirstWallet,
+  setConnectionStatus,
+} from "./segments/walletRoute";
 
 if (typeof chrome !== "undefined" && typeof browser === "undefined") {
   globalThis.browser = chrome;
@@ -71,7 +74,13 @@ export async function deleteFailedWalletRestore() {
 export async function initWallets() {
   window.wallets = await openWallets({
     no_worker: true,
+    onConnectionStatusChange: (status) => {
+      setConnectionStatus(status);
+    },
   });
+  setConnectionStatus(
+    window.wallets?.connectionStatusOpened?.connectionStatus ?? null,
+  );
   //if (!wallets) throw new Error("Could not open wallets");
   console.log("wallets", window.wallets);
 

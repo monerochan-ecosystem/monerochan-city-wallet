@@ -6,8 +6,7 @@ import { walletUnlocked } from "./send";
 import {
   connectedToNode,
   currentScanHeight,
-  daemonHeight,
-  disnavigate,
+  daemonHeight
 } from "./walletRoute";
 
 export const walletLower = () => {
@@ -34,7 +33,6 @@ export function lowerClickHandler(e: MouseEvent) {
     return;
   }
   window.activeWalletPlate = id;
-  //disnavigate();
 }
 
 export type LowerButtonId =

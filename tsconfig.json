@@ -14,7 +14,7 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
-    "types": ["bun"] ,
+    "types": ["bun", "chrome"],
     // Best practices
     "strict": true,
     "skipLibCheck": true,
