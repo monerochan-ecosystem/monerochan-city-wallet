@@ -187,8 +187,8 @@ export function validityMessage(t?: ParsedMoneroToolInvocation) {
   if (t.valid === "unverified")
     return html`<div class="unverified-message">
       <span
-        >this is an open destination payment link, make sure you got it from a
-        trusted source</span
+        >this payment link skips destination checks, make sure you
+        got it from a trusted source & the address matches.</span
       >
     </div>`;
   return "";
